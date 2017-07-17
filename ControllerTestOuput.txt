@@ -1,4 +1,4 @@
-i32SetTemperatureValue, f32ActualTemperatureValue, f32AmbientTemperatureValue, i32ControllerOutput
+i32SetTemperatureValue, f32ActualTemperatureValue, f32AmbientTemperatureValue, i32ControllerOutput,
 4000, 485, 10, 5000, 
 4000, 936.25, 10, 5000, 
 4000, 1364.95, 10, 5000, 
