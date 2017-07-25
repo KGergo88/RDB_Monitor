@@ -19,7 +19,7 @@ using DataPointType = double;
 int main(void)
 {
     std::fstream myFile;
-    std::string myFilePathAndName("/home/gergo/sources/RDB_Diplomaterv_Monitor/ControllerTestOuput.txt");    
+    std::string myFilePathAndName("../ControllerTestOuput.txt");    
     
     std::cout << "Hello RDB!" << std::endl;
     std::cout << std::endl;
