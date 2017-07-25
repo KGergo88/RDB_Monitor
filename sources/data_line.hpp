@@ -5,6 +5,7 @@
  * Created on July 16, 2017, 7:40 PM
  */
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -28,14 +29,15 @@ public:
     DataLine& operator=(DataLine&& newDataLine) = delete;
     
     inline void ChangeTitle(const std::string& newTitle) {Title = newTitle;}
-    inline void AddDataPoint(const DataPoint<T>& newDataPoint)
+    inline void AddNewDataPoint(const DataPoint<T>& newDataPoint)
     {
-        Data.push_back(newDataPoint);
+        Data.push_back(newDataPoint);       
     }
     inline DataLine& operator<<(const DataPoint<T>& newDataPoint)
     {
-        Data.push_back(newDataPoint);
+        AddNewDataPoint(newDataPoint);
     }
+    inline uint64_t GetTheNumberOfDataPoints(void) { return Data.size(); }
     
 private:
     std::string Title;

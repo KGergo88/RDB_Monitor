@@ -92,8 +92,8 @@ int main(void)
             {
                 for(auto i = 0; i < myDataLines.size(); i++)
                 {
-                    myDataLines[i].AddDataPoint(DataPoint<DataPointType>(static_cast<DataPointType>(lineCounter),
-                                                                  readNumbersOfTheLine.at(i)));
+                    myDataLines[i].AddNewDataPoint(DataPoint<DataPointType>(static_cast<DataPointType>(lineCounter),
+                                                   readNumbersOfTheLine.at(i)));
                 }
             }
             lineCounter++;
