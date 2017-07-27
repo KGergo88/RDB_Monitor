@@ -24,8 +24,8 @@ public:
     inline T GetX(void) {return x;}
     inline T GetY(void) {return y;}
     
-    inline T SetX(T newX = 0) {x = newX; return x;}
-    inline T SetY(T newY = 0) {y = newY; return y;}
+    inline T SetX(T& newX = 0) {x = newX; return x;}
+    inline T SetY(T& newY = 0) {y = newY; return y;}
     
 private:
     T x;

@@ -14,7 +14,7 @@
 #ifndef DATALINE_H
 #define DATALINE_H
 
-template <typename T>
+template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
 {
 public:
@@ -28,20 +28,56 @@ public:
     DataLine& operator=(DataLine&  newDataLine) = delete;
     DataLine& operator=(DataLine&& newDataLine) = delete;
     
-    inline void ChangeTitle(const std::string& newTitle) {Title = newTitle;}
-    inline void AddNewDataPoint(const DataPoint<T>& newDataPoint)
+    inline const std::string&   GetTitle(void) { return Title; }
+    inline void                 SetTitle(const std::string& newTitle) { Title = newTitle; }    
+    
+    inline void AddNewDataPoint(const DataPoint<T_DATA_POINT>& newDataPoint)
     {
         Data.push_back(newDataPoint);       
     }
-    inline DataLine& operator<<(const DataPoint<T>& newDataPoint)
+    inline DataLine<T_DATA_POINT, T_INDEX>& operator<<(const DataPoint<T_DATA_POINT>& newDataPoint)
     {
         AddNewDataPoint(newDataPoint);
     }
-    inline uint64_t GetTheNumberOfDataPoints(void) { return Data.size(); }
+    inline T_INDEX GetTheNumberOfDataPoints(void) { return Data.size(); }
+    
+    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataPointIndex)
+    {
+        CheckDataPointIndex();
+
+        return Data[dataPointIndex];
+    }
+    
+    inline void SetDataPoint(const T_INDEX& dataPointIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
+    {
+        CheckDataPointIndex();
+        
+        Data[dataPointIndex] = newDataPoint;
+    }    
     
 private:
+    bool CheckDataPointIndex(T_INDEX dataPointIndex)
+    {
+        bool result = false;
+
+        if(Data.size() > dataPointIndex)
+        {
+            result = true;
+        }
+        else
+        {
+            std::string errorMessage = "The indexed DataPoint does not exist: /n Requested index: ";
+            errorMessage += dataPointIndex;
+            errorMessage += "/nMax index: ";
+            errorMessage += Data.size();
+            throw errorMessage;
+        }
+
+        return result;
+    }
+    
     std::string Title;
-    std::vector<DataPoint<T> > Data;
+    std::vector<DataPoint<T_DATA_POINT> > Data;
 };
 
 #endif /* DATALINE_H */

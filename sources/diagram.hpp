@@ -14,7 +14,7 @@
 #ifndef DIAGRAM_HPP
 #define DIAGRAM_HPP
 
-template <typename T_DATA_POINT, T_INDEX >
+template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
 public:
     Diagram(const std::string& newTitle = "") : Title(newTitle) {};
@@ -29,20 +29,71 @@ public:
     inline const std::string&   GetTitle(void) { return Title; }
     inline void                 SetTitle(const std::string& newTitle) { Title = newTitle; }
     
-    const std::string&  GetDataLineTitle(const T_INDEX& dataLineIndex);
-    void                SetDataLineTitle(const T_INDEX& dataLineIndex, const std::string newDataLineTitle);
+    inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex)
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        return Data[dataLineIndex].GetTitle();
+    }
+
+    inline void SetDataLineTitle(const T_INDEX& dataLineIndex, const std::string newDataLineTitle)
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        Data[dataLineIndex].SetTitle(newDataLineTitle);
+    }
     
-    inline T_INDEX GetTheNumberOfDataLines(void) { return Data.size(); }
+    inline const T_INDEX GetTheNumberOfDataLines(void) { return Data.size(); }
     
-    void                AddNewDataPoint(const T_INDEX& dataLineIndex, const DataPoint& newDataPoint);
-    const DataPoint&    GetDataPoint(const T_INDEX& dataLineIndex, const uint64_t& dataPointIndex);
-    void                SetDataPoint(const T_INDEX& dataLineIndex, const uint64_t& dataPointIndex, const DataPoint& newDataPoint);    
+    void AddNewDataLine(const std::string& newDataLineTitle = "")
+    {
+        Data.push_back(DataLine<T_DATA_POINT, T_INDEX>(newDataLineTitle));
+    }
+    
+    void AddNewDataPoint(T_INDEX dataLineIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        Data[dataLineIndex].AddNewDataPoint(newDataPoint);
+    }
+
+    DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex)
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        return Data[dataLineIndex].GetDataPoint(dataPointIndex);
+    }
+    
+    void SetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        Data[dataLineIndex].SetDataPoint(dataPointIndex, newDataPoint);
+    }    
 
 private:
     bool CheckDataLineIndex(T_INDEX dataLineIndex)
+    {
+        bool result = false;
+
+        if(Data.size() > dataLineIndex)
+        {
+            result = true;
+        }
+        else
+        {            
+            std::string errorMessage = "The indexed DataLine does not exist: /n Requested index: ";
+            errorMessage += dataLineIndex;
+            errorMessage += "/nMax index: ";
+            errorMessage += Data.size();
+            throw errorMessage;
+        }    
+
+        return result;
+    }
     
     std::string Title;
-    std::vector<DataLine<T_DATA_POINT> > Data;
+    std::vector<DataLine<T_DATA_POINT, T_INDEX> > Data;
 };
 
 #endif /* DIAGRAM_HPP */

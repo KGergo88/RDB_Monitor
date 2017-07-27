@@ -12,9 +12,10 @@
 #include <vector>
 #include <cstdlib>
 
-#include "data_line.hpp"
+#include "diagram.hpp"
 
 using DataPointType = double;
+using DataIndexType = uint64_t;
 
 int main(void)
 {
@@ -48,7 +49,7 @@ int main(void)
         
         std::cout << "2 - The analization of the columns:" << std::endl;
         myFile.clear(); myFile.seekg(0);      
-        std::vector<DataLine<DataPointType> > myDataLines;
+        Diagram<DataPointType, DataIndexType> myDiagram("myDiagram");
         std::getline(myFile,myLine);
         myLine.erase(std::remove(myLine.begin(), myLine.end(), ' '), myLine.end());
         std::cout << "The first line without spaces:" << std::endl << myLine << std::endl;
@@ -61,10 +62,10 @@ int main(void)
                        
             columnTitle = myLine.substr(nameStartPos, nameEndPos - nameStartPos);
             std::cout << columnTitle << std::endl;
-            myDataLines.push_back(columnTitle);
+            myDiagram.AddNewDataLine(columnTitle);
             nameStartPos = nameEndPos + 1;
         }
-        std::cout << "The number of colums: " << myDataLines.size() << std::endl;
+        std::cout << "The number of colums: " << myDiagram.GetTheNumberOfDataLines() << std::endl;
         std::cout << std::endl;
         
         std::cout << "3 - The analization of the data:" << std::endl;
@@ -81,19 +82,18 @@ int main(void)
             {
                 std::string readNumber = myLine.substr(numberStartPos, numberEndPos - numberStartPos);
                 std::cout << readNumber << std::endl;
-                readNumbersOfTheLine.push_back(atof(readNumber.c_str()));
+                readNumbersOfTheLine.push_back(static_cast<DataPointType>(atof(readNumber.c_str())));
                 numberStartPos = numberEndPos + 1;
             }
-            if(myDataLines.size() != readNumbersOfTheLine.size())
+            if(myDiagram.GetTheNumberOfDataLines() != readNumbersOfTheLine.size())
             {
                 throw std::string("The dataline \"" + myLine + "\" could not be processed.");
             }
             else
             {
-                for(auto i = 0; i < myDataLines.size(); i++)
+                for(auto i = 0; i < myDiagram.GetTheNumberOfDataLines(); i++)
                 {
-                    myDataLines[i].AddNewDataPoint(DataPoint<DataPointType>(static_cast<DataPointType>(lineCounter),
-                                                   readNumbersOfTheLine.at(i)));
+                    myDiagram.AddNewDataPoint(i, DataPoint<DataPointType>(static_cast<DataPointType>(lineCounter), readNumbersOfTheLine.at(i)));
                 }
             }
             lineCounter++;
