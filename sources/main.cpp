@@ -20,7 +20,7 @@
 int main(int argc, char *argv[])
 {
     std::fstream myFile;
-    std::string myFilePathAndName("../../ControllerTestOuput.txt");
+    std::string myFilePathAndName("../../MotorTestOutput.txt");
     
     std::cout << "Hello RDB!" << std::endl;
     std::cout << std::endl;

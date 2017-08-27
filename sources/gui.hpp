@@ -8,7 +8,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 #include <QtCharts/QChartView>
-#include <QtCharts/QSplineSeries>
+#include <QtCharts/QLineSeries>
 QT_CHARTS_USE_NAMESPACE
 
 #include <memory>
@@ -39,7 +39,7 @@ public:
         DataIndexType numberOfDataLines = diagramData.GetTheNumberOfDataLines();
         for(DataIndexType dataLineCounter = 0; dataLineCounter < numberOfDataLines; dataLineCounter++)
         {
-            displayedDataLines.push_back(std::make_unique<QSplineSeries>());
+            displayedDataLines.push_back(std::make_unique<QLineSeries>());
             displayedDataLines.back()->setName(QString::fromStdString(diagramData.GetDataLineTitle(dataLineCounter)));
             DataIndexType dataPointCounter;
             DataIndexType numberofDataPoints = diagramData.GetTheNumberOfDataPoints(dataLineCounter);
@@ -60,7 +60,7 @@ public:
         }
         displayedChart->setTitle(QString::fromStdString(Title));
         displayedChart->createDefaultAxes();
-        displayedChart->axisY()->setRange(-100, 5500);
+        displayedChart->axisY()->setRange(-6000, 6000);
         QChartView *myChartView = new QChartView(displayedChart);
         myChartView->setRenderHint(QPainter::Antialiasing);
         QMainWindow window;
@@ -73,7 +73,7 @@ public:
 private:
     QApplication QtApplication;
     std::string Title;
-    std::vector<std::unique_ptr<QSplineSeries> > displayedDataLines;
+    std::vector<std::unique_ptr<QLineSeries> > displayedDataLines;
 };
 
 #endif /* GUI_HPP */
