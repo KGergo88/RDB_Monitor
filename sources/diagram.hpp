@@ -5,7 +5,6 @@
  * Created on July 18, 2017, 6:29 PM
  */
 
-#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -18,13 +17,13 @@ template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
 public:
     Diagram(const std::string& newTitle = "") : Title(newTitle) {};
-    Diagram(const Diagram&  newDiagram) = delete;
-    Diagram(const Diagram&& newDiagram) = delete;
+    Diagram(Diagram&  newDiagram) = delete;
+    Diagram(Diagram&& newDiagram) = delete;
     
     ~Diagram() {}
     
-    Diagram& operator=(const Diagram&  newDiagram) = delete;
-    Diagram& operator=(const Diagram&& newDiagram) = delete;
+    Diagram& operator=(Diagram&  newDiagram) = delete;
+    Diagram& operator=(Diagram&& newDiagram) = delete;
 
     inline const std::string&   GetTitle(void) { return Title; }
     inline void                 SetTitle(const std::string& newTitle) { Title = newTitle; }
@@ -57,7 +56,14 @@ public:
         Data[dataLineIndex].AddNewDataPoint(newDataPoint);
     }
 
-    DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex)
+    inline const T_INDEX GetTheNumberOfDataPoints(const T_INDEX& dataLineIndex)
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        return Data[dataLineIndex].GetTheNumberOfDataPoints();
+    }
+
+    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex)
     {
         CheckDataLineIndex(dataLineIndex);
 
@@ -72,7 +78,7 @@ public:
     }    
 
 private:
-    bool CheckDataLineIndex(T_INDEX dataLineIndex)
+    bool CheckDataLineIndex(const T_INDEX& dataLineIndex)
     {
         bool result = false;
 

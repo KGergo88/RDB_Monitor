@@ -10,17 +10,17 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <memory>
 #include <cstdlib>
 
+#include "global.hpp"
 #include "diagram.hpp"
+#include "gui.hpp"
 
-using DataPointType = double;
-using DataIndexType = uint64_t;
-
-int main(void)
+int main(int argc, char *argv[])
 {
     std::fstream myFile;
-    std::string myFilePathAndName("../ControllerTestOuput.txt");    
+    std::string myFilePathAndName("../../ControllerTestOuput.txt");
     
     std::cout << "Hello RDB!" << std::endl;
     std::cout << std::endl;
@@ -99,12 +99,17 @@ int main(void)
             lineCounter++;
         }
         std::cout << std::endl;
-        
-        std::cout << "The End." << std::endl;        
+
+        std::cout << "2 - The graphical representation of the data:" << std::endl;
+        Gui myGui(argc, argv);
+        myGui.SetData(myDiagram);
+        myGui.StartGui();
+
+        std::cout << "The End." << std::endl;
     }
     catch(std::string errorString)
     {
-        std::cerr << "Exception catched with text: " << std::endl << errorString << std::endl;
+        std::cout << "Exception catched with text: " << std::endl << errorString << std::endl;
     }
     catch(...)
     {

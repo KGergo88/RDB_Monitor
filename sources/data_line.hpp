@@ -1,18 +1,17 @@
 /* 
- * File:   data_line.h
+ * File:   data_line.hpp
  * Author: gergo
  *
  * Created on July 16, 2017, 7:40 PM
  */
 
-#include <cstdint>
 #include <string>
 #include <vector>
 
 #include "data_point.hpp"
 
-#ifndef DATALINE_H
-#define DATALINE_H
+#ifndef DATALINE_HPP
+#define DATALINE_HPP
 
 template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
@@ -35,28 +34,30 @@ public:
     {
         Data.push_back(newDataPoint);       
     }
+
     inline DataLine<T_DATA_POINT, T_INDEX>& operator<<(const DataPoint<T_DATA_POINT>& newDataPoint)
     {
         AddNewDataPoint(newDataPoint);
     }
+
     inline T_INDEX GetTheNumberOfDataPoints(void) { return Data.size(); }
     
     inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataPointIndex)
     {
-        CheckDataPointIndex();
+        CheckDataPointIndex(dataPointIndex);
 
         return Data[dataPointIndex];
-    }
+    }  
     
     inline void SetDataPoint(const T_INDEX& dataPointIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
     {
-        CheckDataPointIndex();
+        CheckDataPointIndex(dataPointIndex);
         
         Data[dataPointIndex] = newDataPoint;
     }    
     
 private:
-    bool CheckDataPointIndex(T_INDEX dataPointIndex)
+    bool CheckDataPointIndex(const T_INDEX& dataPointIndex)
     {
         bool result = false;
 
@@ -80,4 +81,4 @@ private:
     std::vector<DataPoint<T_DATA_POINT> > Data;
 };
 
-#endif /* DATALINE_H */
+#endif /* DATALINE_HPP */
