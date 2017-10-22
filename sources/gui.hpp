@@ -5,75 +5,83 @@
  * Created on August 27, 2017, 12:37 PM
  */
 
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QMainWindow>
-#include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
-QT_CHARTS_USE_NAMESPACE
+#include <QtWidgets>
+#include <QtCharts>
 
+#include <iostream>
 #include <memory>
+#include <mutex>
+#include <thread>
 
 #include "global.hpp"
 #include "diagram.hpp"
 
-#ifndef GUI_H
-#define GUI_H
+#ifndef GUI_HPP
+#define GUI_HPP
+
+class GuiWindow : public QWidget
+{
+    Q_OBJECT
+
+signals:
+    void signalDisplayDiagram(std::size_t index);
+    void signalAddToDiagramList(std::size_t index);
+
+private slots:
+    void slotDisplayDiagram(std::size_t index);
+    void slotAddToDiagramList(std::size_t index);
+    void slotListSelectionChanged(void);
+
+private:
+    void resizeEvent(QResizeEvent* event)
+    {
+        (void) event;
+
+        SetSizes();
+    }
+
+public:
+    QChartView*     pChartView;
+    QListWidget*    pListWidget;
+    QPushButton*    pPushButton;
+    QLineEdit*      pLineEdit;
+
+    std::vector<DiagramObject> diagram_container;
+
+    GuiWindow(QWidget *parent = nullptr) : QWidget(parent) {}
+
+    GuiWindow(const GuiWindow&  newGuiWindow) = delete;
+    GuiWindow(GuiWindow&& newGuiWindow) = delete;
+
+    GuiWindow& operator=(const GuiWindow&  newGuiWindow) = delete;
+    GuiWindow& operator=(GuiWindow&& newGuiWindow) = delete;
+
+    void SetSizes(void);
+};
+
+    Q_DECLARE_METATYPE(std::size_t)
 
 class Gui
 {
+private:
+    bool is_running = false;
+    std::mutex mutex;
+    QApplication QtApplication;
+    GuiWindow window;
+
+    Gui(int argc, char **argv);
+
 public:
-    Gui(int &argc, char **argv) : QtApplication(argc, argv)
-    {
-
-    }
-
-    Gui(Gui&  newGui) = delete;
+    Gui(const Gui&  newGui) = delete;
     Gui(Gui&& newGui) = delete;
 
-    Gui& operator=(Gui&  newGui) = delete;
+    Gui& operator=(const Gui&  newGui) = delete;
     Gui& operator=(Gui&& newGui) = delete;
 
-    void SetData(Diagram<DataPointType, DataIndexType>& diagramData)
-    {
-        Title = diagramData.GetTitle();
-        DataIndexType numberOfDataLines = diagramData.GetTheNumberOfDataLines();
-        for(DataIndexType dataLineCounter = 0; dataLineCounter < numberOfDataLines; dataLineCounter++)
-        {
-            displayedDataLines.push_back(std::make_unique<QLineSeries>());
-            displayedDataLines.back()->setName(QString::fromStdString(diagramData.GetDataLineTitle(dataLineCounter)));
-            DataIndexType dataPointCounter;
-            DataIndexType numberofDataPoints = diagramData.GetTheNumberOfDataPoints(dataLineCounter);
-            for(dataPointCounter = 0; dataPointCounter < numberofDataPoints; dataPointCounter++)
-            {
-                const DataPoint<DataPointType> tempDataPoint = diagramData.GetDataPoint(dataLineCounter, dataPointCounter);
-                displayedDataLines.back()->append(tempDataPoint.GetX(), tempDataPoint.GetY());
-            }
-        }
-    }
-
-    void StartGui(void)
-    {
-        QChart *displayedChart = new QChart();
-        for(DataIndexType lineCounter = 0; lineCounter < displayedDataLines.size(); lineCounter++)
-        {
-            displayedChart->addSeries(displayedDataLines[lineCounter].get());
-        }
-        displayedChart->setTitle(QString::fromStdString(Title));
-        displayedChart->createDefaultAxes();
-        displayedChart->axisY()->setRange(-6000, 6000);
-        QChartView *myChartView = new QChartView(displayedChart);
-        myChartView->setRenderHint(QPainter::Antialiasing);
-        QMainWindow window;
-        window.setCentralWidget(myChartView);
-        window.resize(400, 300);
-        window.show();
-        QtApplication.exec();
-    }
-
-private:
-    QApplication QtApplication;
-    std::string Title;
-    std::vector<std::unique_ptr<QLineSeries> > displayedDataLines;
+    static Gui& Get(void);
+    void Run(void);
+    bool IsRunning(void);
+    void AddToDiagramList(const DiagramObject& diagram);
 };
 
 #endif /* GUI_HPP */

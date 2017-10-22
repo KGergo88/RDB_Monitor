@@ -17,14 +17,14 @@ template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
 {
 public:
-    DataLine() {}
-    DataLine(const std::string& newTitle) : Title(newTitle) {}
-    DataLine(const DataLine&  newDataLine): Title(newDataLine.Title), Data(newDataLine.Data) {}
-    DataLine(const DataLine&& newDataLine): Title(newDataLine.Title), Data(newDataLine.Data) {}
+    DataLine(const std::string& newTitle = "") : Title(newTitle) {}
+
+    DataLine(const DataLine&  newDataLine) = default;
+    DataLine(DataLine&& newDataLine) = default;
     
     ~DataLine() {}
     
-    DataLine& operator=(DataLine&  newDataLine) = delete;
+    DataLine& operator=(const DataLine&  newDataLine) = delete;
     DataLine& operator=(DataLine&& newDataLine) = delete;
     
     inline const std::string&   GetTitle(void) { return Title; }

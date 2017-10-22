@@ -7,10 +7,22 @@
 
 #include <cstdint>
 
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef GLOBAL_HPP
+#define GLOBAL_HPP
 
 using DataPointType = double;
 using DataIndexType = uint64_t;
+
+template <typename T_DATA_POINT, typename T_INDEX>
+class Diagram;
+using DiagramObject = Diagram<DataPointType, DataIndexType>;
+
+template <typename T_DATA_POINT, typename T_INDEX>
+class DataLine;
+using DataLineObject = DataLine<DataPointType, DataIndexType>;
+
+template <typename T_DATA_POINT>
+class DataPoint;
+using DataPointObject = DataPoint<DataPointType>;
 
 #endif /* GLOBAL_HPP */

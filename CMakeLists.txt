@@ -5,7 +5,6 @@ set(PROJECT_VERSION_MAJOR "1")
 set(PROJECT_VERSION_MINOR "0")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}_${PROJECT_VERSION_MINOR}")
 
-set(COMPILER_FLAGS -O0 -g -std=c++14)
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -std=c++14 -pthread")
 
 add_subdirectory(sources)

@@ -17,15 +17,17 @@ template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
 public:
     Diagram(const std::string& newTitle = "") : Title(newTitle) {};
-    Diagram(Diagram&  newDiagram) = delete;
-    Diagram(Diagram&& newDiagram) = delete;
-    
-    ~Diagram() {}
-    
-    Diagram& operator=(Diagram&  newDiagram) = delete;
-    Diagram& operator=(Diagram&& newDiagram) = delete;
 
-    inline const std::string&   GetTitle(void) { return Title; }
+    Diagram(const Diagram&  newDiagram) = default;
+
+    Diagram(Diagram&& newDiagram) = default;
+
+    ~Diagram() {}
+
+    Diagram& operator=(const Diagram&  newDiagram) = default;
+    Diagram& operator=(Diagram&& newDiagram) = default;
+
+    inline const std::string&   GetTitle(void) const { return Title; }
     inline void                 SetTitle(const std::string& newTitle) { Title = newTitle; }
     
     inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex)
@@ -76,6 +78,12 @@ public:
 
         Data[dataLineIndex].SetDataPoint(dataPointIndex, newDataPoint);
     }    
+
+    void EraseContent(void)
+    {
+        Title = "";
+        Data.clear();
+    }
 
 private:
     bool CheckDataLineIndex(const T_INDEX& dataLineIndex)
