@@ -46,33 +46,48 @@ void GuiWindow::slotAddToDiagramList(std::size_t index)
     {
         auto pListWidgetItem = new QListWidgetItem();
         pListWidgetItem->setText(QString::fromStdString(diagram_container[index].GetTitle()));
-        pListWidget->addItem(pListWidgetItem);
-
-        std::cout << "GuiWindow::slotAddToDiagramList() was called!" << std::endl;
-        std::cout << "The diagram_container content actually is: ";
-        for(const auto i : diagram_container)
-        {
-            std::cout << i.GetTitle() << ", ";
-        }
-        std::cout << std::endl;
+        pListWidgetDiagrams->addItem(pListWidgetItem);
 
         if(pChartView->chart()->series().empty())
         {
-            pListWidget->setCurrentItem(pListWidgetItem);
+            pListWidgetDiagrams->setCurrentItem(pListWidgetItem);
         }
     }
 }
 
-void GuiWindow::slotListSelectionChanged(void)
+void GuiWindow::slotReportStatus(std::string message)
 {
-    auto selected_items = pListWidget->currentItem();
-
-    std::cout << "The selected item now is: " << selected_items->text().toStdString()
-              << ". The row of this item is: " << pListWidget->currentRow() << std::endl;
-    emit slotDisplayDiagram(pListWidget->currentRow());
+    auto pListWidgetItem = new QListWidgetItem();
+    pListWidgetItem->setText(QString::fromStdString(message));
+    pListWidgetStatus->insertItem(0, pListWidgetItem);
 }
 
-///---------------------------------------------------------------------------------------------------------------------------------------------///
+void GuiWindow::slotListSelectionChanged(void)
+{
+    emit slotDisplayDiagram(pListWidgetDiagrams->currentRow());
+}
+
+void GuiWindow::slotPushButtonWasClicked(void)
+{
+    if(!SerialPort::GetInstance().IsOpen())
+    {
+        std::string serial_port_device(pLineEdit->text().toStdString());
+
+        if(SerialPort::GetInstance().Open(serial_port_device))
+        {
+            pLineEdit->setReadOnly(true);
+            pPushButton->setText("Close Serial Port");
+        }
+    }
+    else
+    {
+        if(SerialPort::GetInstance().Close())
+        {
+            pLineEdit->setReadOnly(false);
+            pPushButton->setText("Open Serial Port");
+        }
+    }
+}
 
 void GuiWindow::SetSizes(void)
 {
@@ -84,47 +99,50 @@ void GuiWindow::SetSizes(void)
     int chart_view_width = pChartView->width();
     int chart_view_height = pChartView->height();
 
-    pListWidget->setGeometry(chart_view_width, 0, window_width - chart_view_width, chart_view_height);
-    int list_widget_width = pListWidget->width();
-    int list_widget_height = pListWidget->height();
+    pListWidgetDiagrams->setGeometry(chart_view_width, 0, window_width - chart_view_width, chart_view_height);
+    int list_widget_diagrams_width = pListWidgetDiagrams->width();
+    int list_widget_diagrams_height = pListWidgetDiagrams->height();
 
-    pLineEdit->setGeometry(0, chart_view_height, chart_view_width, window_height - chart_view_height);
+    pListWidgetStatus->setGeometry(0, chart_view_height, chart_view_width, window_height - list_widget_diagrams_height);
+    int list_widget_status_height = pListWidgetStatus->height();
 
-    pPushButton->setGeometry(chart_view_width, list_widget_height, list_widget_width, window_height - list_widget_height);
+    pLineEdit->setGeometry(chart_view_width, chart_view_height, list_widget_diagrams_width, list_widget_status_height / 2);
+    int line_edit_height = pLineEdit->height();
+
+    pPushButton->setGeometry(chart_view_width, chart_view_height + line_edit_height, list_widget_diagrams_width, line_edit_height);
 }
+
+///---------------------------------------------------------------------------------------------------------------------------------------------///
 
 Gui::Gui(int argc, char **argv) : QtApplication(argc, argv), window()
 {
-    std::cout << "Constructing GUI! Thread ID: " << std::this_thread::get_id() << std::endl;
-
     window.pChartView = new QChartView(&window);
     window.pChartView->setRenderHint(QPainter::Antialiasing);
     window.pChartView->setRubberBand(QChartView::HorizontalRubberBand);
 
-    window.pListWidget = new QListWidget(&window);
+    window.pListWidgetDiagrams = new QListWidget(&window);
 
-    window.pPushButton= new QPushButton("LoadFile", &window);
+    window.pListWidgetStatus = new QListWidget(&window);
 
-    window.pLineEdit = new QLineEdit("Insert path of the file to be loaded here...", &window);
-#warning "Solve this problem as well..."
-//    window.setWindowTitle(QString::fromStdString("RDB Diplomaterv Monitor V1.0"));
+    window.pLineEdit = new QLineEdit((SERIAL_PORT_DEFAULT_DEVICE_NAME), &window);
+
+    window.pPushButton= new QPushButton("Open Serial Port", &window);
+
+    window.setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
     window.showMaximized();
-}
-
-Gui& Gui::Get(void)
-{
-    static Gui Singleton(0, nullptr);
-
-    return Singleton;
 }
 
 void Gui::Run(void)
 {
     qRegisterMetaType<std::size_t>("std::size_t");
+    qRegisterMetaType<std::string>("std::string");
+
     QObject::connect(&window, SIGNAL(signalDisplayDiagram(std::size_t)), &window, SLOT(slotDisplayDiagram(std::size_t)));
     QObject::connect(&window, SIGNAL(signalAddToDiagramList(std::size_t)), &window, SLOT(slotAddToDiagramList(std::size_t)));
+    QObject::connect(&window, SIGNAL(signalReportStatus(std::string)), &window, SLOT(slotReportStatus(std::string)));
+    QObject::connect(window.pListWidgetDiagrams, SIGNAL(itemSelectionChanged()), &window, SLOT(slotListSelectionChanged()));
+    QObject::connect(window.pPushButton, SIGNAL(clicked()), &window, SLOT(slotPushButtonWasClicked()));
 
-    QObject::connect(window.pListWidget, SIGNAL(itemSelectionChanged()), &window, SLOT(slotListSelectionChanged()));
     is_running = true;
     QtApplication.exec();
 }
@@ -134,12 +152,17 @@ bool Gui::IsRunning(void)
     return is_running;
 }
 
-void Gui::AddToDiagramList(const DiagramObject& diagram)
+void Gui::AddToDiagramList(DiagramObject& diagram)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
-    std::cout << "Gui::AddToDiagramList( " << diagram.GetTitle() << " );" << std::endl;
-
-    window.diagram_container.emplace_back(diagram);
+    window.diagram_container.push_back(diagram);
     emit window.signalAddToDiagramList(window.diagram_container.size() - 1);
+}
+
+void Gui::ReportStatus(const std::string& message)
+{
+    auto current_date_and_time = std::time(0);
+    std::string complete_message = std::string(ctime(&current_date_and_time)) + " - " + message;
+    emit window.signalReportStatus(complete_message);
 }

@@ -15,6 +15,7 @@
 
 #include "global.hpp"
 #include "diagram.hpp"
+#include "serial_port.hpp"
 
 #ifndef GUI_HPP
 #define GUI_HPP
@@ -26,11 +27,14 @@ class GuiWindow : public QWidget
 signals:
     void signalDisplayDiagram(std::size_t index);
     void signalAddToDiagramList(std::size_t index);
+    void signalReportStatus(std::string message);
 
 private slots:
     void slotDisplayDiagram(std::size_t index);
     void slotAddToDiagramList(std::size_t index);
+    void slotReportStatus(std::string message);
     void slotListSelectionChanged(void);
+    void slotPushButtonWasClicked(void);
 
 private:
     void resizeEvent(QResizeEvent* event)
@@ -42,7 +46,8 @@ private:
 
 public:
     QChartView*     pChartView;
-    QListWidget*    pListWidget;
+    QListWidget*    pListWidgetDiagrams;
+    QListWidget*    pListWidgetStatus;
     QPushButton*    pPushButton;
     QLineEdit*      pLineEdit;
 
@@ -78,10 +83,16 @@ public:
     Gui& operator=(const Gui&  newGui) = delete;
     Gui& operator=(Gui&& newGui) = delete;
 
-    static Gui& Get(void);
+    static Gui& GetInstance(void)
+    {
+        static Gui Singleton(0, nullptr);
+        return Singleton;
+    }
+
     void Run(void);
     bool IsRunning(void);
-    void AddToDiagramList(const DiagramObject& diagram);
+    void AddToDiagramList(DiagramObject& diagram);
+    void ReportStatus(const std::string& message);
 };
 
 #endif /* GUI_HPP */

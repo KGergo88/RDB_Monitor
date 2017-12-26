@@ -115,14 +115,24 @@ void ProcessInputFile(const std::string& path, DiagramObject& myDiagram)
 
 bool WorkerThread(void)
 {
-    SerialPort serial_port("/dev/ttyACM0", 115200);
-    DataProcessor data_processor;
-
     while(1)
     {
-        auto received_data = serial_port.ReceiveMeasurementData();
-        auto assembled_diagram = data_processor.ProcessData(*received_data);
-        Gui::Get().AddToDiagramList(*assembled_diagram);
+        if(SerialPort::GetInstance().IsOpen())
+        {
+            auto received_data = SerialPort::GetInstance().ReceiveMeasurementData();
+            if(received_data)
+            {
+                auto assembled_diagram = DataProcessor::GetInstance().ProcessData("SerialPort", *received_data);
+                if(assembled_diagram)
+                {
+                    Gui::GetInstance().AddToDiagramList(*assembled_diagram);
+                }
+                else
+                {
+                    std::cerr << "Empty assembled_diagram..." << std::endl;
+                }
+            }
+        }
     }
 }
 
@@ -132,7 +142,7 @@ int main(void)
 
     std::thread worker_thread(WorkerThread);
 
-    Gui::Get().Run();
+    Gui::GetInstance().Run();
     std::cout << "The GUI has stopped." << std::endl;
 
     worker_thread.join();

@@ -3,6 +3,7 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#include <ctime>
 
 #include "global.hpp"
 #include "diagram.hpp"
@@ -13,7 +14,11 @@
 class DataProcessor
 {
 public:
-    DataProcessor() {}
+    static inline DataProcessor& GetInstance(void)
+    {
+        static DataProcessor Singleton;
+        return Singleton;
+    }
 
     DataProcessor(const DataProcessor&) = delete;
     DataProcessor(DataProcessor&&) = delete;
@@ -21,58 +26,72 @@ public:
     DataProcessor& operator=(const DataProcessor&) = delete;
     DataProcessor& operator=(DataProcessor&&) = delete;
 
-    std::shared_ptr<DiagramObject> ProcessData(std::istream& input_data)
+    std::shared_ptr<DiagramObject> ProcessData(std::string data_source, std::istream& input_data)
     {
-        std::shared_ptr<DiagramObject> diagram(nullptr);
+        bool data_start_line_was_found = false;
+        bool data_end_line_was_found = false;
 
-        if(input_data)
+        auto current_date_and_time = std::time(0);
+        auto diagram = std::make_shared<DiagramObject>(data_source + " - " + std::string(ctime(&current_date_and_time)));
+
+        std::string actual_line;
+        while(std::getline(input_data, actual_line) && !input_data.eof())
         {
-            std::string actual_line;
-
-#warning "Add the date and time as a diagram title..."
-#warning "Also add some error handling to other parts of the module and the whole program..."
-            diagram = std::make_shared<DiagramObject>("Yoyo Ketszihh");
-
-            while(std::getline(input_data, actual_line) && !input_data.eof())
+            if(std::string::npos != actual_line.find(DATA_START_LINE))
             {
-                if(std::string::npos != actual_line.find("<<<START>>>"))
-                {
-                    break;
-                }
+                data_start_line_was_found = true;
+                break;
             }
+        }
 
+        if(data_start_line_was_found)
+        {
             std::getline(input_data, actual_line);
             auto columns = ProcessHeadLine(actual_line);
-
-            for(const auto& i : *columns)
+            if(columns)
             {
-                diagram->AddNewDataLine(i);
+                for(const auto& i : *columns)
+                {
+                    diagram->AddNewDataLine(i);
+                }
+
+                DataIndexType data_point_x_coordinate = 0;
+                while(std::getline(input_data, actual_line) && !input_data.eof())
+                {
+                    if(std::string::npos != actual_line.find(DATA_END_LINE))
+                    {
+                        data_end_line_was_found = true;
+                        break;
+                    }
+
+                    auto data_points = ProcessDataLine(actual_line);
+                    if(data_points)
+                    {
+                        if(columns->size() != data_points->size())
+                        {
+                            break;
+                        }
+
+                        DataIndexType data_line_index = 0;
+                        for(auto& i : *data_points)
+                        {
+                            diagram->AddNewDataPoint(data_line_index, DataPointObject(data_point_x_coordinate, i));
+                            data_line_index++;
+                        }
+                        data_point_x_coordinate++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
             }
+        }
 
-            DataIndexType data_point_x_coordinate = 0;
-            while(std::getline(input_data, actual_line) && !input_data.eof())
-            {
-                if(std::string::npos != actual_line.find("<<<END>>>"))
-                {
-                    break;
-                }
-
-                auto data_points = ProcessDataLine(actual_line);
-
-                if(columns->size() != data_points->size())
-                {
-                    diagram.reset();
-                    break;
-                }
-
-                DataIndexType data_line_index = 0;
-                for(auto& i : *data_points)
-                {
-                    diagram->AddNewDataPoint(data_line_index, DataPointObject(data_point_x_coordinate, i));
-                    data_line_index++;
-                }
-                data_point_x_coordinate++;
-            }
+        if(!(data_start_line_was_found && data_end_line_was_found))
+        {
+            std::cerr << "The input data could not be processed." << std::endl;
+            diagram.reset();
         }
 
         input_data.clear(); input_data.seekg(0);
@@ -81,6 +100,8 @@ public:
     }
 
 private:
+    DataProcessor() = default;
+
     std::shared_ptr<std::vector<std::string> > ProcessHeadLine(std::string& headline)
     {
         auto columns = std::make_shared<std::vector<std::string> >();
@@ -96,6 +117,12 @@ private:
             columnTitle = headline.substr(nameStartPos, nameEndPos - nameStartPos);
             columns->emplace_back(columnTitle);
             nameStartPos = nameEndPos + 1;
+        }
+
+        if(0 == columns->size())
+        {
+            std::cerr << "The headline could not be processed. Content:" << headline << std::endl;
+            columns.reset();
         }
 
         return columns;
@@ -114,6 +141,12 @@ private:
             std::string readNumber = data_line.substr(numberStartPos, numberEndPos - numberStartPos);
             data_points->push_back(static_cast<DataPointType>(atof(readNumber.c_str())));
             numberStartPos = numberEndPos + 1;
+        }
+
+        if(0 == data_points->size())
+        {
+            std::cerr << "The dataline could not be processed. Content:" << data_line << std::endl;
+            data_points.reset();
         }
 
         return data_points;

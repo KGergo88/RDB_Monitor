@@ -25,4 +25,9 @@ template <typename T_DATA_POINT>
 class DataPoint;
 using DataPointObject = DataPoint<DataPointType>;
 
+#define APPLICATION_NAME                ("RDB Diplomaterv Monitor V1.0")
+#define SERIAL_PORT_DEFAULT_DEVICE_NAME ("/dev/ttyACM0")
+#define DATA_START_LINE                 ("<<<START>>>")
+#define DATA_END_LINE                   ("<<<END>>>")
+
 #endif /* GLOBAL_HPP */

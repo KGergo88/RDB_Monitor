@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "global.hpp"
 #include "data_point.hpp"
 
 #ifndef DATALINE_HPP

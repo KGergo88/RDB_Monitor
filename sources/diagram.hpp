@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "global.hpp"
 #include "data_line.hpp"
 
 #ifndef DIAGRAM_HPP

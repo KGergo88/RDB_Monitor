@@ -1,9 +1,12 @@
 #include <iostream>
 #include <memory>
+#include <mutex>
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/serial_port.hpp>
+
+#include "global.hpp"
 
 #ifndef SERIAL_PORT_HPP
 #define SERIAL_PORT_HPP
@@ -11,7 +14,12 @@
 class SerialPort
 {
 public:
-    SerialPort(const std::string& new_device_name, const uint32_t& new_baud_rate);
+    static inline SerialPort& GetInstance(void)
+    {
+        static SerialPort Singleton;
+        return Singleton;
+    }
+
     ~SerialPort();
 
     SerialPort(const SerialPort&) = delete;
@@ -20,9 +28,19 @@ public:
     SerialPort& operator=(const SerialPort&) = delete;
     SerialPort& operator=(SerialPort&&) = delete;
 
+    bool Open(const std::string& device_to_open);
+    bool Close();
+    bool IsOpen(void);
+
     std::shared_ptr<std::istream> ReceiveMeasurementData(void);
 
+    static constexpr uint32_t baud_rate = 115200;
+
 private:
+    SerialPort();
+
+    bool ShutdownWasRequested = false;
+    std::string device_name;
     boost::asio::io_service  io_service;
     boost::asio::serial_port port;
     boost::asio::streambuf buffer;

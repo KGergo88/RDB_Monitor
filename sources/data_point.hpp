@@ -5,6 +5,8 @@
  * Created on July 16, 2017, 7:23 PM
  */
 
+#include "global.hpp"
+
 #ifndef DATA_POINT_HPP
 #define DATA_POINT_HPP
 
