@@ -69,9 +69,9 @@ private:
         else
         {
             std::string errorMessage = "The indexed DataPoint does not exist: /n Requested index: ";
-            errorMessage += dataPointIndex;
+            errorMessage += std::to_string(dataPointIndex);
             errorMessage += "/nMax index: ";
-            errorMessage += Data.size();
+            errorMessage += std::to_string(Data.size());
             throw errorMessage;
         }
 

@@ -14,6 +14,8 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <atomic>
+#include <signal.h>
 
 #include "global.hpp"
 #include "diagram.hpp"
@@ -21,101 +23,11 @@
 #include "serial_port.hpp"
 #include "data_processor.hpp"
 
+std::atomic_bool shutdown_worker_thread = false;
 
-/*
-void ProcessInputFile(const std::string& path, DiagramObject& myDiagram)
+void WorkerThread(void)
 {
-    std::fstream myFile;
-    std::string myFilePathAndName(path);
-
-    try
-    {
-//        std::cout << "1 - Accessing the measured data from a file:" << std::endl;
-        myFile.open(myFilePathAndName);
-        if(myFile.is_open())
-        {
-            std::cout << "The file \"" << myFilePathAndName << "\" was successfully opened..." << std::endl;
-        }
-        else
-        {
-            throw std::string("The file could not be opened. Maybe wrong path or name?");
-        }
-
-        std::cout << "The content of the file:" << std::endl;
-        myFile.clear(); myFile.seekg(0);
-        std::string myLine;
-        while(std::getline(myFile,myLine))
-        {
-            //std::cout << myLine << std::endl;
-        }
-        std::cout << std::endl;
-
-//        std::cout << "2 - The analization of the columns:" << std::endl;
-        myFile.clear(); myFile.seekg(0);
-        std::getline(myFile,myLine);
-        myLine.erase(std::remove(myLine.begin(), myLine.end(), ' '), myLine.end());
-//        std::cout << "The first line without spaces:" << std::endl << myLine << std::endl;
-//        std::cout << "The received column titles:" << std::endl;
-        std::size_t nameStartPos = 0;
-        std::size_t nameEndPos = 0;
-        while(std::string::npos != (nameEndPos = myLine.find(',', nameStartPos)))
-        {
-            std::string columnTitle;
-
-            columnTitle = myLine.substr(nameStartPos, nameEndPos - nameStartPos);
-//            std::cout << columnTitle << std::endl;
-            myDiagram.AddNewDataLine(columnTitle);
-            nameStartPos = nameEndPos + 1;
-        }
-//        std::cout << "The number of colums: " << myDiagram.GetTheNumberOfDataLines() << std::endl;
-        std::cout << std::endl;
-
-//        std::cout << "3 - The analization of the data:" << std::endl;
-        auto lineCounter = 0;
-        while(std::getline(myFile,myLine) && !myFile.eof())
-        {
-            myLine.erase(std::remove(myLine.begin(), myLine.end(), ' '), myLine.end());
-//            std::cout << "The next line (" << lineCounter << ") without spaces:" << std::endl << myLine << std::endl;
-//            std::cout << "The received numbers:" << std::endl;
-            std::size_t numberStartPos = 0;
-            std::size_t numberEndPos = 0;
-            std::vector<DataPointType> readNumbersOfTheLine;
-            while(std::string::npos != (numberEndPos = myLine.find(',', numberStartPos)))
-            {
-                std::string readNumber = myLine.substr(numberStartPos, numberEndPos - numberStartPos);
-//                std::cout << readNumber << std::endl;
-                readNumbersOfTheLine.push_back(static_cast<DataPointType>(atof(readNumber.c_str())));
-                numberStartPos = numberEndPos + 1;
-            }
-            if(myDiagram.GetTheNumberOfDataLines() != readNumbersOfTheLine.size())
-            {
-                throw std::string("The dataline \"" + myLine + "\" could not be processed.");
-            }
-            else
-            {
-                for(DataIndexType i = 0; i < myDiagram.GetTheNumberOfDataLines(); i++)
-                {
-                    myDiagram.AddNewDataPoint(i, DataPointObject(static_cast<DataPointType>(lineCounter), readNumbersOfTheLine.at(i)));
-                }
-            }
-            lineCounter++;
-        }
-        std::cout << std::endl;
-    }
-    catch(std::string errorString)
-    {
-        std::cout << "Exception catched with text: " << std::endl << errorString << std::endl;
-    }
-    catch(...)
-    {
-        std::cout << "Exception was catched with the ... argument." << std::endl;
-    }
-}
-*/
-
-bool WorkerThread(void)
-{
-    while(1)
+    while(!shutdown_worker_thread)
     {
         if(SerialPort::GetInstance().IsOpen())
         {
@@ -145,8 +57,12 @@ int main(void)
     Gui::GetInstance().Run();
     std::cout << "The GUI has stopped." << std::endl;
 
+    std::cout << "Stopping the worker thread." << std::endl;
+    shutdown_worker_thread = true;
+
     worker_thread.join();
-    std::cout << "The working thread has stopped." << std::endl;
+    std::cout << "The worker thread has stopped." << std::endl;
 
     std::cout << "The End." << std::endl;
+    return EXIT_SUCCESS;
 }

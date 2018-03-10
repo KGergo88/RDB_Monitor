@@ -19,33 +19,47 @@ TEMPLATE = app
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
-# You can also make your code fail to compile if you use deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
 CONFIG += c++14
 
-INCLUDEPATH += $$_BOOST_ROOT
-LIBS += -lboost_system
+#Linux
+unix {
+    message("Linux build was selected!")
+    INCLUDEPATH += $$_BOOST_ROOT
+    LIBS += -lboost_system
+}
+
+#Windows
+win32 {
+    message("Windows build was selected!")
+
+    DEFINES += WIN32_LEAN_AND_MEAN
+
+    #This is the folder that contains the header files of the boost library.
+    _BOOST_INCLUDES = "C:/boost/boost_1_66_0_msvc64_14_1/"
+    #This is the folder that contains the compiled library files.
+    _BOOST_LIBRARIES = "C:/boost/boost_1_66_0_msvc64_14_1/lib64-msvc-14.1"
+
+    INCLUDEPATH += $$_BOOST_INCLUDES
+    LIBS += -L$$_BOOST_LIBRARIES
+}
 
 SOURCES += \
-    ../../sources/data_line.cpp \
-    ../../sources/data_point.cpp \
-    ../../sources/diagram.cpp \
-    ../../sources/main.cpp \
-    ../../sources/gui.cpp \
-    ../../sources/serial_port.cpp \
-    ../../sources/data_processor.cpp
+    sources/data_line.cpp \
+    sources/data_point.cpp \
+    sources/diagram.cpp \
+    sources/main.cpp \
+    sources/gui.cpp \
+    sources/serial_port.cpp \
+    sources/data_processor.cpp
 
 HEADERS += \
-    ../../sources/data_line.hpp \
-    ../../sources/data_point.hpp \
-    ../../sources/diagram.hpp \
-    ../../sources/data_line.hpp \
-    ../../sources/data_point.hpp \
-    ../../sources/diagram.hpp \
-    ../../sources/gui.hpp \
-    ../../sources/global.hpp \
-    ../../sources/serial_port.hpp \
-    ../../sources/data_processor.hpp
+    sources/data_line.hpp \
+    sources/data_point.hpp \
+    sources/diagram.hpp \
+    sources/data_line.hpp \
+    sources/data_point.hpp \
+    sources/diagram.hpp \
+    sources/gui.hpp \
+    sources/global.hpp \
+    sources/serial_port.hpp \
+    sources/data_processor.hpp

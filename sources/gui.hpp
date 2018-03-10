@@ -51,7 +51,7 @@ public:
     QPushButton*    pPushButton;
     QLineEdit*      pLineEdit;
 
-    std::vector<DiagramObject> diagram_container;
+    std::vector<DiagramSpecialized> diagram_container;
 
     GuiWindow(QWidget *parent = nullptr) : QWidget(parent) {}
 
@@ -91,7 +91,7 @@ public:
 
     void Run(void);
     bool IsRunning(void);
-    void AddToDiagramList(DiagramObject& diagram);
+    void AddToDiagramList(DiagramSpecialized& diagram);
     void ReportStatus(const std::string& message);
 };
 

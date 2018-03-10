@@ -15,15 +15,15 @@ using DataIndexType = uint64_t;
 
 template <typename T_DATA_POINT, typename T_INDEX>
 class Diagram;
-using DiagramObject = Diagram<DataPointType, DataIndexType>;
+using DiagramSpecialized = Diagram<DataPointType, DataIndexType>;
 
 template <typename T_DATA_POINT, typename T_INDEX>
 class DataLine;
-using DataLineObject = DataLine<DataPointType, DataIndexType>;
+using DataLineSpecialized = DataLine<DataPointType, DataIndexType>;
 
 template <typename T_DATA_POINT>
 class DataPoint;
-using DataPointObject = DataPoint<DataPointType>;
+using DataPointSpecialized = DataPoint<DataPointType>;
 
 #define APPLICATION_NAME                ("RDB Diplomaterv Monitor V1.0")
 #define SERIAL_PORT_DEFAULT_DEVICE_NAME ("/dev/ttyACM0")

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <functional>
 #include <ctime>
+#include <cctype>
 
 #include "global.hpp"
 #include "diagram.hpp"
@@ -26,13 +27,13 @@ public:
     DataProcessor& operator=(const DataProcessor&) = delete;
     DataProcessor& operator=(DataProcessor&&) = delete;
 
-    std::shared_ptr<DiagramObject> ProcessData(std::string data_source, std::istream& input_data)
+    std::shared_ptr<DiagramSpecialized> ProcessData(std::string data_source, std::istream& input_data)
     {
         bool data_start_line_was_found = false;
         bool data_end_line_was_found = false;
 
         auto current_date_and_time = std::time(0);
-        auto diagram = std::make_shared<DiagramObject>(data_source + " - " + std::string(ctime(&current_date_and_time)));
+        auto diagram = std::make_shared<DiagramSpecialized>(data_source + " - " + std::string(ctime(&current_date_and_time)));
 
         std::string actual_line;
         while(std::getline(input_data, actual_line) && !input_data.eof())
@@ -55,7 +56,7 @@ public:
                     diagram->AddNewDataLine(i);
                 }
 
-                DataIndexType data_point_x_coordinate = 0;
+                DataPointType data_point_x_coordinate = 0;
                 while(std::getline(input_data, actual_line) && !input_data.eof())
                 {
                     if(std::string::npos != actual_line.find(DATA_END_LINE))
@@ -75,7 +76,7 @@ public:
                         DataIndexType data_line_index = 0;
                         for(auto& i : *data_points)
                         {
-                            diagram->AddNewDataPoint(data_line_index, DataPointObject(data_point_x_coordinate, i));
+                            diagram->AddNewDataPoint(data_line_index, DataPointSpecialized(data_point_x_coordinate, i));
                             data_line_index++;
                         }
                         data_point_x_coordinate++;
@@ -105,8 +106,8 @@ private:
     std::shared_ptr<std::vector<std::string> > ProcessHeadLine(std::string& headline)
     {
         auto columns = std::make_shared<std::vector<std::string> >();
-
-        headline.erase(std::remove_if(headline.begin(), headline.end(), std::bind(std::isspace<char>, std::placeholders::_1, std::locale::classic())), headline.end());
+        headline.erase(std::remove_if(headline.begin(), headline.end(), std::isspace), headline.end());
+//        headline.erase(std::remove_if(headline.begin(), headline.end(), std::bind(std::isspace<char>, std::placeholders::_1, std::locale::classic())), headline.end());
 
         std::size_t nameStartPos = 0;
         std::size_t nameEndPos = 0;
@@ -131,8 +132,8 @@ private:
     std::shared_ptr<std::vector<DataPointType> > ProcessDataLine(std::string& data_line)
     {
         auto data_points = std::make_shared<std::vector<DataPointType> >();
-
-        data_line.erase(std::remove_if(data_line.begin(), data_line.end(), std::bind(std::isspace<char>, std::placeholders::_1, std::locale::classic())), data_line.end());
+        data_line.erase(std::remove_if(data_line.begin(), data_line.end(), std::isspace), data_line.end());
+//        data_line.erase(std::remove_if(data_line.begin(), data_line.end(), std::bind(std::isspace<char>, std::placeholders::_1, std::locale::classic())), data_line.end());
 
         std::size_t numberStartPos = 0;
         std::size_t numberEndPos = 0;

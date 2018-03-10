@@ -13,7 +13,7 @@ void GuiWindow::slotDisplayDiagram(std::size_t index)
 {
     if(index < diagram_container.size())
     {
-        DiagramObject& diagram_to_display = diagram_container[index];
+        DiagramSpecialized& diagram_to_display = diagram_container[index];
 
         auto old_chart = pChartView->chart();
         if(!old_chart)
@@ -152,7 +152,7 @@ bool Gui::IsRunning(void)
     return is_running;
 }
 
-void Gui::AddToDiagramList(DiagramObject& diagram)
+void Gui::AddToDiagramList(DiagramSpecialized& diagram)
 {
     std::lock_guard<std::mutex> lock(mutex);
 

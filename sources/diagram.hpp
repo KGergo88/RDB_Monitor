@@ -98,9 +98,9 @@ private:
         else
         {            
             std::string errorMessage = "The indexed DataLine does not exist: /n Requested index: ";
-            errorMessage += dataLineIndex;
+            errorMessage += std::to_string(dataLineIndex);
             errorMessage += "/nMax index: ";
-            errorMessage += Data.size();
+            errorMessage += std::to_string(Data.size());
             throw errorMessage;
         }    
 
