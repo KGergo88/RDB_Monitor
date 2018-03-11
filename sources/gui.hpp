@@ -73,8 +73,10 @@ private:
     std::mutex mutex;
     QApplication QtApplication;
     GuiWindow window;
+    static int argc_value;
+    static char** argv_value;
 
-    Gui(int argc, char **argv);
+    Gui();
 
 public:
     Gui(const Gui&  newGui) = delete;
@@ -83,9 +85,15 @@ public:
     Gui& operator=(const Gui&  newGui) = delete;
     Gui& operator=(Gui&& newGui) = delete;
 
+    static void SetArgcArgv(int argc, char **argv)
+    {
+        argc_value = argc;
+        argv_value = argv;
+    }
+
     static Gui& GetInstance(void)
     {
-        static Gui Singleton(0, nullptr);
+        static Gui Singleton;
         return Singleton;
     }
 

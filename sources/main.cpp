@@ -23,7 +23,7 @@
 #include "serial_port.hpp"
 #include "data_processor.hpp"
 
-std::atomic_bool shutdown_worker_thread = false;
+std::atomic_bool shutdown_worker_thread;
 
 void WorkerThread(void)
 {
@@ -48,12 +48,15 @@ void WorkerThread(void)
     }
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
+    shutdown_worker_thread = false;
+
     std::cout << "Hello RDB!" << std::endl << std::endl;
 
     std::thread worker_thread(WorkerThread);
 
+    Gui::SetArgcArgv(argc, argv);
     Gui::GetInstance().Run();
     std::cout << "The GUI has stopped." << std::endl;
 
@@ -65,4 +68,5 @@ int main(void)
 
     std::cout << "The End." << std::endl;
     return EXIT_SUCCESS;
+#warning "Linux: The program has unexpectedly finished. The process was ended forcefully."
 }

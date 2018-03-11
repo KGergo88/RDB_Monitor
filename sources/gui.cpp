@@ -7,7 +7,9 @@
 
 #include "gui.hpp"
 
-
+int Gui::argc_value = 1;
+char* default_argv_value = ((char*)"");
+char** Gui::argv_value = &default_argv_value;
 
 void GuiWindow::slotDisplayDiagram(std::size_t index)
 {
@@ -77,6 +79,11 @@ void GuiWindow::slotPushButtonWasClicked(void)
         {
             pLineEdit->setReadOnly(true);
             pPushButton->setText("Close Serial Port");
+            Gui::GetInstance().ReportStatus("The serial port was opened");
+        }
+        else
+        {
+            Gui::GetInstance().ReportStatus("The serial could not be opened. Maybe it is not a valid port name?");
         }
     }
     else
@@ -85,6 +92,11 @@ void GuiWindow::slotPushButtonWasClicked(void)
         {
             pLineEdit->setReadOnly(false);
             pPushButton->setText("Open Serial Port");
+            Gui::GetInstance().ReportStatus("The serial port was closed");
+        }
+        else
+        {
+            Gui::GetInstance().ReportStatus("The serial could not be closed");
         }
     }
 }
@@ -114,7 +126,7 @@ void GuiWindow::SetSizes(void)
 
 ///---------------------------------------------------------------------------------------------------------------------------------------------///
 
-Gui::Gui(int argc, char **argv) : QtApplication(argc, argv), window()
+Gui::Gui() : QtApplication(argc_value, argv_value), window()
 {
     window.pChartView = new QChartView(&window);
     window.pChartView->setRenderHint(QPainter::Antialiasing);
@@ -162,6 +174,7 @@ void Gui::AddToDiagramList(DiagramSpecialized& diagram)
 
 void Gui::ReportStatus(const std::string& message)
 {
+#warning "There is a new line at the end of the time string. Also the Date is not important in this string"
     auto current_date_and_time = std::time(0);
     std::string complete_message = std::string(ctime(&current_date_and_time)) + " - " + message;
     emit window.signalReportStatus(complete_message);

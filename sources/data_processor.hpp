@@ -106,8 +106,12 @@ private:
     std::shared_ptr<std::vector<std::string> > ProcessHeadLine(std::string& headline)
     {
         auto columns = std::make_shared<std::vector<std::string> >();
+#warning "This should be working in the same was in both OSs. Either include locale for Windows of use the cctype version on Linux."
+#ifdef _WIN32
         headline.erase(std::remove_if(headline.begin(), headline.end(), std::isspace), headline.end());
-//        headline.erase(std::remove_if(headline.begin(), headline.end(), std::bind(std::isspace<char>, std::placeholders::_1, std::locale::classic())), headline.end());
+#else
+        headline.erase(std::remove_if(headline.begin(), headline.end(), std::bind(std::isspace<char>, std::placeholders::_1, std::locale::classic())), headline.end());
+#endif
 
         std::size_t nameStartPos = 0;
         std::size_t nameEndPos = 0;
@@ -132,8 +136,12 @@ private:
     std::shared_ptr<std::vector<DataPointType> > ProcessDataLine(std::string& data_line)
     {
         auto data_points = std::make_shared<std::vector<DataPointType> >();
+#warning "This should be working in the same was in both OSs. Either include locale for Windows of use the cctype version on Linux."
+#ifdef _WIN32
         data_line.erase(std::remove_if(data_line.begin(), data_line.end(), std::isspace), data_line.end());
-//        data_line.erase(std::remove_if(data_line.begin(), data_line.end(), std::bind(std::isspace<char>, std::placeholders::_1, std::locale::classic())), data_line.end());
+#else
+        data_line.erase(std::remove_if(data_line.begin(), data_line.end(), std::bind(std::isspace<char>, std::placeholders::_1, std::locale::classic())), data_line.end());
+#endif
 
         std::size_t numberStartPos = 0;
         std::size_t numberEndPos = 0;
