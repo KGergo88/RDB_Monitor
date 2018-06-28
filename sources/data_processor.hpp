@@ -123,7 +123,7 @@ private:
             columns->emplace_back(columnTitle);
             nameStartPos = nameEndPos + 1;
         }
-
+#warning "At least two from now one..."
         if(0 == columns->size())
         {
             std::cerr << "The headline could not be processed. Content:" << headline << std::endl;

@@ -18,7 +18,7 @@ template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
 {
 public:
-    DataLine(const std::string& newTitle = "") : Title(newTitle) {}
+    DataLine(const std::string& newDataLineTitle = "") : DataLineTitle(newDataLineTitle) {}
 
     DataLine(const DataLine&  newDataLine) = default;
     DataLine(DataLine&& newDataLine) = default;
@@ -28,8 +28,8 @@ public:
     DataLine& operator=(const DataLine&  newDataLine) = delete;
     DataLine& operator=(DataLine&& newDataLine) = delete;
     
-    inline const std::string&   GetTitle(void) { return Title; }
-    inline void                 SetTitle(const std::string& newTitle) { Title = newTitle; }    
+    inline const std::string&   GetTitle(void) { return DataLineTitle; }
+    inline void                 SetTitle(const std::string& newDataLineTitle) { DataLineTitle = newDataLineTitle; }
     
     inline void AddNewDataPoint(const DataPoint<T_DATA_POINT>& newDataPoint)
     {
@@ -78,7 +78,7 @@ private:
         return result;
     }
     
-    std::string Title;
+    std::string DataLineTitle;
     std::vector<DataPoint<T_DATA_POINT> > Data;
 };
 

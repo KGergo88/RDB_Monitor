@@ -13,32 +13,94 @@ char** Gui::argv_value = &default_argv_value;
 
 void GuiWindow::slotDisplayDiagram(std::size_t index)
 {
+    // Check whether the diagram exists
     if(index < diagram_container.size())
     {
+        // Accessing the requested diagram from the
         DiagramSpecialized& diagram_to_display = diagram_container[index];
 
-        auto old_chart = pChartView->chart();
-        if(!old_chart)
+        // Accessing the current pChart from the pChartView
+        // and deleting it if there was one previously because we will add a new one with the new data
+        auto pChart = pChartView->chart();
+        if(!pChart)
         {
-            delete old_chart;
+            delete pChart;
         }
-        auto new_chart = new QChart();
+        pChart = new QChart();
 
+        // Setting the title with the Diagram name
+        pChart->setTitle(QString::fromStdString(diagram_to_display.GetTitle()));
+        // Hiding the legend because the data lines will be recognisable from their Y axis
+        pChart->legend()->hide();
+        // Creating the X axis, it will only be set up after we have analyzed the diagram content
+        auto pXAxis = new QValueAxis;
+
+        // We will add every DataLine of the Diagram to the chart
         DataIndexType number_of_data_lines = diagram_to_display.GetTheNumberOfDataLines();
+        // Variables to store the min/max X axis values
+        DataPointType x_axis_minimum_value = 0;
+        DataPointType x_axis_maximum_value = 0;
+
         for(DataIndexType data_line_counter = 0; data_line_counter < number_of_data_lines; data_line_counter++)
         {
-            auto myLine = new QLineSeries();
-            myLine->setName(QString::fromStdString(diagram_to_display.GetDataLineTitle(data_line_counter)));
+            // Creating a line series and filling it with the data that needs to be displayed
+            auto pLineSeries = new QLineSeries();
+            // Setting the title with the current DataLine name
+            pLineSeries->setName(QString::fromStdString(diagram_to_display.GetDataLineTitle(data_line_counter)));
+            // Setting the data with the DataPoints of the DataLine
             DataIndexType number_of_data_points = diagram_to_display.GetTheNumberOfDataPoints(data_line_counter);
+            // Variables to store the min/max Y axis values
+            DataPointType y_axis_minimum_value = 0;
+            DataPointType y_axis_maximum_value = 0;
+
             for(DataIndexType data_point_counter = 0; data_point_counter < number_of_data_points; data_point_counter++)
             {
-                auto temp_data_point = diagram_to_display.GetDataPoint(data_line_counter, data_point_counter);
-                myLine->append(temp_data_point.GetX(), temp_data_point.GetY());
+                auto data_point = diagram_to_display.GetDataPoint(data_line_counter, data_point_counter);
+                pLineSeries->append(data_point.GetX(), data_point.GetY());
+
+                // Updating the min/max axis values
+                if(data_point.GetX() < x_axis_minimum_value)
+                {
+                    x_axis_minimum_value = data_point.GetX();
+                }
+                if(x_axis_maximum_value < data_point.GetX())
+                {
+                    x_axis_maximum_value = data_point.GetX();
+                }
+                if(data_point.GetY() < y_axis_minimum_value)
+                {
+                    y_axis_minimum_value = data_point.GetY();
+                }
+                if(y_axis_maximum_value < data_point.GetY())
+                {
+                    y_axis_maximum_value = data_point.GetY();
+                }
             }
-            new_chart->addSeries(myLine);
+
+            // Adding the line series to the chart
+            pChart->addSeries(pLineSeries);
+            auto pYAxis = new QValueAxis;
+            pYAxis->setTitleText(pLineSeries->name());
+            pYAxis->setRange(y_axis_minimum_value, y_axis_maximum_value);
+            pYAxis->setTitleBrush(pLineSeries->pen().color());
+            pChart->addAxis(pYAxis, Qt::AlignLeft);
+            pLineSeries->attachAxis(pXAxis);
+            pLineSeries->attachAxis(pYAxis);
         }
-        new_chart->setTitle(QString::fromStdString(diagram_to_display.GetTitle()));
-        pChartView->setChart(new_chart);
+
+        // Setting up the X axis
+        pXAxis->setTitleText(QString::fromStdString(diagram_to_display.GetAxisXTitle()));
+        pChart->addAxis(pXAxis, Qt::AlignBottom);
+        pXAxis->setRange(x_axis_minimum_value, x_axis_maximum_value);
+        // Adding the chart to the chart view
+        pChartView->setChart(pChart);
+    }
+    else
+    {
+        // Then we will throw an exception because this case should never occur
+        std::string errorMessage = "The indexed Diagram does not exist in the GuiWindow::diagram_container: /n Requested index: ";
+        errorMessage += std::to_string(index);
+        throw errorMessage;
     }
 }
 

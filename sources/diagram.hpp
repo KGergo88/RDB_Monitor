@@ -17,7 +17,7 @@
 template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
 public:
-    Diagram(const std::string& newTitle = "") : Title(newTitle) {};
+    Diagram(const std::string& newDiagramTitle = "", const std::string& newAxisXTitle = "") : DiagramTitle(newDiagramTitle), AxisXTitle(newAxisXTitle) {};
 
     Diagram(const Diagram&  newDiagram) = default;
 
@@ -28,8 +28,10 @@ public:
     Diagram& operator=(const Diagram&  newDiagram) = default;
     Diagram& operator=(Diagram&& newDiagram) = default;
 
-    inline const std::string&   GetTitle(void) const { return Title; }
-    inline void                 SetTitle(const std::string& newTitle) { Title = newTitle; }
+    inline const std::string&   GetTitle(void) const { return DiagramTitle; }
+    inline void                 SetTitle(const std::string& newDiagramTitle) { DiagramTitle = newDiagramTitle; }
+    inline const std::string&   GetAxisXTitle(void) const { return AxisXTitle; }
+    inline void                 SetAxisXTitle(const std::string& newAxisXTitle) { AxisXTitle = newAxisXTitle; }
     
     inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex)
     {
@@ -82,7 +84,8 @@ public:
 
     void EraseContent(void)
     {
-        Title = "";
+        DiagramTitle = "";
+        AxisXTitle = "";
         Data.clear();
     }
 
@@ -107,7 +110,8 @@ private:
         return result;
     }
     
-    std::string Title;
+    std::string DiagramTitle;
+    std::string AxisXTitle;
     std::vector<DataLine<T_DATA_POINT, T_INDEX> > Data;
 };
 

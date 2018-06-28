@@ -25,10 +25,37 @@
 
 std::atomic_bool shutdown_worker_thread;
 
+#warning "Only debug..."
+#include <chrono>
+    bool demoDiagramWasAdded = false;
+#warning "Only debug..."
+
 void WorkerThread(void)
 {
     while(!shutdown_worker_thread)
     {
+#warning "Only debug..."
+        if(!demoDiagramWasAdded)
+        {
+            std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(1000));
+            demoDiagramWasAdded = true;
+
+            DiagramSpecialized myDiagram("MyTestDiagram", "Degrees");
+            myDiagram.AddNewDataLine("Sin");
+            myDiagram.AddNewDataLine("Cos");
+
+            for(DataIndexType loop_point = 0; loop_point < 360; loop_point++)
+            {
+                DataPointSpecialized SinDataPoint(loop_point, sin(double(loop_point) * (3.14159265/180.0)));
+                DataPointSpecialized CosDataPoint(loop_point, cos(double(loop_point) * (3.14159265/180.0)));
+                myDiagram.AddNewDataPoint(0, SinDataPoint);
+                myDiagram.AddNewDataPoint(1, CosDataPoint);
+            }
+
+            Gui::GetInstance().AddToDiagramList(myDiagram);
+        }
+#warning "Only debug..."
+
         if(SerialPort::GetInstance().IsOpen())
         {
             auto received_data = SerialPort::GetInstance().ReceiveMeasurementData();
@@ -68,5 +95,5 @@ int main(int argc, char **argv)
 
     std::cout << "The End." << std::endl;
     return EXIT_SUCCESS;
-#warning "Linux: The program has unexpectedly finished. The process was ended forcefully."
+#warning "Linux: The program has unexpectedly finished. The process was ended forcefully. This is probably because the Gui module has memory leak...check it later with Valgrind!"
 }
