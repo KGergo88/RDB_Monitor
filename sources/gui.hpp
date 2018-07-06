@@ -99,7 +99,7 @@ public:
 
     void Run(void);
     bool IsRunning(void);
-    void AddToDiagramList(DiagramSpecialized& diagram);
+    void AddToDiagramList(DiagramSpecialized&& diagram);
     void ReportStatus(const std::string& message);
 };
 

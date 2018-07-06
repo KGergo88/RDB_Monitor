@@ -32,8 +32,10 @@ void GuiWindow::slotDisplayDiagram(std::size_t index)
         pChart->setTitle(QString::fromStdString(diagram_to_display.GetTitle()));
         // Hiding the legend because the data lines will be recognisable from their Y axis
         pChart->legend()->hide();
-        // Creating the X axis, it will only be set up after we have analyzed the diagram content
+        // Creating the X axis, giving it a title and addig it to the chart. The ranges will only be set after analyzing the data points.
         auto pXAxis = new QValueAxis;
+        pXAxis->setTitleText(QString::fromStdString(diagram_to_display.GetAxisXTitle()));
+        pChart->addAxis(pXAxis, Qt::AlignBottom);
 
         // We will add every DataLine of the Diagram to the chart
         DataIndexType number_of_data_lines = diagram_to_display.GetTheNumberOfDataLines();
@@ -89,8 +91,6 @@ void GuiWindow::slotDisplayDiagram(std::size_t index)
         }
 
         // Setting up the X axis
-        pXAxis->setTitleText(QString::fromStdString(diagram_to_display.GetAxisXTitle()));
-        pChart->addAxis(pXAxis, Qt::AlignBottom);
         pXAxis->setRange(x_axis_minimum_value, x_axis_maximum_value);
         // Adding the chart to the chart view
         pChartView->setChart(pChart);
@@ -226,11 +226,10 @@ bool Gui::IsRunning(void)
     return is_running;
 }
 
-void Gui::AddToDiagramList(DiagramSpecialized& diagram)
+void Gui::AddToDiagramList(DiagramSpecialized&& diagram)
 {
     std::lock_guard<std::mutex> lock(mutex);
-
-    window.diagram_container.push_back(diagram);
+    window.diagram_container.emplace_back(diagram);
     emit window.signalAddToDiagramList(window.diagram_container.size() - 1);
 }
 

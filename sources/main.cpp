@@ -23,6 +23,8 @@
 #include "serial_port.hpp"
 #include "data_processor.hpp"
 
+#warning "The exception handling needs to be solved overall the program..."
+
 std::atomic_bool shutdown_worker_thread;
 
 #warning "Only debug..."
@@ -34,44 +36,53 @@ void WorkerThread(void)
 {
     while(!shutdown_worker_thread)
     {
+        while(!Gui::GetInstance().IsRunning());
 #warning "Only debug..."
         if(!demoDiagramWasAdded)
         {
-            std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(1000));
             demoDiagramWasAdded = true;
+            //std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(1000));
+            std::ifstream sample_measurement_data;
 
-            DiagramSpecialized myDiagram("MyTestDiagram", "Degrees");
-            myDiagram.AddNewDataLine("Sin");
-            myDiagram.AddNewDataLine("Cos");
-
-            for(DataIndexType loop_point = 0; loop_point < 360; loop_point++)
+            try
             {
-                DataPointSpecialized SinDataPoint(loop_point, sin(double(loop_point) * (3.14159265/180.0)));
-                DataPointSpecialized CosDataPoint(loop_point, cos(double(loop_point) * (3.14159265/180.0)));
-                myDiagram.AddNewDataPoint(0, SinDataPoint);
-                myDiagram.AddNewDataPoint(1, CosDataPoint);
+                sample_measurement_data.open("/media/gergo/Data_HDD/Programozas/RDB_Diplomaterv_Monitor/MotorTestOutput.txt");
+
+                auto diagram_container = DataProcessor::GetInstance().GetInstance().ProcessData("File", sample_measurement_data);
+
+                for(auto &i : diagram_container)
+                {
+                    Gui::GetInstance().AddToDiagramList(std::move(*i.release()));
+                }
+            }
+            catch(...)
+            {
+                std::cout << "Exception!" << std::endl;
             }
 
-            Gui::GetInstance().AddToDiagramList(myDiagram);
+            sample_measurement_data.close();
         }
 #warning "Only debug..."
 
-        if(SerialPort::GetInstance().IsOpen())
-        {
-            auto received_data = SerialPort::GetInstance().ReceiveMeasurementData();
-            if(received_data)
-            {
-                auto assembled_diagram = DataProcessor::GetInstance().ProcessData("SerialPort", *received_data);
-                if(assembled_diagram)
-                {
-                    Gui::GetInstance().AddToDiagramList(*assembled_diagram);
-                }
-                else
-                {
-                    std::cerr << "Empty assembled_diagram..." << std::endl;
-                }
-            }
-        }
+//        if(SerialPort::GetInstance().IsOpen())
+//        {
+//            auto received_data = SerialPort::GetInstance().ReceiveMeasurementData();
+//            if(received_data)
+//            {
+//                auto diagram_container = DataProcessor::GetInstance().ProcessData("SerialPort", *received_data);
+//                if(!assembled_diagram.empty())
+//                {
+//                    for(const auto &i : diagram_container)
+//                    {
+//                        Gui::GetInstance().AddToDiagramList(*i);
+//                    }
+//                }
+//                else
+//                {
+//                    std::cerr << "We could not assemble any diagram from the input data..." << std::endl;
+//                }
+//            }
+//        }
     }
 }
 
