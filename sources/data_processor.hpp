@@ -40,12 +40,12 @@ private:
 
 #warning "This part needs to be reworked...the <<<START>>> and <<<END>>> strings are duplicated here and in the global.hpp"
     // REGEX strings to search the input data for valid measurement session
-    std::string regex_start_line         = R"(^<<<START>>>$)";
-    std::string regex_headline           = R"(^(\w+,){2,}$)";
-    std::string regex_headline_analyzer  = R"(^(\w+),)";
-    std::string regex_data_line          = R"(^(((?:\+|\-)?\d+),){2,}$)";
-    std::string regex_data_line_analyzer = R"(^((?:\+|\-)?\d+),)";
-    std::string regex_end_line           = R"(^<<<END>>>$)";
+    std::string regex_start_line         = R"(^\s*<<<START>>>$)";
+    std::string regex_headline           = R"(^\s*(\w+,){2,}$)";
+    std::string regex_headline_analyzer  = R"(^\s*(\w+),)";
+    std::string regex_data_line          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
+    std::string regex_data_line_analyzer = R"(^\s*((?:\+|\-)?\d+),)";
+    std::string regex_end_line           = R"(^\s*<<<END>>>$)";
 
     DataProcessor() = default;
 

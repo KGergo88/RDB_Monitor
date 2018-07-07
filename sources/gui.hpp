@@ -45,6 +45,8 @@ private:
     }
 
 public:
+    static constexpr qreal y_axis_range_multiplicator = 0.05;
+
     QChartView*     pChartView;
     QListWidget*    pListWidgetDiagrams;
     QListWidget*    pListWidgetStatus;

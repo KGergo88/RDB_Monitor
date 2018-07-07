@@ -83,7 +83,11 @@ void GuiWindow::slotDisplayDiagram(std::size_t index)
             pChart->addSeries(pLineSeries);
             auto pYAxis = new QValueAxis;
             pYAxis->setTitleText(pLineSeries->name());
-            pYAxis->setRange(y_axis_minimum_value, y_axis_maximum_value);
+            qreal y_axis_range_minimum = y_axis_minimum_value - (std::abs(y_axis_minimum_value) * y_axis_range_multiplicator);
+            qreal y_axis_range_maximum = y_axis_maximum_value + (std::abs(y_axis_maximum_value) * y_axis_range_multiplicator);
+            pYAxis->setTickCount(5);
+            pYAxis->setMinorTickCount(0);
+            pYAxis->setRange(y_axis_range_minimum, y_axis_range_maximum);
             pYAxis->setTitleBrush(pLineSeries->pen().color());
             pChart->addAxis(pYAxis, Qt::AlignLeft);
             pLineSeries->attachAxis(pXAxis);
@@ -162,7 +166,7 @@ void GuiWindow::slotPushButtonWasClicked(void)
         }
     }
 }
-
+#warning "The magic numbers!!!"
 void GuiWindow::SetSizes(void)
 {
     setMinimumSize(500, 500);
