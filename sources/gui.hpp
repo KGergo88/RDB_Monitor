@@ -81,6 +81,8 @@ private:
     Gui();
 
 public:
+    static constexpr std::size_t report_date_and_time_string_size = 10;
+
     Gui(const Gui&  newGui) = delete;
     Gui(Gui&& newGui) = delete;
 

@@ -239,8 +239,21 @@ void Gui::AddToDiagramList(DiagramSpecialized&& diagram)
 
 void Gui::ReportStatus(const std::string& message)
 {
-#warning "There is a new line at the end of the time string. Also the Date is not important in this string"
-    auto current_date_and_time = std::time(0);
-    std::string complete_message = std::string(ctime(&current_date_and_time)) + " - " + message;
+    time_t rawtime;
+    tm* timeinfo;
+    std::string date_and_time_string;
+
+    // Getting the current time
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    // Resizing the string containing the current time to an appropriate size
+    date_and_time_string.resize(report_date_and_time_string_size);
+
+    // Assembling the status message from the time and the input text
+    strftime(&date_and_time_string[0], date_and_time_string.size(), "%T", timeinfo);
+    std::string complete_message = date_and_time_string + " - " + message;
+
+    // Emitting the signal
     emit window.signalReportStatus(complete_message);
 }
