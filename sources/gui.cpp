@@ -7,11 +7,13 @@
 
 #include "gui.hpp"
 
+
 int Gui::argc_value = 1;
 char* default_argv_value = ((char*)"");
 char** Gui::argv_value = &default_argv_value;
 
-void GuiWindow::slotDisplayDiagram(std::size_t index)
+
+void MainWindow::slotDisplayDiagram(std::size_t index)
 {
     // Check whether the diagram exists
     if(index < diagram_container.size())
@@ -108,7 +110,7 @@ void GuiWindow::slotDisplayDiagram(std::size_t index)
     }
 }
 
-void GuiWindow::slotAddToDiagramList(std::size_t index)
+void MainWindow::slotAddToDiagramList(std::size_t index)
 {
     if(index < diagram_container.size())
     {
@@ -123,19 +125,19 @@ void GuiWindow::slotAddToDiagramList(std::size_t index)
     }
 }
 
-void GuiWindow::slotReportStatus(std::string message)
+void MainWindow::slotReportStatus(std::string message)
 {
     auto pListWidgetItem = new QListWidgetItem();
     pListWidgetItem->setText(QString::fromStdString(message));
     pListWidgetStatus->insertItem(0, pListWidgetItem);
 }
 
-void GuiWindow::slotListSelectionChanged(void)
+void MainWindow::slotListSelectionChanged(void)
 {
     emit slotDisplayDiagram(pListWidgetDiagrams->currentRow());
 }
 
-void GuiWindow::slotPushButtonWasClicked(void)
+void MainWindow::slotPushButtonWasClicked(void)
 {
     if(!SerialPort::GetInstance().IsOpen())
     {
@@ -167,7 +169,7 @@ void GuiWindow::slotPushButtonWasClicked(void)
     }
 }
 #warning "The magic numbers!!!"
-void GuiWindow::SetSizes(void)
+void MainWindow::SetSizes(void)
 {
     setMinimumSize(500, 500);
     int window_width = size().width();
@@ -192,53 +194,69 @@ void GuiWindow::SetSizes(void)
 
 ///---------------------------------------------------------------------------------------------------------------------------------------------///
 
-Gui::Gui() : QtApplication(argc_value, argv_value), window()
+Gui::Gui() : QtApplication(argc_value, argv_value), main_window()
 {
-    window.pChartView = new QChartView(&window);
-    window.pChartView->setRenderHint(QPainter::Antialiasing);
-    window.pChartView->setRubberBand(QChartView::HorizontalRubberBand);
+    // Adding the object to the main window that will display the charts with anti-aliasing and the zooming turned off
+    main_window.pChartView = new QChartView(&main_window);
+    main_window.pChartView->setRenderHint(QPainter::Antialiasing);
+    main_window.pChartView->setRubberBand(QChartView::NoRubberBand);
 
-    window.pListWidgetDiagrams = new QListWidget(&window);
+    // Adding the object to the main window that will list the processed diagrams to be selected to display
+    main_window.pListWidgetDiagrams = new QListWidget(&main_window);
 
-    window.pListWidgetStatus = new QListWidget(&window);
+    // Adding the object to the main window that will list the status messages
+    main_window.pListWidgetStatus = new QListWidget(&main_window);
 
-    window.pLineEdit = new QLineEdit((SERIAL_PORT_DEFAULT_DEVICE_NAME), &window);
+    // Adding the object to where the user can enter which serial port will be opened
+    main_window.pLineEdit = new QLineEdit((SERIAL_PORT_DEFAULT_DEVICE_NAME), &main_window);
 
-    window.pPushButton= new QPushButton("Open Serial Port", &window);
+    // Adding the object with which the user can open and close the serial port
+    main_window.pPushButton = new QPushButton("Open Serial Port", &main_window);
 
-    window.setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
-    window.showMaximized();
+    // Setting the title of the main window and showing it maximized
+    main_window.setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
+    main_window.showMaximized();
 }
 
 void Gui::Run(void)
 {
+    // Registering the types that are used in the signal and slot function prototypes
     qRegisterMetaType<std::size_t>("std::size_t");
     qRegisterMetaType<std::string>("std::string");
 
-    QObject::connect(&window, SIGNAL(signalDisplayDiagram(std::size_t)), &window, SLOT(slotDisplayDiagram(std::size_t)));
-    QObject::connect(&window, SIGNAL(signalAddToDiagramList(std::size_t)), &window, SLOT(slotAddToDiagramList(std::size_t)));
-    QObject::connect(&window, SIGNAL(signalReportStatus(std::string)), &window, SLOT(slotReportStatus(std::string)));
-    QObject::connect(window.pListWidgetDiagrams, SIGNAL(itemSelectionChanged()), &window, SLOT(slotListSelectionChanged()));
-    QObject::connect(window.pPushButton, SIGNAL(clicked()), &window, SLOT(slotPushButtonWasClicked()));
+    // Registering the connections between the signals and the slots
+    QObject::connect(&main_window, SIGNAL(signalDisplayDiagram(std::size_t)), &main_window, SLOT(slotDisplayDiagram(std::size_t)));
+    QObject::connect(&main_window, SIGNAL(signalAddToDiagramList(std::size_t)), &main_window, SLOT(slotAddToDiagramList(std::size_t)));
+    QObject::connect(&main_window, SIGNAL(signalReportStatus(std::string)), &main_window, SLOT(slotReportStatus(std::string)));
+    QObject::connect(main_window.pListWidgetDiagrams, SIGNAL(itemSelectionChanged()), &main_window, SLOT(slotListSelectionChanged()));
+    QObject::connect(main_window.pPushButton, SIGNAL(clicked()), &main_window, SLOT(slotPushButtonWasClicked()));
 
+    // Running the GUI
     is_running = true;
     QtApplication.exec();
 }
 
 bool Gui::IsRunning(void)
 {
+#warning "The way we are checking whether the GUI is running or not is not really good, this part needs to be reworked."
     return is_running;
 }
 
 void Gui::AddToDiagramList(DiagramSpecialized&& diagram)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    window.diagram_container.emplace_back(diagram);
-    emit window.signalAddToDiagramList(window.diagram_container.size() - 1);
+
+    // Adding the diagram to the container that stores them for the GUI
+    main_window.diagram_container.emplace_back(diagram);
+
+    // Emitting a signal to add this diagram to the end of the diagram list
+    emit main_window.signalAddToDiagramList(main_window.diagram_container.size() - 1);
 }
 
 void Gui::ReportStatus(const std::string& message)
 {
+#warning "this is not thread safe like this ..."
+
     time_t rawtime;
     tm* timeinfo;
     std::string date_and_time_string;
@@ -255,5 +273,5 @@ void Gui::ReportStatus(const std::string& message)
     std::string complete_message = date_and_time_string + " - " + message;
 
     // Emitting the signal
-    emit window.signalReportStatus(complete_message);
+    emit main_window.signalReportStatus(complete_message);
 }

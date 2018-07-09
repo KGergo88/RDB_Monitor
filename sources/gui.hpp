@@ -20,7 +20,7 @@
 #ifndef GUI_HPP
 #define GUI_HPP
 
-class GuiWindow : public QWidget
+class MainWindow : public QWidget
 {
     Q_OBJECT
 
@@ -55,18 +55,18 @@ public:
 
     std::vector<DiagramSpecialized> diagram_container;
 
-    GuiWindow(QWidget *parent = nullptr) : QWidget(parent) {}
+    MainWindow(QWidget *parent = nullptr) : QWidget(parent) {}
 
-    GuiWindow(const GuiWindow&  newGuiWindow) = delete;
-    GuiWindow(GuiWindow&& newGuiWindow) = delete;
+    MainWindow(const MainWindow&  newGuiWindow) = delete;
+    MainWindow(MainWindow&& newGuiWindow) = delete;
 
-    GuiWindow& operator=(const GuiWindow&  newGuiWindow) = delete;
-    GuiWindow& operator=(GuiWindow&& newGuiWindow) = delete;
+    MainWindow& operator=(const MainWindow&  newGuiWindow) = delete;
+    MainWindow& operator=(MainWindow&& newGuiWindow) = delete;
 
     void SetSizes(void);
 };
 
-    Q_DECLARE_METATYPE(std::size_t)
+Q_DECLARE_METATYPE(std::size_t)
 
 class Gui
 {
@@ -74,7 +74,7 @@ private:
     bool is_running = false;
     std::mutex mutex;
     QApplication QtApplication;
-    GuiWindow window;
+    MainWindow main_window;
     static int argc_value;
     static char** argv_value;
 

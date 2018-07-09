@@ -25,7 +25,7 @@ template <typename T_DATA_POINT>
 class DataPoint;
 using DataPointSpecialized = DataPoint<DataPointType>;
 
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor V1.0")
+#define APPLICATION_NAME                ("RDB Diplomaterv Monitor V1.0.0")
 
 #ifdef _WIN32
     #define SERIAL_PORT_DEFAULT_DEVICE_NAME ("COM3")
