@@ -8,10 +8,30 @@
 #include "gui.hpp"
 
 
-int Gui::argc_value = 1;
-char* default_argv_value = ((char*)"");
-char** Gui::argv_value = &default_argv_value;
 
+MainWindow::MainWindow() : QMainWindow()
+{
+    // Adding the object to the main window that will display the charts with anti-aliasing and the zooming turned off
+    pChartView = new QChartView(this);
+    pChartView->setRenderHint(QPainter::Antialiasing);
+    pChartView->setRubberBand(QChartView::NoRubberBand);
+
+    // Adding the object to the main window that will list the processed diagrams to be selected to display
+    pListWidgetDiagrams = new QListWidget(this);
+
+    // Adding the object to the main window that will list the status messages
+    pListWidgetStatus = new QListWidget(this);
+
+    // Adding the object to where the user can enter which serial port will be opened
+    pLineEdit = new QLineEdit((SERIAL_PORT_DEFAULT_DEVICE_NAME), this);
+
+    // Adding the object with which the user can open and close the serial port
+    pPushButton = new QPushButton("Open Serial Port", this);
+
+    // Setting the title of the main window and showing it maximized
+    setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
+    showMaximized();
+}
 
 void MainWindow::slotDisplayDiagram(std::size_t index)
 {
@@ -147,11 +167,11 @@ void MainWindow::slotPushButtonWasClicked(void)
         {
             pLineEdit->setReadOnly(true);
             pPushButton->setText("Close Serial Port");
-            Gui::GetInstance().ReportStatus("The serial port was opened");
+            Gui::ReportStatus("The serial port was opened");
         }
         else
         {
-            Gui::GetInstance().ReportStatus("The serial could not be opened. Maybe it is not a valid port name?");
+            Gui::ReportStatus("The serial port could not be opened. Maybe it is not a valid port name?");
         }
     }
     else
@@ -160,14 +180,22 @@ void MainWindow::slotPushButtonWasClicked(void)
         {
             pLineEdit->setReadOnly(false);
             pPushButton->setText("Open Serial Port");
-            Gui::GetInstance().ReportStatus("The serial port was closed");
+            Gui::ReportStatus("The serial port was closed");
         }
         else
         {
-            Gui::GetInstance().ReportStatus("The serial could not be closed");
+            Gui::ReportStatus("The serial port could not be closed");
         }
     }
 }
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+    (void) event;
+
+    SetSizes();
+}
+
 #warning "The magic numbers!!!"
 void MainWindow::SetSizes(void)
 {
@@ -194,52 +222,46 @@ void MainWindow::SetSizes(void)
 
 ///---------------------------------------------------------------------------------------------------------------------------------------------///
 
-Gui::Gui() : QtApplication(argc_value, argv_value), main_window()
+QApplication* Gui::pQtApplication;
+MainWindow* Gui::pMainWindow;
+std::mutex Gui::mutex;
+
+void Gui::Run(int argc, char** argv)
 {
-    // Adding the object to the main window that will display the charts with anti-aliasing and the zooming turned off
-    main_window.pChartView = new QChartView(&main_window);
-    main_window.pChartView->setRenderHint(QPainter::Antialiasing);
-    main_window.pChartView->setRubberBand(QChartView::NoRubberBand);
+    pQtApplication = new QApplication(argc, argv);
+    pMainWindow = new MainWindow();
 
-    // Adding the object to the main window that will list the processed diagrams to be selected to display
-    main_window.pListWidgetDiagrams = new QListWidget(&main_window);
-
-    // Adding the object to the main window that will list the status messages
-    main_window.pListWidgetStatus = new QListWidget(&main_window);
-
-    // Adding the object to where the user can enter which serial port will be opened
-    main_window.pLineEdit = new QLineEdit((SERIAL_PORT_DEFAULT_DEVICE_NAME), &main_window);
-
-    // Adding the object with which the user can open and close the serial port
-    main_window.pPushButton = new QPushButton("Open Serial Port", &main_window);
-
-    // Setting the title of the main window and showing it maximized
-    main_window.setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
-    main_window.showMaximized();
-}
-
-void Gui::Run(void)
-{
     // Registering the types that are used in the signal and slot function prototypes
     qRegisterMetaType<std::size_t>("std::size_t");
     qRegisterMetaType<std::string>("std::string");
 
     // Registering the connections between the signals and the slots
-    QObject::connect(&main_window, SIGNAL(signalDisplayDiagram(std::size_t)), &main_window, SLOT(slotDisplayDiagram(std::size_t)));
-    QObject::connect(&main_window, SIGNAL(signalAddToDiagramList(std::size_t)), &main_window, SLOT(slotAddToDiagramList(std::size_t)));
-    QObject::connect(&main_window, SIGNAL(signalReportStatus(std::string)), &main_window, SLOT(slotReportStatus(std::string)));
-    QObject::connect(main_window.pListWidgetDiagrams, SIGNAL(itemSelectionChanged()), &main_window, SLOT(slotListSelectionChanged()));
-    QObject::connect(main_window.pPushButton, SIGNAL(clicked()), &main_window, SLOT(slotPushButtonWasClicked()));
+    QObject::connect(pMainWindow, SIGNAL(signalDisplayDiagram(std::size_t)), pMainWindow, SLOT(slotDisplayDiagram(std::size_t)));
+    QObject::connect(pMainWindow, SIGNAL(signalAddToDiagramList(std::size_t)), pMainWindow, SLOT(slotAddToDiagramList(std::size_t)));
+    QObject::connect(pMainWindow, SIGNAL(signalReportStatus(std::string)), pMainWindow, SLOT(slotReportStatus(std::string)));
+    QObject::connect(pMainWindow->pListWidgetDiagrams, SIGNAL(itemSelectionChanged()), pMainWindow, SLOT(slotListSelectionChanged()));
+    QObject::connect(pMainWindow->pPushButton, SIGNAL(clicked()), pMainWindow, SLOT(slotPushButtonWasClicked()));
 
-    // Running the GUI
-    is_running = true;
-    QtApplication.exec();
+    auto qtapplication_return_value = pQtApplication->exec();
+
+    delete pMainWindow;
+    delete pQtApplication;
+
+    std::cout << "The QtApplication has returned with: " << qtapplication_return_value << std::endl;
 }
 
 bool Gui::IsRunning(void)
 {
-#warning "The way we are checking whether the GUI is running or not is not really good, this part needs to be reworked."
-    return is_running;
+    std::lock_guard<std::mutex> lock(mutex);
+
+    bool result = false;
+
+    if(pQtApplication && pMainWindow)
+    {
+        result = !pQtApplication->startingUp();
+    }
+
+    return result;
 }
 
 void Gui::AddToDiagramList(DiagramSpecialized&& diagram)
@@ -247,10 +269,10 @@ void Gui::AddToDiagramList(DiagramSpecialized&& diagram)
     std::lock_guard<std::mutex> lock(mutex);
 
     // Adding the diagram to the container that stores them for the GUI
-    main_window.diagram_container.emplace_back(diagram);
+    pMainWindow->diagram_container.emplace_back(diagram);
 
     // Emitting a signal to add this diagram to the end of the diagram list
-    emit main_window.signalAddToDiagramList(main_window.diagram_container.size() - 1);
+    emit pMainWindow->signalAddToDiagramList(pMainWindow->diagram_container.size() - 1);
 }
 
 void Gui::ReportStatus(const std::string& message)
@@ -273,5 +295,5 @@ void Gui::ReportStatus(const std::string& message)
     std::string complete_message = date_and_time_string + " - " + message;
 
     // Emitting the signal
-    emit main_window.signalReportStatus(complete_message);
+    emit pMainWindow->signalReportStatus(complete_message);
 }

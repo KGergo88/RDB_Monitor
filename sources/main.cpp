@@ -31,10 +31,10 @@ std::atomic_bool shutdown_worker_thread;
 
 void WorkerThread(void)
 {
+    while(!Gui::IsRunning());
+
     while(!shutdown_worker_thread)
     {
-        while(!Gui::GetInstance().IsRunning());
-
         if(SerialPort::GetInstance().IsOpen())
         {
             auto received_data = SerialPort::GetInstance().ReceiveMeasurementData();
@@ -45,7 +45,7 @@ void WorkerThread(void)
                 {
                     for(auto &i : diagram_container)
                     {
-                        Gui::GetInstance().AddToDiagramList(std::move(*i.release()));
+                        Gui::AddToDiagramList(std::move(*i.release()));
                     }
                 }
                 else
@@ -65,8 +65,7 @@ int main(int argc, char **argv)
 
     std::thread worker_thread(WorkerThread);
 
-    Gui::SetArgcArgv(argc, argv);
-    Gui::GetInstance().Run();
+    Gui::Run(argc, argv);
     std::cout << "The GUI has stopped." << std::endl;
 
     std::cout << "Stopping the worker thread." << std::endl;
@@ -77,5 +76,4 @@ int main(int argc, char **argv)
 
     std::cout << "The End." << std::endl;
     return EXIT_SUCCESS;
-#warning "Linux: The program has unexpectedly finished. The process was ended forcefully. This is probably because the Gui module has memory leak...check it later with Valgrind!"
 }

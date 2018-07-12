@@ -20,9 +20,13 @@
 #ifndef GUI_HPP
 #define GUI_HPP
 
-class MainWindow : public QWidget
+
+
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+    friend class Gui;
 
 signals:
     void signalDisplayDiagram(std::size_t index);
@@ -37,12 +41,10 @@ private slots:
     void slotPushButtonWasClicked(void);
 
 private:
-    void resizeEvent(QResizeEvent* event)
-    {
-        (void) event;
+    MainWindow();
 
-        SetSizes();
-    }
+    void resizeEvent(QResizeEvent* event);
+    void SetSizes(void);
 
 public:
     static constexpr qreal y_axis_range_multiplicator = 0.05;
@@ -50,35 +52,29 @@ public:
     QChartView*     pChartView;
     QListWidget*    pListWidgetDiagrams;
     QListWidget*    pListWidgetStatus;
-    QPushButton*    pPushButton;
     QLineEdit*      pLineEdit;
+    QPushButton*    pPushButton;
 
     std::vector<DiagramSpecialized> diagram_container;
-
-    MainWindow(QWidget *parent = nullptr) : QWidget(parent) {}
 
     MainWindow(const MainWindow&  newGuiWindow) = delete;
     MainWindow(MainWindow&& newGuiWindow) = delete;
 
     MainWindow& operator=(const MainWindow&  newGuiWindow) = delete;
     MainWindow& operator=(MainWindow&& newGuiWindow) = delete;
-
-    void SetSizes(void);
 };
 
-Q_DECLARE_METATYPE(std::size_t)
 
-class Gui
+
+class Gui final
 {
 private:
-    bool is_running = false;
-    std::mutex mutex;
-    QApplication QtApplication;
-    MainWindow main_window;
-    static int argc_value;
-    static char** argv_value;
+    static QApplication* pQtApplication;
+    static MainWindow* pMainWindow;
+    static std::mutex mutex;
 
     Gui();
+    ~Gui();
 
 public:
     static constexpr std::size_t report_date_and_time_string_size = 10;
@@ -89,22 +85,10 @@ public:
     Gui& operator=(const Gui&  newGui) = delete;
     Gui& operator=(Gui&& newGui) = delete;
 
-    static void SetArgcArgv(int argc, char **argv)
-    {
-        argc_value = argc;
-        argv_value = argv;
-    }
-
-    static Gui& GetInstance(void)
-    {
-        static Gui Singleton;
-        return Singleton;
-    }
-
-    void Run(void);
-    bool IsRunning(void);
-    void AddToDiagramList(DiagramSpecialized&& diagram);
-    void ReportStatus(const std::string& message);
+    static void Run(int argc, char **argv);
+    static bool IsRunning(void);
+    static void AddToDiagramList(DiagramSpecialized&& diagram);
+    static void ReportStatus(const std::string& message);
 };
 
 #endif /* GUI_HPP */
