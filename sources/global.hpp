@@ -49,7 +49,7 @@ using DataPointSpecialized = DataPoint<DataPointType>;
     #define SERIAL_PORT_DEFAULT_DEVICE_NAME ("/dev/ttyACM0")
 #endif
 
-#define DATA_START_LINE                 (R"(<<<START>>>)")
-#define DATA_END_LINE                   (R"(<<<END>>>)")
+#define DATA_START_LINE                 ("<<<START>>>")
+#define DATA_END_LINE                   ("<<<END>>>")
 
 #endif /* GLOBAL_HPP */

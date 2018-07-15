@@ -23,6 +23,7 @@
 
 #include <QtWidgets>
 #include <QtCharts>
+#include <QString>
 
 #include <iostream>
 #include <memory>
@@ -57,14 +58,30 @@ private slots:
     void slotPushButtonWasClicked(void);
 
 private:
+    static constexpr int main_window_minimum_width = 750;
+    static constexpr int main_window_minimum_height = 500;
+
+    static constexpr const char* const push_button_open_text = "Open Serial Port";
+    static constexpr const char* const push_button_close_text = "Close Serial Port";
+
+    static constexpr int   chartview_fixposition_x = 0;
+    static constexpr int   chartview_fixposition_y = 0;
+    static constexpr qreal chartview_width_relative_to_main_window = 0.8;
+    static constexpr qreal chartview_height_relative_to_main_window = 0.9;
+    static constexpr int   listwidgetdiagrams_fixposition_y = 0;
+    static constexpr int   listwidgetstatus_fixposition_x = 0;
+    static constexpr qreal lineedit_height_relative_to_listwidgetstatus = 0.5;
+
+    static constexpr qreal y_axis_range_multiplicator = 0.05;
+    static constexpr int   y_axis_tick_count = 5;
+    static constexpr int   y_axis_minor_tick_count = 0;
+
     MainWindow();
 
     void resizeEvent(QResizeEvent* event);
     void SetSizes(void);
 
 public:
-    static constexpr qreal y_axis_range_multiplicator = 0.05;
-
     QChartView*     pChartView;
     QListWidget*    pListWidgetDiagrams;
     QListWidget*    pListWidgetStatus;

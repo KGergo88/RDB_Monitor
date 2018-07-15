@@ -42,9 +42,10 @@ MainWindow::MainWindow() : QMainWindow()
     pLineEdit = new QLineEdit((SERIAL_PORT_DEFAULT_DEVICE_NAME), this);
 
     // Adding the object with which the user can open and close the serial port
-    pPushButton = new QPushButton("Open Serial Port", this);
+    pPushButton = new QPushButton(push_button_open_text, this);
 
-    // Setting the title of the main window and showing it maximized
+    // Setting the minimum size and the title of the main window and showing it maximized
+    setMinimumSize(main_window_minimum_width, main_window_minimum_height);
     setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
     showMaximized();
 }
@@ -123,8 +124,8 @@ void MainWindow::slotDisplayDiagram(std::size_t index)
             pYAxis->setTitleText(pLineSeries->name());
             qreal y_axis_range_minimum = y_axis_minimum_value - (std::abs(y_axis_minimum_value) * y_axis_range_multiplicator);
             qreal y_axis_range_maximum = y_axis_maximum_value + (std::abs(y_axis_maximum_value) * y_axis_range_multiplicator);
-            pYAxis->setTickCount(5);
-            pYAxis->setMinorTickCount(0);
+            pYAxis->setTickCount(y_axis_tick_count);
+            pYAxis->setMinorTickCount(y_axis_minor_tick_count);
             pYAxis->setRange(y_axis_range_minimum, y_axis_range_maximum);
             pYAxis->setTitleBrush(pLineSeries->pen().color());
             pChart->addAxis(pYAxis, Qt::AlignLeft);
@@ -182,7 +183,7 @@ void MainWindow::slotPushButtonWasClicked(void)
         if(SerialPort::GetInstance().Open(serial_port_device))
         {
             pLineEdit->setReadOnly(true);
-            pPushButton->setText("Close Serial Port");
+            pPushButton->setText(push_button_close_text);
             Gui::ReportStatus("The serial port was opened");
         }
         else
@@ -195,7 +196,7 @@ void MainWindow::slotPushButtonWasClicked(void)
         if(SerialPort::GetInstance().Close())
         {
             pLineEdit->setReadOnly(false);
-            pPushButton->setText("Open Serial Port");
+            pPushButton->setText(push_button_open_text);
             Gui::ReportStatus("The serial port was closed");
         }
         else
@@ -212,28 +213,41 @@ void MainWindow::resizeEvent(QResizeEvent* event)
     SetSizes();
 }
 
-#warning "The magic numbers!!!"
 void MainWindow::SetSizes(void)
 {
-    setMinimumSize(500, 500);
     int window_width = size().width();
     int window_height = size().height();
 
-    pChartView->setGeometry(0, 0, window_width * 0.8, window_height * 0.9);
+    pChartView->setGeometry(chartview_fixposition_x,
+                            chartview_fixposition_y,
+                            (window_width * chartview_width_relative_to_main_window),
+                            (window_height * chartview_height_relative_to_main_window));
     int chart_view_width = pChartView->width();
     int chart_view_height = pChartView->height();
 
-    pListWidgetDiagrams->setGeometry(chart_view_width, 0, window_width - chart_view_width, chart_view_height);
+    pListWidgetDiagrams->setGeometry(chart_view_width,
+                                     listwidgetdiagrams_fixposition_y,
+                                     (window_width - chart_view_width),
+                                     chart_view_height);
     int list_widget_diagrams_width = pListWidgetDiagrams->width();
     int list_widget_diagrams_height = pListWidgetDiagrams->height();
 
-    pListWidgetStatus->setGeometry(0, chart_view_height, chart_view_width, window_height - list_widget_diagrams_height);
+    pListWidgetStatus->setGeometry(listwidgetstatus_fixposition_x,
+                                   chart_view_height,
+                                   chart_view_width,
+                                   (window_height - list_widget_diagrams_height));
     int list_widget_status_height = pListWidgetStatus->height();
 
-    pLineEdit->setGeometry(chart_view_width, chart_view_height, list_widget_diagrams_width, list_widget_status_height / 2);
+    pLineEdit->setGeometry(chart_view_width,
+                           chart_view_height,
+                           list_widget_diagrams_width,
+                           (list_widget_status_height * lineedit_height_relative_to_listwidgetstatus));
     int line_edit_height = pLineEdit->height();
 
-    pPushButton->setGeometry(chart_view_width, chart_view_height + line_edit_height, list_widget_diagrams_width, line_edit_height);
+    pPushButton->setGeometry(chart_view_width,
+                             (chart_view_height + line_edit_height),
+                             list_widget_diagrams_width,
+                             line_edit_height);
 }
 
 ///---------------------------------------------------------------------------------------------------------------------------------------------///
@@ -293,7 +307,7 @@ void Gui::AddToDiagramList(DiagramSpecialized&& diagram)
 
 void Gui::ReportStatus(const std::string& message)
 {
-#warning "this is not thread safe like this ..."
+    std::lock_guard<std::mutex> lock(mutex);
 
     time_t rawtime;
     tm* timeinfo;

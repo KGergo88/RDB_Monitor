@@ -131,7 +131,8 @@ std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(std
                     }
                     break;
                 default:
-                    #warning "This should never happen, throw an exception or terminate the program or something..."
+                    std::string errorMessage = "The DataProcessor::ProcessData's statemachine switched to an undefined state...";
+                    throw errorMessage;
                     break;
             }
         }

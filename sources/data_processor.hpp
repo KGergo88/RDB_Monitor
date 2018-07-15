@@ -61,7 +61,6 @@ private:
         ProcessingDataLines
     };
 
-#warning "This part needs to be reworked...the <<<START>>> and <<<END>>> strings are duplicated here and in the global.hpp"
     // REGEX strings to search the input data for valid measurement session
     std::string regex_start_line         = R"(^\s*<<<START>>>$)";
     std::string regex_headline           = R"(^\s*(\w+,){2,}$)";

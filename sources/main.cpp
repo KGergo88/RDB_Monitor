@@ -39,7 +39,7 @@
 #include "serial_port.hpp"
 #include "data_processor.hpp"
 
-#warning "The exception handling needs to be solved overall the program..."
+
 
 std::atomic_bool shutdown_worker_thread;
 
@@ -75,21 +75,32 @@ void WorkerThread(void)
 
 int main(int argc, char **argv)
 {
-    shutdown_worker_thread = false;
+    try
+    {
+        shutdown_worker_thread = false;
 
-    std::cout << "Hello RDB!" << std::endl << std::endl;
+        std::cout << "Hello RDB!" << std::endl << std::endl;
 
-    std::thread worker_thread(WorkerThread);
+        std::thread worker_thread(WorkerThread);
 
-    Gui::Run(argc, argv);
-    std::cout << "The GUI has stopped." << std::endl;
+        Gui::Run(argc, argv);
+        std::cout << "The GUI has stopped." << std::endl;
 
-    std::cout << "Stopping the worker thread." << std::endl;
-    shutdown_worker_thread = true;
+        std::cout << "Stopping the worker thread." << std::endl;
+        shutdown_worker_thread = true;
 
-    worker_thread.join();
-    std::cout << "The worker thread has stopped." << std::endl;
+        worker_thread.join();
+        std::cout << "The worker thread has stopped." << std::endl;
 
-    std::cout << "The End." << std::endl;
-    return EXIT_SUCCESS;
+        std::cout << "The End." << std::endl;
+        return EXIT_SUCCESS;
+    }
+    catch(std::string exception_text)
+    {
+        std::cerr << "An exception with a string was caught! Content: " << exception_text << std::endl;
+    }
+    catch(...)
+    {
+        std::cerr << "An exception was caught without any detailed info!" << std::endl;
+    }
 }
