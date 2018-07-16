@@ -80,3 +80,6 @@ HEADERS += \
     sources/global.hpp \
     sources/serial_port.hpp \
     sources/data_processor.hpp
+
+DISTFILES += \
+    README
