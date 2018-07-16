@@ -24,6 +24,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <sstream>
 #include <algorithm>
 #include <functional>
 #include <ctime>
