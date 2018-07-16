@@ -14,7 +14,8 @@ Table of contents
 	2 - Dependencies
 	3 - Portability
 	4 - Building the project
-	5 - License
+        5 - Release notes
+        6 - License
 
 
 
@@ -26,6 +27,8 @@ that are following the measurement data protocol (see chapter 1b).
 
 The data that will be displayed are received through a serial port. In the tested environment the ST_LinkV2 debugger of the RDB Diplomaterv project
 was connected to the PC running the RDB Diplomaterv Monitor with a USB cable and the data was received through either a COM port (Windows) or a device in the /dev folder (Linux).
+
+
 
 1a - Usage
 ==========
@@ -45,6 +48,8 @@ The status field in the lower side of the window tells whether the port could be
 "Close Serial Port". It should be noted that if any other program listens to the same port that we have opened, then the data on the port will not completely received by the monitor,
 and this might lead to dropped measurement results because of violations of the measurement data protocol. Then the program will listen to the opened serial port and list every diagram
 that was received on the port on the right side of the window. The listed diagrams can be selected for displaying by clicking on them.
+
+
 
 1b - Measurement data protocol
 ==============================
@@ -79,6 +84,8 @@ The rules:
 	- This is called a measurement session that contains all data needed to describe a diagram
 	- If there was an error detected in one of the lines then the whole session is invalid
 
+
+
 2 - Dependencies
 ================
 
@@ -89,17 +96,40 @@ The RDB Diplomaterv Monitor was developed in C++14 and it depends on the followi
 	- Boost v1.65 or newer, the only used component is the ASIO
 		- You may download it from the www.boost.org website
 
+
+
 3 - Portability
 ===============
 
-The RDB Diplomaterv Monitor was developed on an Ubuntu 18.04 LTS Linux but it tries to ensure compatibility with Windows 10 as much as possible. 
+The RDB Diplomaterv Monitor was developed on an Ubuntu 18.04 LTS Linux but it tries to ensure compatibility with Windows 10 as much as possible as well.
+
+
 
 4 - Building the project
 ========================
 
 The RDB Diplomaterv Monitor can be compiled only using the Qt Creator IDE at the moment.
 
-5 - License
+
+
+5 - Release notes
+=================
+
+v1.0.0:
+    First release:
+        - The program supports the basic functionality:
+            + Opening a serial port and listening to it
+            + Processing and displaying the diagrams received on the serial port
+            + Keeping the received diagrams in the list and allowing switching between them
+
+    Errata:
+        - A probable memory leak is present in the program
+            + It can be seen when there are at least two diagrams listed in the program
+            + When it is being switched between them, the memory usage of the program is increasing with every switch
+
+
+
+6 - License
 ===========
 
     RDB Diplomaterv Monitor
