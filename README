@@ -70,7 +70,7 @@ The rules:
 		- The headline tells how many different signals were measured and their names
 		- There has to be always at least two headline elements transmitted: the common X axis and at least one signal
 		- The headline elements:
-			- can contain alphanumeric characters (0..9, A..Z, a..z)
+                        - can only contain alphanumeric characters (0..9, A..Z, a..z)
 	- After the headline the measured data is transmitted:
 		- Every dataline element is followed by a comma "," 
 		- There has to be as many elements in a data line as there was in the headline
@@ -114,6 +114,10 @@ The RDB Diplomaterv Monitor can be compiled only using the Qt Creator IDE at the
 
 5 - Release notes
 =================
+
+v1.0.2 - Shutdown failure patch
+    Fixes:
+        - The shutdown problem that was described in the errata of the v1.0.1 was fixed
 
 v1.0.1 - Memory leak patch for the first release
     Fixes:

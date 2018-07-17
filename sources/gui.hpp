@@ -78,6 +78,7 @@ private:
 
     MainWindow();
 
+    void closeEvent(QCloseEvent* event);
     void resizeEvent(QResizeEvent* event);
     void SetSizes(void);
 

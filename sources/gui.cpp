@@ -208,6 +208,13 @@ void MainWindow::slotPushButtonWasClicked(void)
     }
 }
 
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    (void) event;
+
+    SerialPort::GetInstance().Close();
+}
+
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
     (void) event;
