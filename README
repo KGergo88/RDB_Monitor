@@ -115,6 +115,13 @@ The RDB Diplomaterv Monitor can be compiled only using the Qt Creator IDE at the
 5 - Release notes
 =================
 
+v1.0.1 - Memory leak patch for the first release
+    Fixes:
+        - The memory that was described in the errata of the v1.0.0 was fixed
+
+    Errata:
+        - The worker thread will not join when quitting the program while the serial port is open
+
 v1.0.0 - First release
     Functionality:
             + Opening a serial port and listening to it
@@ -125,7 +132,6 @@ v1.0.0 - First release
         - A probable memory leak is present in the program
             + It can be seen when there are at least two diagrams listed in the program
             + When it is being switched between them, the memory usage of the program is increasing rapidly with every switch
-
 
 
 6 - License

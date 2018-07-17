@@ -58,23 +58,17 @@ void MainWindow::slotDisplayDiagram(std::size_t index)
         // Accessing the requested diagram from the
         DiagramSpecialized& diagram_to_display = diagram_container[index];
 
-        // Accessing the current pChart from the pChartView
-        // and deleting it if there was one previously because we will add a new one with the new data
-        auto pChart = pChartView->chart();
-        if(!pChart)
-        {
-            delete pChart;
-        }
-        pChart = new QChart();
+        // Creating a new chart that will be displayed in the chartview after loading it with data
+        auto pNewChart = new QChart();
 
         // Setting the title with the Diagram name
-        pChart->setTitle(QString::fromStdString(diagram_to_display.GetTitle()));
+        pNewChart->setTitle(QString::fromStdString(diagram_to_display.GetTitle()));
         // Hiding the legend because the data lines will be recognisable from their Y axis
-        pChart->legend()->hide();
+        pNewChart->legend()->hide();
         // Creating the X axis, giving it a title and addig it to the chart. The ranges will only be set after analyzing the data points.
         auto pXAxis = new QValueAxis;
         pXAxis->setTitleText(QString::fromStdString(diagram_to_display.GetAxisXTitle()));
-        pChart->addAxis(pXAxis, Qt::AlignBottom);
+        pNewChart->addAxis(pXAxis, Qt::AlignBottom);
 
         // We will add every DataLine of the Diagram to the chart
         DataIndexType number_of_data_lines = diagram_to_display.GetTheNumberOfDataLines();
@@ -119,7 +113,7 @@ void MainWindow::slotDisplayDiagram(std::size_t index)
             }
 
             // Adding the line series to the chart
-            pChart->addSeries(pLineSeries);
+            pNewChart->addSeries(pLineSeries);
             auto pYAxis = new QValueAxis;
             pYAxis->setTitleText(pLineSeries->name());
             qreal y_axis_range_minimum = y_axis_minimum_value - (std::abs(y_axis_minimum_value) * y_axis_range_multiplicator);
@@ -128,15 +122,23 @@ void MainWindow::slotDisplayDiagram(std::size_t index)
             pYAxis->setMinorTickCount(y_axis_minor_tick_count);
             pYAxis->setRange(y_axis_range_minimum, y_axis_range_maximum);
             pYAxis->setTitleBrush(pLineSeries->pen().color());
-            pChart->addAxis(pYAxis, Qt::AlignLeft);
+            pNewChart->addAxis(pYAxis, Qt::AlignLeft);
             pLineSeries->attachAxis(pXAxis);
             pLineSeries->attachAxis(pYAxis);
         }
 
         // Setting up the X axis
         pXAxis->setRange(x_axis_minimum_value, x_axis_maximum_value);
-        // Adding the chart to the chart view
-        pChartView->setChart(pChart);
+
+        // Saving the the current pChart from the pChartView
+        auto pOldChart = pChartView->chart();
+        // Adding the new chart to the chart view
+        pChartView->setChart(pNewChart);
+        // Deleting the old chart (if there was one) because chart view object is not its parent anymore
+        if(pOldChart)
+        {
+            delete pOldChart;
+        }
     }
     else
     {
