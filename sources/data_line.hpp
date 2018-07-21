@@ -34,7 +34,7 @@ template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
 {
 public:
-    DataLine(const std::string& newDataLineTitle = "") : DataLineTitle(newDataLineTitle) {}
+    explicit DataLine(const std::string& newDataLineTitle = "") : DataLineTitle(newDataLineTitle) {}
 
     DataLine(const DataLine&  newDataLine) = default;
     DataLine(DataLine&& newDataLine) = default;

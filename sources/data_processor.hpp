@@ -52,7 +52,7 @@ public:
     DataProcessor& operator=(const DataProcessor&) = delete;
     DataProcessor& operator=(DataProcessor&&) = delete;
 
-    std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(std::string data_source, std::istream& input_data);
+    std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data);
 
 private:
     enum class ProcessingStates : uint8_t

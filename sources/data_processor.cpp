@@ -23,7 +23,7 @@
 
 #include "data_processor.hpp"
 
-std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(std::string data_source, std::istream& input_data)
+std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(const std::string& data_source, std::istream& input_data)
 {
     std::unique_ptr<DiagramSpecialized> actual_diagram;
     std::vector<std::unique_ptr<DiagramSpecialized> > assembled_diagrams;
@@ -70,7 +70,7 @@ std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(std
                                 actual_diagram->AddNewDataLine(match_results[1]);
                             }
 
-                            column_index++;
+                            ++column_index;
                             headline = match_results.suffix().str();
                         }
 
@@ -113,7 +113,7 @@ std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(std
                                 }
                             }
 
-                            column_index++;
+                            ++column_index;
                             data_line = match_results.suffix().str();
                         }
                         if((column_index - 1) != actual_diagram->GetTheNumberOfDataLines())

@@ -95,7 +95,7 @@ int main(int argc, char **argv)
         std::cout << "The End." << std::endl;
         return EXIT_SUCCESS;
     }
-    catch(std::string exception_text)
+    catch(const std::string& exception_text)
     {
         std::cerr << "An exception with a string was caught! Content: " << exception_text << std::endl;
     }

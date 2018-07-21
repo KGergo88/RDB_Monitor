@@ -76,7 +76,7 @@ void MainWindow::slotDisplayDiagram(std::size_t index)
         DataPointType x_axis_minimum_value = 0;
         DataPointType x_axis_maximum_value = 0;
 
-        for(DataIndexType data_line_counter = 0; data_line_counter < number_of_data_lines; data_line_counter++)
+        for(DataIndexType data_line_counter = 0; data_line_counter < number_of_data_lines; ++data_line_counter)
         {
             // Creating a line series and filling it with the data that needs to be displayed
             auto pLineSeries = new QLineSeries();
@@ -88,7 +88,7 @@ void MainWindow::slotDisplayDiagram(std::size_t index)
             DataPointType y_axis_minimum_value = 0;
             DataPointType y_axis_maximum_value = 0;
 
-            for(DataIndexType data_point_counter = 0; data_point_counter < number_of_data_points; data_point_counter++)
+            for(DataIndexType data_point_counter = 0; data_point_counter < number_of_data_points; ++data_point_counter)
             {
                 auto data_point = diagram_to_display.GetDataPoint(data_line_counter, data_point_counter);
                 pLineSeries->append(data_point.GetX(), data_point.GetY());
@@ -319,18 +319,18 @@ void Gui::ReportStatus(const std::string& message)
     std::lock_guard<std::mutex> lock(mutex);
 
     time_t rawtime;
-    tm* timeinfo;
+    tm timeinfo;
     std::string date_and_time_string;
 
     // Getting the current time
     time(&rawtime);
-    timeinfo = localtime(&rawtime);
+    localtime_r(&rawtime, &timeinfo);
 
     // Resizing the string containing the current time to an appropriate size
     date_and_time_string.resize(report_date_and_time_string_size);
 
     // Assembling the status message from the time and the input text
-    strftime(&date_and_time_string[0], date_and_time_string.size(), "%T", timeinfo);
+    strftime(&date_and_time_string[0], date_and_time_string.size(), "%T", &timeinfo);
     std::string complete_message = date_and_time_string + " - " + message;
 
     // Emitting the signal

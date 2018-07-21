@@ -33,7 +33,7 @@
 template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
 public:
-    Diagram(const std::string& newDiagramTitle = "", const std::string& newAxisXTitle = "") : DiagramTitle(newDiagramTitle), AxisXTitle(newAxisXTitle) {};
+    Diagram(const std::string& newDiagramTitle = "", const std::string& newAxisXTitle = "") : DiagramTitle(newDiagramTitle), AxisXTitle(newAxisXTitle) {}
 
     Diagram(const Diagram&  newDiagram) = default;
 
@@ -56,7 +56,7 @@ public:
         return Data[dataLineIndex].GetTitle();
     }
 
-    inline void SetDataLineTitle(const T_INDEX& dataLineIndex, const std::string newDataLineTitle)
+    inline void SetDataLineTitle(const T_INDEX& dataLineIndex, const std::string& newDataLineTitle)
     {
         CheckDataLineIndex(dataLineIndex);
 
