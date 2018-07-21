@@ -1,5 +1,6 @@
-#The following folders or files will be ignored:
+#The following folders or files will be ignored by Git:
 build/
 netbeans/
 qt/
-RDB_Diplomaterv_Monitor.pro.user
+cppcheck/
+RDB_Diplomaterv_Monitor.pro.user*
