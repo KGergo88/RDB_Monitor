@@ -91,10 +91,8 @@ The rules:
 
 The RDB Diplomaterv Monitor was developed in C++14 and it depends on the following external components:
 	- Qt5 v5.11.1 or newer
-		- The used components are Core, Widgets, and Charts
+                - The used components are Core, Widgets, and Charts SerialPort
 		- You can download it from the www.qt.io website
-	- Boost v1.65 or newer, the only used component is the ASIO
-		- You may download it from the www.boost.org website
 
 
 

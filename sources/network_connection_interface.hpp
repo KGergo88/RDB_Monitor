@@ -21,54 +21,30 @@
 
 
 
-#include <iostream>
-#include <sstream>
 #include <memory>
-#include <mutex>
-
-#include <QSerialPort>
-#include <QSerialPortInfo>
+#include <string>
 
 #include "global.hpp"
-#include "network_connection_interface.hpp"
 
 
 
-#ifndef SERIAL_PORT_HPP
-#define SERIAL_PORT_HPP
+#ifndef NETWORK_CONNECTION_INTERFACE_H
+#define NETWORK_CONNECTION_INTERFACE_H
 
 
 
-class SerialPort : public NetworkConnectionInterface
+class NetworkConnectionInterface
 {
 public:
-    SerialPort() = default;
+    virtual bool Open(const std::string& port_name) = 0;
 
-    virtual ~SerialPort();
+    virtual void Close(void) = 0;
 
-    SerialPort(const SerialPort&) = delete;
-    SerialPort(SerialPort&&) = delete;
+    virtual bool IsOpen(void) = 0;
 
-    SerialPort& operator=(const SerialPort&) = delete;
-    SerialPort& operator=(SerialPort&&) = delete;
-
-    bool Open(const std::string& port_name) override;
-
-    void Close(void) override;
-
-    bool IsOpen(void) override;
-
-    std::unique_ptr<std::istream> Listen(const std::string& delimiter, const std::size_t& max_line_length) override;
-
-private:
-    std::mutex mutex_open_close;
-    std::mutex mutex_listener;
-
-    std::unique_ptr<QSerialPort> port = nullptr;
-
-    bool bAboutToClose = false;
+    virtual std::unique_ptr<std::istream> Listen(const std::string& delimiter, const std::size_t& max_line_length) = 0;
 };
 
 
 
-#endif // SERIAL_PORT_HPP
+#endif // NETWORK_CONNECTION_INTERFACE_H

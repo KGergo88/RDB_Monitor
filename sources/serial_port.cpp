@@ -23,119 +23,240 @@
 
 #include "serial_port.hpp"
 
-SerialPort::SerialPort() : io_service(), port(io_service)
-{
 
-}
 
 SerialPort::~SerialPort()
 {
     Close();
 }
 
-bool SerialPort::Open(const std::string& device_to_open)
+bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NAME)
 {
+    std::lock_guard<std::mutex> lock_open_close(mutex_open_close);
+    std::lock_guard<std::mutex> lock_listener(mutex_listener);
+
     bool result = false;
 
-    if(!port.is_open())
+    if(!port)
     {
         try
         {
-            port.open(device_to_open);
-            port.set_option(boost::asio::serial_port::baud_rate(baud_rate));
+            port = std::make_unique<QSerialPort>();
 
-            if(port.is_open())
+            port->setPortName(QString::fromStdString(port_name));
+            if(port->open(QIODevice::ReadWrite))
             {
-                device_name = device_to_open;
+                port->setBaudRate(SERIAL_PORT_DEFAULT_BAUDRATE);
+                port->setDataBits(QSerialPort::Data8);
+                port->setStopBits(QSerialPort::OneStop);
+                port->setParity(QSerialPort::NoParity);
+                port->setFlowControl(QSerialPort::NoFlowControl);
                 result = true;
             }
             else
             {
-                std::cerr << "Could not open the SerialPort. Device: " << device_to_open << std::endl;
+                std::cerr << "Could not open the SerialPort. Device: " << port_name << std::endl;
+                port.reset();
             }
         }
         catch(...)
         {
-            std::cerr << "Could not open the SerialPort. Device: " << device_to_open << std::endl;
+            std::cerr << "Could not open the SerialPort. Device: " << port_name << std::endl;
         }
     }
     else
     {
-        if(device_name == device_to_open)
+        if(port_name == port->portName().toStdString())
         {
             result = true;
         }
         else
         {
-            std::cerr << "Another serial port was already open: " << device_name << std::endl;
+            std::cerr << "Another serial port was already openend with this object: " << port_name << std::endl;
         }
     }
 
     return result;
 }
 
-bool SerialPort::Close()
+void SerialPort::Close()
 {
-    bool result = false;
+    std::lock_guard<std::mutex> lock_open_close(mutex_open_close);
 
-    if(port.is_open())
-    {
-        //This flag is needed to prevent starting new reads and to suppress error messages...
-        ShutdownWasRequested = true;
-        port.close();
-        if(!port.is_open())
-        {
-            result = true;
-        }
-        else
-        {
-            std::cerr << "Could not close the serial port. Device name: " << device_name << std::endl;
-        }
-        ShutdownWasRequested = false;
-    }
-    else
-    {
-        result = true;
-    }
+    bAboutToClose = true;
 
-    return result;
+    std::lock_guard<std::mutex> lock_listener(mutex_listener);
+
+    if(port)
+    {
+        port->close();
+        port.reset();
+        bAboutToClose = false;
+    }
 }
 
 bool SerialPort::IsOpen()
 {
-    return (port.is_open() && !ShutdownWasRequested);
+    std::lock_guard<std::mutex> lock_open_close(mutex_open_close);
+
+    return (nullptr != port);
 }
 
-std::shared_ptr<std::istream> SerialPort::ReceiveMeasurementData(void)
+std::unique_ptr<std::istream> SerialPort::Listen(const std::string& delimiter,
+                                                 const std::size_t& max_length = SERIAL_PORT_MAX_READ_LENGTH_IN_BYTES)
 {
-    std::shared_ptr<std::istream> received_data(nullptr);
+    std::lock_guard<std::mutex> lock_listener(mutex_listener);
 
-    if(port.is_open() && !ShutdownWasRequested)
-    {
-        port.get_io_service().reset();
-        boost::asio::async_read_until(port, buffer, DATA_END_LINE, boost::bind(&SerialPort::AsyncFinished, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
-        port.get_io_service().run();
+    bool delimiter_was_found = false;
+    bool maximal_data_size_was_reached = false;
+    bool error_was_detected = false;
 
-        //This is needed for the case when we are waiting for a transmission, but the serial port closed in the meantime.
-        if(port.is_open() && !ShutdownWasRequested)
+    std::size_t total_received_data_length = 0;
+    auto data_stream = std::make_unique<std::stringstream>();
+
+    while(port && !bAboutToClose &&
+          !delimiter_was_found &&
+          !maximal_data_size_was_reached &&
+          !error_was_detected)
+    {        
+#warning "Magic number..."
+
+        QByteArray received_data;
+        do
         {
-            received_data = std::make_shared<std::istream>(&buffer);
+            received_data.append(port->readAll());
+
+            if(received_data.size() <= max_length)
+            {
+                if(received_data.contains(QByteArray::fromStdString(delimiter)))
+                {
+                    delimiter_was_found = true;
+                }
+            }
+            else
+            {
+                maximal_data_size_was_reached = true;
+            }
+
         }
+        while(port->waitForReadyRead(10));
+
+//        }
+//        else
+//        {
+//            auto port_error = port->error();
+//            if(port_error == QSerialPort::NoError)
+//            {
+//                // Everything is OK but there is no data to read...
+//            }
+//            else if(port_error == QSerialPort::TimeoutError)
+//            {
+//                // Timeout happened, this means that no data was available...
+//            }
+//            else if(port_error == QSerialPort::ReadError)
+//            {
+//                std::cerr << QObject::tr("Failed to read from serial port, error: %1").arg(port->errorString()).toStdString() << std::endl;
+//                error_was_detected = true;
+//            }
+//            else
+//            {
+//                std::cerr << "Unknown error happened, error value: " << port_error << std::endl;
+//                error_was_detected = true;
+//            }
+//        }
     }
 
-    return received_data;
-}
-
-void SerialPort::AsyncFinished(const boost::system::error_code& error, std::size_t bytes_transferred)
-{
-    //The finished event is only interesting for us if the port is open, so it was not raised because of a cancelled operation.
-    if(port.is_open() && !ShutdownWasRequested)
+    // In these cases we will not return a valid data stream...
+    if(!port || bAboutToClose)
     {
-        (void) bytes_transferred;
-
-        if(error)
-        {
-            std::cerr << "SerialPort::AsyncFinished: The error was set: " << error.message() << std::endl;
-        }
+        data_stream.reset();
     }
+
+    return data_stream;
 }
+
+#warning "Saved code..."
+
+//std::unique_ptr<std::istream> SerialPort::Listen(const std::string& delimiter,
+//                                                 const std::size_t& max_length = SERIAL_PORT_MAX_READ_LENGTH_IN_BYTES)
+//{
+//    std::lock_guard<std::mutex> lock_listener(mutex_listener);
+
+//    bool delimiter_was_found = false;
+//    bool maximal_data_size_was_reached = false;
+//    bool error_was_detected = false;
+
+//    std::size_t total_received_data_length = 0;
+//    auto data_stream = std::make_unique<std::stringstream>();
+
+//    while(port && !bAboutToClose &&
+//          !delimiter_was_found &&
+//          !maximal_data_size_was_reached &&
+//          !error_was_detected)
+//    {
+//#warning "Magic number..."
+
+//        auto responseData = port->readAll();
+//        while (serial.waitForReadyRead(10))
+//        {
+//            responseData += serial.readAll();
+//        }
+
+
+//        if(port->waitForReadyRead(100) && port->canReadLine())
+//        {
+//            auto received_data = port->readLine(max_length - total_received_data_length);
+
+//#warning "Only debug..."
+//std::cout << received_data.toStdString() << std::flush;
+//#warning "Only debug..."
+
+//            total_received_data_length += received_data.size();
+//            if(total_received_data_length <= max_length)
+//            {
+//                *data_stream << received_data.toStdString();
+
+//                if(received_data.contains(QByteArray::fromStdString(delimiter)))
+//                {
+//                    delimiter_was_found = true;
+//                }
+//            }
+//            else
+//            {
+//                maximal_data_size_was_reached = true;
+//            }
+//        }
+//        else
+//        {
+//            auto port_error = port->error();
+//            if(port_error == QSerialPort::NoError)
+//            {
+//                // Everything is OK but there is no data to read...
+//            }
+//            else if(port_error == QSerialPort::TimeoutError)
+//            {
+//                // Timeout happened, this means that no data was available...
+//            }
+//            else if(port_error == QSerialPort::ReadError)
+//            {
+//                std::cerr << QObject::tr("Failed to read from serial port, error: %1").arg(port->errorString()).toStdString() << std::endl;
+//                error_was_detected = true;
+//            }
+//            else
+//            {
+//                std::cerr << "Unknown error happened, error value: " << port_error << std::endl;
+//                error_was_detected = true;
+//            }
+//        }
+//    }
+
+//    // In these cases we will not return a valid data stream...
+//    if(!port || bAboutToClose)
+//    {
+//        data_stream.reset();
+//    }
+
+//    return data_stream;
+//}
+
+#warning "Saved code..."

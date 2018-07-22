@@ -27,8 +27,12 @@
 #include "global.hpp"
 #include "data_line.hpp"
 
+
+
 #ifndef DIAGRAM_HPP
 #define DIAGRAM_HPP
+
+
 
 template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
@@ -130,5 +134,7 @@ private:
     std::string AxisXTitle;
     std::vector<DataLine<T_DATA_POINT, T_INDEX> > Data;
 };
+
+
 
 #endif /* DIAGRAM_HPP */

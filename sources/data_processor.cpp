@@ -23,6 +23,8 @@
 
 #include "data_processor.hpp"
 
+
+
 std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(const std::string& data_source, std::istream& input_data)
 {
     std::unique_ptr<DiagramSpecialized> actual_diagram;

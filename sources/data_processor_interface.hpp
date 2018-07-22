@@ -21,54 +21,23 @@
 
 
 
-#include <iostream>
-#include <sstream>
+#include <vector>
 #include <memory>
-#include <mutex>
-
-#include <QSerialPort>
-#include <QSerialPortInfo>
+#include <string>
 
 #include "global.hpp"
-#include "network_connection_interface.hpp"
 
 
 
-#ifndef SERIAL_PORT_HPP
-#define SERIAL_PORT_HPP
+#ifndef DATA_PROCESSOR_INTERFACE_HPP
+#define DATA_PROCESSOR_INTERFACE_HPP
 
 
 
-class SerialPort : public NetworkConnectionInterface
+class DataProcessorInterface
 {
 public:
-    SerialPort() = default;
-
-    virtual ~SerialPort();
-
-    SerialPort(const SerialPort&) = delete;
-    SerialPort(SerialPort&&) = delete;
-
-    SerialPort& operator=(const SerialPort&) = delete;
-    SerialPort& operator=(SerialPort&&) = delete;
-
-    bool Open(const std::string& port_name) override;
-
-    void Close(void) override;
-
-    bool IsOpen(void) override;
-
-    std::unique_ptr<std::istream> Listen(const std::string& delimiter, const std::size_t& max_line_length) override;
-
-private:
-    std::mutex mutex_open_close;
-    std::mutex mutex_listener;
-
-    std::unique_ptr<QSerialPort> port = nullptr;
-
-    bool bAboutToClose = false;
+    virtual std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) = 0;
 };
 
-
-
-#endif // SERIAL_PORT_HPP
+#endif // DATA_PROCESSOR_INTERFACE_HPP

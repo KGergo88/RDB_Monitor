@@ -32,19 +32,22 @@
 #include <regex>
 
 #include "global.hpp"
+#include "data_processor_interface.hpp"
 #include "diagram.hpp"
+
+
 
 #ifndef DATA_PROCESSOR_HPP
 #define DATA_PROCESSOR_HPP
 
-class DataProcessor
+
+
+class DataProcessor : public DataProcessorInterface
 {
 public:
-    static inline DataProcessor& GetInstance(void)
-    {
-        static DataProcessor Singleton;
-        return Singleton;
-    }
+    DataProcessor() = default;
+    virtual ~DataProcessor() = default;
+
 
     DataProcessor(const DataProcessor&) = delete;
     DataProcessor(DataProcessor&&) = delete;
@@ -52,7 +55,7 @@ public:
     DataProcessor& operator=(const DataProcessor&) = delete;
     DataProcessor& operator=(DataProcessor&&) = delete;
 
-    std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data);
+    std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
 
 private:
     enum class ProcessingStates : uint8_t
@@ -63,17 +66,14 @@ private:
     };
 
     // REGEX strings to search the input data for valid measurement session
-    std::string regex_start_line         = R"(^\s*<<<START>>>$)";
-    std::string regex_headline           = R"(^\s*(\w+,){2,}$)";
-    std::string regex_headline_analyzer  = R"(^\s*(\w+),)";
-    std::string regex_data_line          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
-    std::string regex_data_line_analyzer = R"(^\s*((?:\+|\-)?\d+),)";
-    std::string regex_end_line           = R"(^\s*<<<END>>>$)";
-
-    DataProcessor() = default;
-
-    std::shared_ptr<std::vector<std::string> > ProcessHeadLine(std::string& headline);
-    std::shared_ptr<std::vector<DataPointType> > ProcessDataLine(std::string& data_line);
+    const std::string regex_start_line         = R"(^\s*<<<START>>>$)";
+    const std::string regex_headline           = R"(^\s*(\w+,){2,}$)";
+    const std::string regex_headline_analyzer  = R"(^\s*(\w+),)";
+    const std::string regex_data_line          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
+    const std::string regex_data_line_analyzer = R"(^\s*((?:\+|\-)?\d+),)";
+    const std::string regex_end_line           = R"(^\s*<<<END>>>$)";
 };
+
+
 
 #endif // DATA_PROCESSOR_HPP

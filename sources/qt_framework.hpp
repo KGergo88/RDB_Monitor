@@ -22,53 +22,53 @@
 
 
 #include <iostream>
-#include <sstream>
-#include <memory>
 #include <mutex>
 
-#include <QSerialPort>
-#include <QSerialPortInfo>
+#include <QApplication>
 
 #include "global.hpp"
-#include "network_connection_interface.hpp"
+#include "diagram.hpp"
 
 
 
-#ifndef SERIAL_PORT_HPP
-#define SERIAL_PORT_HPP
+#ifndef GUI_FRAMEWORK_HPP
+#define GUI_FRAMEWORK_HPP
 
 
 
-class SerialPort : public NetworkConnectionInterface
+class QtFramework final
 {
-public:
-    SerialPort() = default;
-
-    virtual ~SerialPort();
-
-    SerialPort(const SerialPort&) = delete;
-    SerialPort(SerialPort&&) = delete;
-
-    SerialPort& operator=(const SerialPort&) = delete;
-    SerialPort& operator=(SerialPort&&) = delete;
-
-    bool Open(const std::string& port_name) override;
-
-    void Close(void) override;
-
-    bool IsOpen(void) override;
-
-    std::unique_ptr<std::istream> Listen(const std::string& delimiter, const std::size_t& max_line_length) override;
-
 private:
-    std::mutex mutex_open_close;
-    std::mutex mutex_listener;
+    QApplication qt_application;
 
-    std::unique_ptr<QSerialPort> port = nullptr;
+    MainWindow main_window;
 
-    bool bAboutToClose = false;
+    SerialPort serial_port;
+    DataProcessor data_processor;
+    NetworkHandler serial_network_handler;
+
+    std::mutex mutex_report_status;
+
+    std::vector<DiagramSpecialized> diagram_container;
+
+public:
+    static constexpr std::size_t report_date_and_time_string_size = 10;
+
+    QtFramework() = delete;
+    QtFramework(int argc, char **argv);
+    QtFramework(const QtFramework&  newQtFramework) = delete;
+    QtFramework(QtFramework&& newQtFramework) = delete;
+
+    ~QtFramework() = default;
+
+    QtFramework& operator=(const QtFramework&  newQtFramework) = delete;
+    QtFramework& operator=(QtFramework&& newQtFramework) = delete;
+
+    static void Run(int argc, char **argv);
+//    static bool IsRunning(void);
+//    static void ReportStatus(const std::string& message);
 };
 
 
 
-#endif // SERIAL_PORT_HPP
+#endif /* GUI_FRAMEWORK_HPP */

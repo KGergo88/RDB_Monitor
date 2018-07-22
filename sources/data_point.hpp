@@ -23,8 +23,12 @@
 
 #include "global.hpp"
 
+
+
 #ifndef DATA_POINT_HPP
 #define DATA_POINT_HPP
+
+
 
 template <typename T_DATA_POINT>
 class DataPoint
@@ -49,6 +53,8 @@ private:
     T_DATA_POINT x;
     T_DATA_POINT y;
 };
+
+
 
 #endif /* DATAPOINT_HPP */
 

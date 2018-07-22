@@ -27,8 +27,12 @@
 #include "global.hpp"
 #include "data_point.hpp"
 
+
+
 #ifndef DATALINE_HPP
 #define DATALINE_HPP
+
+
 
 template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
@@ -97,5 +101,7 @@ private:
     std::string DataLineTitle;
     std::vector<DataPoint<T_DATA_POINT> > Data;
 };
+
+
 
 #endif /* DATALINE_HPP */
