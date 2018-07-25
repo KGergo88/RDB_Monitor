@@ -36,6 +36,8 @@
 class NetworkConnectionInterface
 {
 public:
+    virtual ~NetworkConnectionInterface();
+
     virtual bool Open(const std::string& port_name) = 0;
 
     virtual void Close(void) = 0;

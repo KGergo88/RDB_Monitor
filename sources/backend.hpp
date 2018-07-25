@@ -36,7 +36,7 @@
 
 
 
-class QtFramework final
+class Backend final
 {
 private:
     QApplication qt_application;
@@ -54,15 +54,15 @@ private:
 public:
     static constexpr std::size_t report_date_and_time_string_size = 10;
 
-    QtFramework() = delete;
-    QtFramework(int argc, char **argv);
-    QtFramework(const QtFramework&  newQtFramework) = delete;
-    QtFramework(QtFramework&& newQtFramework) = delete;
+    Backend() = delete;
+    Backend(int argc, char **argv);
+    Backend(const Backend&  newQtFramework) = delete;
+    Backend(Backend&& newQtFramework) = delete;
 
-    ~QtFramework() = default;
+    ~Backend() = default;
 
-    QtFramework& operator=(const QtFramework&  newQtFramework) = delete;
-    QtFramework& operator=(QtFramework&& newQtFramework) = delete;
+    Backend& operator=(const Backend&  newQtFramework) = delete;
+    Backend& operator=(Backend&& newQtFramework) = delete;
 
     static void Run(int argc, char **argv);
 //    static bool IsRunning(void);

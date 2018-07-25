@@ -21,7 +21,7 @@
 
 
 
-#include "qt_framework.hpp"
+#include "backend.hpp"
 #include "main_window.hpp"
 #include "network_handler.hpp"
 #include "serial_port.hpp"
@@ -29,13 +29,13 @@
 
 
 
-QtFramework::QtFramework(int argc, char** argv)
+Backend::Backend(int argc, char** argv)
 {
     NetworkHandler serial_network_handler(&serial_port, &data_processor);
 
     MainWindow main_window(&serial_network_handler);
 }
-void QtFramework::Run(void)
+void Backend::Run(void)
 {
     auto qtapplication_return_value = qt_application.exec();
 

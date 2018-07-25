@@ -37,6 +37,8 @@
 class DataProcessorInterface
 {
 public:
+    virtual ~DataProcessorInterface();
+
     virtual std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) = 0;
 };
 

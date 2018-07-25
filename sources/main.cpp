@@ -25,7 +25,7 @@
 #include <string>
 
 #include "global.hpp"
-#include "qt_framework.hpp"
+#include "backend.hpp"
 
 
 
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
         std::cout << "Hello RDB!" << std::endl;
 
         std::cout << "Running the GUI." << std::endl;
-        QtFramework qt_framework(argc, argv);
+        Backend qt_framework(argc, argv);
         qt_framework.Run();
         std::cout << "The GUI has stopped." << std::endl;
 

@@ -61,7 +61,7 @@ SOURCES += \
     sources/data_processor_interface.cpp \
     sources/network_handler.cpp \
     sources/main_window.cpp \
-    sources/qt_framework.cpp
+    sources/backend.cpp
 
 HEADERS += \
     sources/data_line.hpp \
@@ -77,7 +77,7 @@ HEADERS += \
     sources/data_processor_interface.hpp \
     sources/network_handler.hpp \
     sources/main_window.hpp \
-    sources/qt_framework.hpp
+    sources/backend.hpp
 
 DISTFILES += \
     README
