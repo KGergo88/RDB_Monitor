@@ -22,12 +22,16 @@
 
 
 #include <iostream>
+#include <functional>
 #include <mutex>
 
 #include <QApplication>
 
 #include "global.hpp"
 #include "diagram.hpp"
+#include "serial_port.hpp"
+#include "measurement_data_protocol.hpp"
+#include "network_handler.hpp"
 
 
 
@@ -36,17 +40,16 @@
 
 
 
-class Backend final
+class Backend : public QObject
 {
+    Q_OBJECT
+
 private:
-    QApplication qt_application;
-
-    MainWindow main_window;
-
     SerialPort serial_port;
-    DataProcessor data_processor;
+    MeasurementDataProtocol measurement_data_protocol;
     NetworkHandler serial_network_handler;
 
+    std::mutex mutex_diagram_container;
     std::mutex mutex_report_status;
 
     std::vector<DiagramSpecialized> diagram_container;
@@ -54,19 +57,18 @@ private:
 public:
     static constexpr std::size_t report_date_and_time_string_size = 10;
 
-    Backend() = delete;
-    Backend(int argc, char **argv);
-    Backend(const Backend&  newQtFramework) = delete;
-    Backend(Backend&& newQtFramework) = delete;
+    Backend();
+    Backend(const Backend&  new_backend) = delete;
+    Backend(Backend&& new_backend) = delete;
 
     ~Backend() = default;
 
-    Backend& operator=(const Backend&  newQtFramework) = delete;
-    Backend& operator=(Backend&& newQtFramework) = delete;
+    Backend& operator=(const Backend&  new_backend) = delete;
+    Backend& operator=(Backend&& new_backend) = delete;
 
-    static void Run(int argc, char **argv);
-//    static bool IsRunning(void);
-//    static void ReportStatus(const std::string& message);
+    void StoreNewDiagram(DiagramSpecialized&& new_diagram);
+
+    void ReportStatus(const std::string& message);
 };
 
 

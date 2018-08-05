@@ -21,15 +21,18 @@
 
 
 
-#include "data_processor.hpp"
+#include "measurement_data_protocol.hpp"
 
 
 
-std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(const std::string& data_source, std::istream& input_data)
+MeasurementDataProtocol::MeasurementDataProtocol()
 {
-    std::unique_ptr<DiagramSpecialized> actual_diagram;
+    processing_state = ProcessingStates::WaitingForStartLine;
+}
+
+std::vector<std::unique_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessData(const std::string& data_source, std::istream& input_data)
+{
     std::vector<std::unique_ptr<DiagramSpecialized> > assembled_diagrams;
-    ProcessingStates processing_state = ProcessingStates::WaitingForStartLine;
 
     // Processing the input stream until there is data available in it
     while(!input_data.eof())
@@ -64,7 +67,7 @@ std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(con
                         {
                             if(0 == column_index)
                             {
-                                auto current_date_and_time = std::time(0);
+                                auto current_date_and_time = std::time(nullptr);
                                 actual_diagram = std::make_unique<DiagramSpecialized>(data_source + " - " + std::string(ctime(&current_date_and_time)) , match_results[1]);
                             }
                             else
@@ -112,6 +115,7 @@ std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(con
                                 else
                                 {
                                     processing_state = ProcessingStates::WaitingForStartLine;
+                                    break;
                                 }
                             }
 
@@ -133,7 +137,8 @@ std::vector<std::unique_ptr<DiagramSpecialized> > DataProcessor::ProcessData(con
                     }
                     break;
                 default:
-                    std::string errorMessage = "The DataProcessor::ProcessData's statemachine switched to an undefined state...";
+                    std::string errorMessage = ("The DataProcessor::ProcessData's statemachine switched to an undefined state: " + std::to_string(static_cast<std::underlying_type<ProcessingStates>::type>(processing_state)));
+                    processing_state = ProcessingStates::WaitingForStartLine;
                     throw errorMessage;
                     break;
             }

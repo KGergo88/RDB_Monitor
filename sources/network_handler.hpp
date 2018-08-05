@@ -25,9 +25,11 @@
 #include <string>
 #include <functional>
 
+#include <QObject>
+
 #include "global.hpp"
 #include "network_connection_interface.hpp"
-#include "data_processor_interface.hpp"
+#include "data_processing_interface.hpp"
 #include "diagram.hpp"
 
 
@@ -37,13 +39,17 @@
 
 
 
-class NetworkHandler
+class NetworkHandler : public QObject
 {
+    Q_OBJECT
+
 public:
     NetworkHandler(NetworkConnectionInterface *new_network_connection,
-                   DataProcessorInterface *new_data_processor)
+                   DataProcessingInterface *new_data_processor,
+                   std::function<void(DiagramSpecialized&&)> new_diagram_collector)
                               : network_connection(new_network_connection),
-                                data_processor(new_data_processor)
+                                data_processor(new_data_processor),
+                                diagram_collector(new_diagram_collector)
     {
         if(!network_connection)
         {
@@ -55,51 +61,33 @@ public:
             std::string errorMessage = "There was no data_connection set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
-    }
-
-    void Run(const std::string& port_name, std::function<void(DiagramSpecialized&&)> diagram_collector)
-    {
-        if(network_connection && data_processor)
+        if(!diagram_collector)
         {
-            if(!network_connection->Open(port_name))
-            {
-                std::string errorMessage = "The network_connection " + port_name + " could not be opened!";
-                throw errorMessage;
-            }
-
-            while(network_connection->IsOpen())
-            {
-                auto received_data = network_connection->Listen(DATA_END_LINE, SERIAL_PORT_MAX_READ_LENGTH_IN_BYTES);
-                if(received_data)
-                {
-                    auto diagram_container = data_processor->ProcessData("SerialPort", *received_data);
-                    if(!diagram_container.empty())
-                    {
-                        for(auto &i : diagram_container)
-                        {
-                            diagram_collector(std::move(*i.release()));
-                        }
-                    }
-                    else
-                    {
-                        std::cerr << "We could not assemble any diagram from the input data..." << std::endl;
-                    }
-                }
-            }
+            std::string errorMessage = "There was no diagram_collector set in NetworkHandler::NetworkHandler!";
+            throw errorMessage;
         }
     }
 
-    void Stop(void)
-    {
-        if(network_connection)
-        {
-            network_connection->Close();
-        }
-    }
+    ~NetworkHandler() = default;
+
+    NetworkHandler(const NetworkHandler&) = delete;
+    NetworkHandler(NetworkHandler&&) = delete;
+
+    NetworkHandler& operator=(const NetworkHandler&) = delete;
+    NetworkHandler& operator=(NetworkHandler&&) = delete;
+
+    bool Run(const std::string& new_port_name);
+
+    void Stop(void);
+
+private slots:
+    void DataAvailable(std::istream& received_data);
 
 private:
-    NetworkConnectionInterface *const network_connection = nullptr;
-    DataProcessorInterface *const data_processor = nullptr;
+    NetworkConnectionInterface* network_connection;
+    DataProcessingInterface* data_processor;
+    std::function<void(DiagramSpecialized&&)> diagram_collector;
+    std::string port_name;
 };
 
 

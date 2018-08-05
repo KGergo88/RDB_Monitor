@@ -21,8 +21,11 @@
 
 
 
+#include <istream>
 #include <memory>
 #include <string>
+
+#include <QtPlugin>
 
 #include "global.hpp"
 
@@ -36,7 +39,7 @@
 class NetworkConnectionInterface
 {
 public:
-    virtual ~NetworkConnectionInterface();
+    virtual ~NetworkConnectionInterface() {}
 
     virtual bool Open(const std::string& port_name) = 0;
 
@@ -44,8 +47,13 @@ public:
 
     virtual bool IsOpen(void) = 0;
 
-    virtual std::unique_ptr<std::istream> Listen(const std::string& delimiter, const std::size_t& max_line_length) = 0;
+    virtual bool StartListening(void) = 0;
+
+signals:
+    virtual void DataReceived(std::istream& received_data) = 0;
 };
+
+Q_DECLARE_INTERFACE(NetworkConnectionInterface, "NetworkConnectionInterface")
 
 
 

@@ -57,11 +57,10 @@ SOURCES += \
     sources/diagram.cpp \
     sources/main.cpp \
     sources/serial_port.cpp \
-    sources/data_processor.cpp \
-    sources/data_processor_interface.cpp \
     sources/network_handler.cpp \
     sources/main_window.cpp \
-    sources/backend.cpp
+    sources/backend.cpp \
+    sources/measurement_data_protocol.cpp
 
 HEADERS += \
     sources/data_line.hpp \
@@ -72,12 +71,12 @@ HEADERS += \
     sources/diagram.hpp \
     sources/global.hpp \
     sources/serial_port.hpp \
-    sources/data_processor.hpp \
     sources/network_connection_interface.hpp \
-    sources/data_processor_interface.hpp \
     sources/network_handler.hpp \
     sources/main_window.hpp \
-    sources/backend.hpp
+    sources/backend.hpp \
+    sources/data_processing_interface.hpp \
+    sources/measurement_data_protocol.hpp
 
 DISTFILES += \
     README

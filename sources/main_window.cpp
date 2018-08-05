@@ -63,6 +63,8 @@ MainWindow::MainWindow(NetworkHandler* new_network_handler) : QMainWindow(), net
 
 void MainWindow::slotDisplayDiagram(std::size_t index)
 {
+(void) index;
+
 //    // Check whether the diagram exists
 //    if(index < diagram_container.size())
 //    {
@@ -162,6 +164,8 @@ void MainWindow::slotDisplayDiagram(std::size_t index)
 
 void MainWindow::slotAddToDiagramList(std::size_t index)
 {
+    (void) index;
+
 //    if(index < diagram_container.size())
 //    {
 //        auto pListWidgetItem = new QListWidgetItem();
@@ -184,7 +188,7 @@ void MainWindow::slotReportStatus(std::string message)
 
 void MainWindow::slotListSelectionChanged(void)
 {
-    emit slotDisplayDiagram(pListWidgetDiagrams->currentRow());
+//    emit slotDisplayDiagram(pListWidgetDiagrams->currentRow());
 }
 
 void MainWindow::slotPushButtonWasClicked(void)
@@ -225,37 +229,37 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::SetSizes(void)
 {
-    int window_width = size().width();
-    int window_height = size().height();
+//    int window_width = size().width();
+//    int window_height = size().height();
 
-    pChartView->setGeometry(chartview_fixposition_x,
-                            chartview_fixposition_y,
-                            (window_width * chartview_width_relative_to_main_window),
-                            (window_height * chartview_height_relative_to_main_window));
-    int chart_view_width = pChartView->width();
-    int chart_view_height = pChartView->height();
+//    pChartView->setGeometry(chartview_fixposition_x,
+//                            chartview_fixposition_y,
+//                            (window_width * chartview_width_relative_to_main_window),
+//                            (window_height * chartview_height_relative_to_main_window));
+//    int chart_view_width = pChartView->width();
+//    int chart_view_height = pChartView->height();
 
-    pListWidgetDiagrams->setGeometry(chart_view_width,
-                                     listwidgetdiagrams_fixposition_y,
-                                     (window_width - chart_view_width),
-                                     chart_view_height);
-    int list_widget_diagrams_width = pListWidgetDiagrams->width();
-    int list_widget_diagrams_height = pListWidgetDiagrams->height();
+//    pListWidgetDiagrams->setGeometry(chart_view_width,
+//                                     listwidgetdiagrams_fixposition_y,
+//                                     (window_width - chart_view_width),
+//                                     chart_view_height);
+//    int list_widget_diagrams_width = pListWidgetDiagrams->width();
+//    int list_widget_diagrams_height = pListWidgetDiagrams->height();
 
-    pListWidgetStatus->setGeometry(listwidgetstatus_fixposition_x,
-                                   chart_view_height,
-                                   chart_view_width,
-                                   (window_height - list_widget_diagrams_height));
-    int list_widget_status_height = pListWidgetStatus->height();
+//    pListWidgetStatus->setGeometry(listwidgetstatus_fixposition_x,
+//                                   chart_view_height,
+//                                   chart_view_width,
+//                                   (window_height - list_widget_diagrams_height));
+//    int list_widget_status_height = pListWidgetStatus->height();
 
-    pLineEdit->setGeometry(chart_view_width,
-                           chart_view_height,
-                           list_widget_diagrams_width,
-                           (list_widget_status_height * lineedit_height_relative_to_listwidgetstatus));
-    int line_edit_height = pLineEdit->height();
+//    pLineEdit->setGeometry(chart_view_width,
+//                           chart_view_height,
+//                           list_widget_diagrams_width,
+//                           (list_widget_status_height * lineedit_height_relative_to_listwidgetstatus));
+//    int line_edit_height = pLineEdit->height();
 
-    pPushButton->setGeometry(chart_view_width,
-                             (chart_view_height + line_edit_height),
-                             list_widget_diagrams_width,
-                             line_edit_height);
+//    pPushButton->setGeometry(chart_view_width,
+//                             (chart_view_height + line_edit_height),
+//                             list_widget_diagrams_width,
+//                             line_edit_height);
 }

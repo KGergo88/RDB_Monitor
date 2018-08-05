@@ -21,59 +21,25 @@
 
 
 
-#include <iostream>
+#include <vector>
 #include <memory>
 #include <string>
-#include <sstream>
-#include <algorithm>
-#include <functional>
-#include <ctime>
-#include <cctype>
-#include <regex>
 
 #include "global.hpp"
-#include "data_processor_interface.hpp"
-#include "diagram.hpp"
 
 
 
-#ifndef DATA_PROCESSOR_HPP
-#define DATA_PROCESSOR_HPP
+#ifndef DATA_PROCESSING_INTERFACE_HPP
+#define DATA_PROCESSING_INTERFACE_HPP
 
 
 
-class DataProcessor : public DataProcessorInterface
+class DataProcessingInterface
 {
 public:
-    DataProcessor() = default;
-    virtual ~DataProcessor() = default;
+    virtual ~DataProcessingInterface() {}
 
-
-    DataProcessor(const DataProcessor&) = delete;
-    DataProcessor(DataProcessor&&) = delete;
-
-    DataProcessor& operator=(const DataProcessor&) = delete;
-    DataProcessor& operator=(DataProcessor&&) = delete;
-
-    std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
-
-private:
-    enum class ProcessingStates : uint8_t
-    {
-        WaitingForStartLine,
-        ProcessingHeadline,
-        ProcessingDataLines
-    };
-
-    // REGEX strings to search the input data for valid measurement session
-    const std::string regex_start_line         = R"(^\s*<<<START>>>$)";
-    const std::string regex_headline           = R"(^\s*(\w+,){2,}$)";
-    const std::string regex_headline_analyzer  = R"(^\s*(\w+),)";
-    const std::string regex_data_line          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
-    const std::string regex_data_line_analyzer = R"(^\s*((?:\+|\-)?\d+),)";
-    const std::string regex_end_line           = R"(^\s*<<<END>>>$)";
+    virtual std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) = 0;
 };
 
-
-
-#endif // DATA_PROCESSOR_HPP
+#endif // DATA_PROCESSING_INTERFACE_HPP

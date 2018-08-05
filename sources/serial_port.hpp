@@ -26,6 +26,7 @@
 #include <memory>
 #include <mutex>
 
+#include <QObject>
 #include <QSerialPort>
 #include <QSerialPortInfo>
 
@@ -39,12 +40,14 @@
 
 
 
-class SerialPort : public NetworkConnectionInterface
+class SerialPort : public QObject, public NetworkConnectionInterface
 {
-public:
-    SerialPort() = default;
+    Q_OBJECT
+    Q_INTERFACES(NetworkConnectionInterface)
 
-    virtual ~SerialPort();
+public:
+    SerialPort();
+    ~SerialPort() override;
 
     SerialPort(const SerialPort&) = delete;
     SerialPort(SerialPort&&) = delete;
@@ -58,15 +61,19 @@ public:
 
     bool IsOpen(void) override;
 
-    std::unique_ptr<std::istream> Listen(const std::string& delimiter, const std::size_t& max_line_length) override;
+    bool StartListening(void) override;
+
+signals:
+    void DataReceived(std::istream& received_data) override;
+
+private slots:
+    void ReadDataFromPort(void);
 
 private:
     std::mutex mutex_open_close;
     std::mutex mutex_listener;
 
     std::unique_ptr<QSerialPort> port = nullptr;
-
-    bool bAboutToClose = false;
 };
 
 

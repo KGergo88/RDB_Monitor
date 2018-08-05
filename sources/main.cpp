@@ -24,6 +24,8 @@
 #include <iostream>
 #include <string>
 
+#include <QApplication>
+
 #include "global.hpp"
 #include "backend.hpp"
 
@@ -32,16 +34,17 @@
 int main(int argc, char **argv)
 {
     try
-    {       
+    {
         std::cout << "Hello RDB!" << std::endl;
 
         std::cout << "Running the GUI." << std::endl;
-        Backend qt_framework(argc, argv);
-        qt_framework.Run();
+        QApplication q_application(argc, argv);
+
+        auto q_application_result = q_application.exec();
         std::cout << "The GUI has stopped." << std::endl;
 
         std::cout << "The End." << std::endl;
-        return EXIT_SUCCESS;
+        return q_application_result;
     }
     catch(const std::string& exception_text)
     {

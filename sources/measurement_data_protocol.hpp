@@ -21,25 +21,63 @@
 
 
 
-#include <vector>
+#include <iostream>
 #include <memory>
 #include <string>
+#include <sstream>
+#include <algorithm>
+#include <functional>
+#include <ctime>
+#include <cctype>
+#include <regex>
+#include <type_traits>
 
 #include "global.hpp"
+#include "data_processing_interface.hpp"
+#include "diagram.hpp"
 
 
 
-#ifndef DATA_PROCESSOR_INTERFACE_HPP
-#define DATA_PROCESSOR_INTERFACE_HPP
+#ifndef MEAUREMENT_DATA_PROTOCOL_HPP
+#define MEAUREMENT_DATA_PROTOCOL_HPP
 
 
 
-class DataProcessorInterface
+class MeasurementDataProtocol : public DataProcessingInterface
 {
 public:
-    virtual ~DataProcessorInterface();
+    MeasurementDataProtocol();
+    virtual ~MeasurementDataProtocol() = default;
 
-    virtual std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) = 0;
+
+    MeasurementDataProtocol(const MeasurementDataProtocol&) = delete;
+    MeasurementDataProtocol(MeasurementDataProtocol&&) = delete;
+
+    MeasurementDataProtocol& operator=(const MeasurementDataProtocol&) = delete;
+    MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
+
+    std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
+
+private:
+    enum class ProcessingStates : uint8_t
+    {
+        WaitingForStartLine,
+        ProcessingHeadline,
+        ProcessingDataLines
+    };
+
+    // REGEX strings to search the input data for valid measurement session
+    const std::string regex_start_line         = R"(^\s*<<<START>>>$)";
+    const std::string regex_headline           = R"(^\s*(\w+,){2,}$)";
+    const std::string regex_headline_analyzer  = R"(^\s*(\w+),)";
+    const std::string regex_data_line          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
+    const std::string regex_data_line_analyzer = R"(^\s*((?:\+|\-)?\d+),)";
+    const std::string regex_end_line           = R"(^\s*<<<END>>>$)";
+
+    ProcessingStates processing_state;
+    std::unique_ptr<DiagramSpecialized> actual_diagram;
 };
 
-#endif // DATA_PROCESSOR_INTERFACE_HPP
+
+
+#endif // MEAUREMENT_DATA_PROTOCOL_HPP
