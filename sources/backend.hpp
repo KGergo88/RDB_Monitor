@@ -28,6 +28,8 @@
 #include <QApplication>
 
 #include "global.hpp"
+#include "backend_signal_interface.hpp"
+#include "gui_signal_interface.h"
 #include "diagram.hpp"
 #include "serial_port.hpp"
 #include "measurement_data_protocol.hpp"
@@ -40,25 +42,16 @@
 
 
 
-class Backend : public QObject
+class Backend : public QObject, public BackendSignalInterface
 {
     Q_OBJECT
-
-private:
-    SerialPort serial_port;
-    MeasurementDataProtocol measurement_data_protocol;
-    NetworkHandler serial_network_handler;
-
-    std::mutex mutex_diagram_container;
-    std::mutex mutex_report_status;
-
-    std::vector<DiagramSpecialized> diagram_container;
+    Q_INTERFACES(BackendSignalInterface)
 
 public:
     static constexpr std::size_t report_date_and_time_string_size = 10;
 
     Backend();
-    Backend(const Backend&  new_backend) = delete;
+    Backend(const Backend& new_backend) = delete;
     Backend(Backend&& new_backend) = delete;
 
     ~Backend() = default;
@@ -66,9 +59,31 @@ public:
     Backend& operator=(const Backend&  new_backend) = delete;
     Backend& operator=(Backend&& new_backend) = delete;
 
-    void StoreNewDiagram(DiagramSpecialized&& new_diagram);
+    void RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface);
+
+    void StoreNewDiagrams(std::vector<std::unique_ptr<DiagramSpecialized> >&& new_diagrams);
+
+    void NotifyAboutDiagramContainerChange(void);
 
     void ReportStatus(const std::string& message);
+
+signals:
+    void NewStatusMessage(const std::string& message_text) override;
+    void NetworkOperationFinished(const std::string& port_name, bool result) override;
+    void ShowThisDiagram(const DiagramSpecialized& diagram) override;
+    void DiagramListHasChanged(const std::vector<std::string>& available_diagrams) override;
+
+private:
+    SerialPort serial_port;
+    MeasurementDataProtocol measurement_data_protocol;
+    NetworkHandler serial_network_handler;
+
+    GuiSignalInterface *gui_signal_interface;
+
+    std::mutex mutex_diagram_container;
+    std::mutex mutex_report_status;
+
+    std::vector<DiagramSpecialized> diagram_container;
 };
 
 

@@ -33,7 +33,7 @@
 #define DIAGRAM_HPP
 
 
-
+#warning "Review this class: which functions could be const? Are all the return value specifiers ok like that?"
 template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
 public:
@@ -53,7 +53,7 @@ public:
     inline const std::string&   GetAxisXTitle(void) const { return AxisXTitle; }
     inline void                 SetAxisXTitle(const std::string& newAxisXTitle) { AxisXTitle = newAxisXTitle; }
     
-    inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex)
+    inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
@@ -67,7 +67,7 @@ public:
         Data[dataLineIndex].SetTitle(newDataLineTitle);
     }
     
-    inline const T_INDEX GetTheNumberOfDataLines(void) { return Data.size(); }
+    inline const T_INDEX GetTheNumberOfDataLines(void) const { return Data.size(); }
     
     void AddNewDataLine(const std::string& newDataLineTitle = "")
     {
@@ -81,14 +81,14 @@ public:
         Data[dataLineIndex].AddNewDataPoint(newDataPoint);
     }
 
-    inline const T_INDEX GetTheNumberOfDataPoints(const T_INDEX& dataLineIndex)
+    inline const T_INDEX GetTheNumberOfDataPoints(const T_INDEX& dataLineIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
         return Data[dataLineIndex].GetTheNumberOfDataPoints();
     }
 
-    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex)
+    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 

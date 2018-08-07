@@ -31,7 +31,7 @@
 
 
 using DataPointType = double;
-using DataIndexType = uint64_t;
+using DataIndexType = std::size_t;
 
 template <typename T_DATA_POINT, typename T_INDEX>
 class Diagram;

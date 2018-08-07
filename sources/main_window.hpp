@@ -21,16 +21,17 @@
 
 
 
+#include <vector>
+#include <string>
+#include <memory>
+
 #include <QtWidgets>
 #include <QtCharts>
 #include <QString>
 
-#include <iostream>
-#include <memory>
-#include <mutex>
-#include <thread>
-
 #include "global.hpp"
+#include "gui_signal_interface.h"
+#include "backend_signal_interface.hpp"
 #include "diagram.hpp"
 #include "network_handler.hpp"
 
@@ -41,32 +42,36 @@
 
 
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public GuiSignalInterface
 {
     Q_OBJECT
-
-signals:
-    void signalDisplayDiagram(std::size_t index);
-    void signalAddToDiagramList(std::size_t index);
-    void signalReportStatus(std::string message);
-
-private slots:
-    void slotDisplayDiagram(std::size_t index);
-    void slotAddToDiagramList(std::size_t index);
-    void slotReportStatus(std::string message);
-    void slotListSelectionChanged(void);
-    void slotPushButtonWasClicked(void);
+    Q_INTERFACES(GuiSignalInterface)
 
 public:
-    MainWindow(NetworkHandler *new_network_handler);
+    MainWindow();
+
+    MainWindow(const MainWindow& newGuiWindow) = delete;
+    MainWindow(MainWindow&& newGuiWindow) = delete;
 
     ~MainWindow() = default;
 
-    MainWindow(const MainWindow&  newGuiWindow) = delete;
-    MainWindow(MainWindow&& newGuiWindow) = delete;
-
     MainWindow& operator=(const MainWindow&  newGuiWindow) = delete;
     MainWindow& operator=(MainWindow&& newGuiWindow) = delete;
+
+    void RegisterBackendSignalInterface(BackendSignalInterface* new_backend_signal_interface);
+
+signals:
+    void StartsToRun(void) override;
+    void ShuttingDown(void) override;
+    void OpenNetworkConnection(const std::string& port_name) override;
+    void CloseNetworkConnection(const std::string& port_name) override;
+    void RequestForDiagram(const DataIndexType& diagram_index) override;
+
+private slots:
+    void DisplayStatusMessage(const std::string& message_text);
+    void ProcessNetworkOperationResult(const std::string& port_name, const bool& result);
+    void DisplayDiagram(const DiagramSpecialized& diagram);
+    void UpdateDiagramList(const std::vector<std::string>& available_diagrams);
 
 private:
     static constexpr int main_window_minimum_width = 750;
@@ -87,7 +92,7 @@ private:
     static constexpr int   y_axis_tick_count = 5;
     static constexpr int   y_axis_minor_tick_count = 0;
 
-    NetworkHandler *const network_handler;
+    BackendSignalInterface* backend_signal_interface;
 
     QChartView*     pChartView;
     QListWidget*    pListWidgetDiagrams;

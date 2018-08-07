@@ -21,44 +21,34 @@
 
 
 
-#include "network_handler.hpp"
+#include <vector>
+#include <string>
+
+#include <QtPlugin>
+
+#include "global.hpp"
 
 
 
-bool NetworkHandler::Run(const std::string& new_port_name)
+#ifndef BACKEND_SIGNAL_INTERFACE_HPP
+#define BACKEND_SIGNAL_INTERFACE_HPP
+
+
+
+class BackendSignalInterface
 {
-    bool result = true;
+public:
+    virtual ~BackendSignalInterface() {}
 
-    if(network_connection_interface && data_processor_interface && diagram_collector)
-    {
-        if(network_connection_interface->Open(port_name))
-        {
-            if(network_connection_interface->StartListening())
-            {
-                QObject::connect(dynamic_cast<QObject *>(network_connection_interface), SIGNAL(DataReceived(std::istream& received_data)), this, SLOT(DataAvailable(std::istream& received_data)));
-                port_name = new_port_name;
-                result = true;
-            }
-        }
-    }
+signals:
+    virtual void NewStatusMessage(const std::string& message_text) = 0;
+    virtual void NetworkOperationFinished(const std::string& port_name, bool result) = 0;
+    virtual void ShowThisDiagram(const DiagramSpecialized& diagram) = 0;
+    virtual void DiagramListHasChanged(const std::vector<std::string>& available_diagrams) = 0;
+};
 
-    return result;
-}
+Q_DECLARE_INTERFACE(BackendSignalInterface, "BackendSignalInterface")
 
-void NetworkHandler::Stop(void)
-{
-    if(network_connection_interface)
-    {
-        network_connection_interface->Close();
-        QObject::disconnect(dynamic_cast<QObject *>(network_connection_interface), SIGNAL(DataReceived(std::istream& received_data)), this, SLOT(DataAvailable(std::istream& received_data)));
-    }
-}
 
-void NetworkHandler::DataAvailable(std::istream& received_data)
-{
-    if(diagram_collector)
-    {
-        auto assembled_diagrams = data_processor_interface->ProcessData(port_name, received_data);
-        diagram_collector(std::move(assembled_diagrams));
-    }
-}
+
+#endif // BACKEND_SIGNAL_INTERFACE_HPP

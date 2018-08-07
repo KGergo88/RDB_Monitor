@@ -21,44 +21,35 @@
 
 
 
-#include "network_handler.hpp"
+#include <vector>
+#include <string>
+
+#include <QtPlugin>
+
+#include "global.hpp"
 
 
 
-bool NetworkHandler::Run(const std::string& new_port_name)
+#ifndef GUI_SIGNAL_INTERFACE_H
+#define GUI_SIGNAL_INTERFACE_H
+
+
+
+class GuiSignalInterface
 {
-    bool result = true;
+public:
+    virtual ~GuiSignalInterface() {}
 
-    if(network_connection_interface && data_processor_interface && diagram_collector)
-    {
-        if(network_connection_interface->Open(port_name))
-        {
-            if(network_connection_interface->StartListening())
-            {
-                QObject::connect(dynamic_cast<QObject *>(network_connection_interface), SIGNAL(DataReceived(std::istream& received_data)), this, SLOT(DataAvailable(std::istream& received_data)));
-                port_name = new_port_name;
-                result = true;
-            }
-        }
-    }
+signals:
+    virtual void StartsToRun(void) = 0;
+    virtual void ShuttingDown(void) = 0;
+    virtual void OpenNetworkConnection(const std::string& port_name) = 0;
+    virtual void CloseNetworkConnection(const std::string& port_name) = 0;
+    virtual void RequestForDiagram(const DataIndexType& diagram_index) = 0;
+};
 
-    return result;
-}
+Q_DECLARE_INTERFACE(GuiSignalInterface, "GuiSignalInterface")
 
-void NetworkHandler::Stop(void)
-{
-    if(network_connection_interface)
-    {
-        network_connection_interface->Close();
-        QObject::disconnect(dynamic_cast<QObject *>(network_connection_interface), SIGNAL(DataReceived(std::istream& received_data)), this, SLOT(DataAvailable(std::istream& received_data)));
-    }
-}
 
-void NetworkHandler::DataAvailable(std::istream& received_data)
-{
-    if(diagram_collector)
-    {
-        auto assembled_diagrams = data_processor_interface->ProcessData(port_name, received_data);
-        diagram_collector(std::move(assembled_diagrams));
-    }
-}
+
+#endif // GUI_SIGNAL_INTERFACE_H

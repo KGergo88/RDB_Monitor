@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 #include <functional>
 
 #include <QObject>
@@ -44,21 +45,24 @@ class NetworkHandler : public QObject
     Q_OBJECT
 
 public:
-    NetworkHandler(NetworkConnectionInterface *new_network_connection,
-                   DataProcessingInterface *new_data_processor,
-                   std::function<void(DiagramSpecialized&&)> new_diagram_collector)
-                              : network_connection(new_network_connection),
-                                data_processor(new_data_processor),
+
+    using diagram_collector_type = std::function<void(std::vector<std::unique_ptr<DiagramSpecialized> >&&)>;
+
+    NetworkHandler(NetworkConnectionInterface *new_network_connection_interface,
+                   DataProcessingInterface *new_data_processor_interface,
+                   diagram_collector_type new_diagram_collector)
+                              : network_connection_interface(new_network_connection_interface),
+                                data_processor_interface(new_data_processor_interface),
                                 diagram_collector(new_diagram_collector)
     {
-        if(!network_connection)
+        if(!network_connection_interface)
         {
-            std::string errorMessage = "There was no network_connection set in NetworkHandler::NetworkHandler!";
+            std::string errorMessage = "There was no network_connection_interface set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
-        if(!data_processor)
+        if(!data_processor_interface)
         {
-            std::string errorMessage = "There was no data_connection set in NetworkHandler::NetworkHandler!";
+            std::string errorMessage = "There was no data_processor_interface set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
         if(!diagram_collector)
@@ -84,9 +88,9 @@ private slots:
     void DataAvailable(std::istream& received_data);
 
 private:
-    NetworkConnectionInterface* network_connection;
-    DataProcessingInterface* data_processor;
-    std::function<void(DiagramSpecialized&&)> diagram_collector;
+    NetworkConnectionInterface* network_connection_interface;
+    DataProcessingInterface* data_processor_interface;
+    diagram_collector_type diagram_collector;
     std::string port_name;
 };
 

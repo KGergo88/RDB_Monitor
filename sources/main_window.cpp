@@ -25,7 +25,7 @@
 
 
 
-MainWindow::MainWindow(NetworkHandler* new_network_handler) : QMainWindow(), network_handler(new_network_handler)
+MainWindow::MainWindow() : QMainWindow()
 {
     // Adding the object to the main window that will display the charts with anti-aliasing and the zooming turned off
     pChartView = new QChartView(this);
@@ -61,111 +61,108 @@ MainWindow::MainWindow(NetworkHandler* new_network_handler) : QMainWindow(), net
     showMaximized();
 }
 
-void MainWindow::slotDisplayDiagram(std::size_t index)
+void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_backend_signal_interface)
 {
-(void) index;
-
-//    // Check whether the diagram exists
-//    if(index < diagram_container.size())
-//    {
-//        // Accessing the requested diagram from the
-//        DiagramSpecialized& diagram_to_display = diagram_container[index];
-
-//        // Creating a new chart that will be displayed in the chartview after loading it with data
-//        auto pNewChart = new QChart();
-
-//        // Setting the title with the Diagram name
-//        pNewChart->setTitle(QString::fromStdString(diagram_to_display.GetTitle()));
-//        // Hiding the legend because the data lines will be recognisable from their Y axis
-//        pNewChart->legend()->hide();
-//        // Creating the X axis, giving it a title and addig it to the chart. The ranges will only be set after analyzing the data points.
-//        auto pXAxis = new QValueAxis;
-//        pXAxis->setTitleText(QString::fromStdString(diagram_to_display.GetAxisXTitle()));
-//        pNewChart->addAxis(pXAxis, Qt::AlignBottom);
-
-//        // We will add every DataLine of the Diagram to the chart
-//        DataIndexType number_of_data_lines = diagram_to_display.GetTheNumberOfDataLines();
-//        // Variables to store the min/max X axis values
-//        DataPointType x_axis_minimum_value = 0;
-//        DataPointType x_axis_maximum_value = 0;
-
-//        for(DataIndexType data_line_counter = 0; data_line_counter < number_of_data_lines; ++data_line_counter)
-//        {
-//            // Creating a line series and filling it with the data that needs to be displayed
-//            auto pLineSeries = new QLineSeries();
-//            // Setting the title with the current DataLine name
-//            pLineSeries->setName(QString::fromStdString(diagram_to_display.GetDataLineTitle(data_line_counter)));
-//            // Setting the data with the DataPoints of the DataLine
-//            DataIndexType number_of_data_points = diagram_to_display.GetTheNumberOfDataPoints(data_line_counter);
-//            // Variables to store the min/max Y axis values
-//            DataPointType y_axis_minimum_value = 0;
-//            DataPointType y_axis_maximum_value = 0;
-
-//            for(DataIndexType data_point_counter = 0; data_point_counter < number_of_data_points; ++data_point_counter)
-//            {
-//                auto data_point = diagram_to_display.GetDataPoint(data_line_counter, data_point_counter);
-//                pLineSeries->append(data_point.GetX(), data_point.GetY());
-
-//                // Updating the min/max axis values
-//                if(data_point.GetX() < x_axis_minimum_value)
-//                {
-//                    x_axis_minimum_value = data_point.GetX();
-//                }
-//                if(x_axis_maximum_value < data_point.GetX())
-//                {
-//                    x_axis_maximum_value = data_point.GetX();
-//                }
-//                if(data_point.GetY() < y_axis_minimum_value)
-//                {
-//                    y_axis_minimum_value = data_point.GetY();
-//                }
-//                if(y_axis_maximum_value < data_point.GetY())
-//                {
-//                    y_axis_maximum_value = data_point.GetY();
-//                }
-//            }
-
-//            // Adding the line series to the chart
-//            pNewChart->addSeries(pLineSeries);
-//            auto pYAxis = new QValueAxis;
-//            pYAxis->setTitleText(pLineSeries->name());
-//            qreal y_axis_range_minimum = y_axis_minimum_value - (std::abs(y_axis_minimum_value) * y_axis_range_multiplicator);
-//            qreal y_axis_range_maximum = y_axis_maximum_value + (std::abs(y_axis_maximum_value) * y_axis_range_multiplicator);
-//            pYAxis->setTickCount(y_axis_tick_count);
-//            pYAxis->setMinorTickCount(y_axis_minor_tick_count);
-//            pYAxis->setRange(y_axis_range_minimum, y_axis_range_maximum);
-//            pYAxis->setTitleBrush(pLineSeries->pen().color());
-//            pNewChart->addAxis(pYAxis, Qt::AlignLeft);
-//            pLineSeries->attachAxis(pXAxis);
-//            pLineSeries->attachAxis(pYAxis);
-//        }
-
-//        // Setting up the X axis
-//        pXAxis->setRange(x_axis_minimum_value, x_axis_maximum_value);
-
-//        // Saving the the current pChart from the pChartView
-//        auto pOldChart = pChartView->chart();
-//        // Adding the new chart to the chart view
-//        pChartView->setChart(pNewChart);
-//        // Deleting the old chart (if there was one) because chart view object is not its parent anymore
-//        if(pOldChart)
-//        {
-//            delete pOldChart;
-//        }
-//    }
-//    else
-//    {
-//        // Then we will throw an exception because this case should never occur
-//        std::string errorMessage = "The indexed Diagram does not exist in the GuiWindow::diagram_container: /n Requested index: ";
-//        errorMessage += std::to_string(index);
-//        throw errorMessage;
-//    }
+    if(new_backend_signal_interface)
+    {
+        backend_signal_interface = new_backend_signal_interface;
+#warning "Make the connections here..."
+    }
+    else
+    {
+        std::string errorMessage = "There was no backend_signal_interface set in MainWindow::RegisterBackendSignalInterface!";
+        throw errorMessage;
+    }
 }
 
-void MainWindow::slotAddToDiagramList(std::size_t index)
+void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
 {
-    (void) index;
+   // Creating a new chart that will be displayed in the chartview after loading it with data
+    auto pNewChart = new QChart();
 
+    // Setting the title with the Diagram name
+    pNewChart->setTitle(QString::fromStdString(diagram.GetTitle()));
+    // Hiding the legend because the data lines will be recognisable from their Y axis
+    pNewChart->legend()->hide();
+    // Creating the X axis, giving it a title and addig it to the chart. The ranges will only be set after analyzing the data points.
+    auto pXAxis = new QValueAxis;
+    pXAxis->setTitleText(QString::fromStdString(diagram.GetAxisXTitle()));
+    pNewChart->addAxis(pXAxis, Qt::AlignBottom);
+
+    // We will add every DataLine of the Diagram to the chart
+    DataIndexType number_of_data_lines = diagram.GetTheNumberOfDataLines();
+    // Variables to store the min/max X axis values
+    DataPointType x_axis_minimum_value = 0;
+    DataPointType x_axis_maximum_value = 0;
+
+    for(DataIndexType data_line_counter = 0; data_line_counter < number_of_data_lines; ++data_line_counter)
+    {
+        // Creating a line series and filling it with the data that needs to be displayed
+        auto pLineSeries = new QLineSeries();
+        // Setting the title with the current DataLine name
+        pLineSeries->setName(QString::fromStdString(diagram.GetDataLineTitle(data_line_counter)));
+        // Setting the data with the DataPoints of the DataLine
+        DataIndexType number_of_data_points = diagram.GetTheNumberOfDataPoints(data_line_counter);
+        // Variables to store the min/max Y axis values
+        DataPointType y_axis_minimum_value = 0;
+        DataPointType y_axis_maximum_value = 0;
+
+        for(DataIndexType data_point_counter = 0; data_point_counter < number_of_data_points; ++data_point_counter)
+        {
+            auto data_point = diagram.GetDataPoint(data_line_counter, data_point_counter);
+            pLineSeries->append(data_point.GetX(), data_point.GetY());
+
+            // Updating the min/max axis values
+            if(data_point.GetX() < x_axis_minimum_value)
+            {
+                x_axis_minimum_value = data_point.GetX();
+            }
+            if(x_axis_maximum_value < data_point.GetX())
+            {
+                x_axis_maximum_value = data_point.GetX();
+            }
+            if(data_point.GetY() < y_axis_minimum_value)
+            {
+                y_axis_minimum_value = data_point.GetY();
+            }
+            if(y_axis_maximum_value < data_point.GetY())
+            {
+                y_axis_maximum_value = data_point.GetY();
+            }
+        }
+
+        // Adding the line series to the chart
+        pNewChart->addSeries(pLineSeries);
+        auto pYAxis = new QValueAxis;
+        pYAxis->setTitleText(pLineSeries->name());
+        qreal y_axis_range_minimum = y_axis_minimum_value - (std::abs(y_axis_minimum_value) * y_axis_range_multiplicator);
+        qreal y_axis_range_maximum = y_axis_maximum_value + (std::abs(y_axis_maximum_value) * y_axis_range_multiplicator);
+        pYAxis->setTickCount(y_axis_tick_count);
+        pYAxis->setMinorTickCount(y_axis_minor_tick_count);
+        pYAxis->setRange(y_axis_range_minimum, y_axis_range_maximum);
+        pYAxis->setTitleBrush(pLineSeries->pen().color());
+        pNewChart->addAxis(pYAxis, Qt::AlignLeft);
+        pLineSeries->attachAxis(pXAxis);
+        pLineSeries->attachAxis(pYAxis);
+    }
+
+    // Setting up the X axis
+    pXAxis->setRange(x_axis_minimum_value, x_axis_maximum_value);
+
+    // Saving the the current pChart from the pChartView
+    auto pOldChart = pChartView->chart();
+    // Adding the new chart to the chart view
+    pChartView->setChart(pNewChart);
+    // Deleting the old chart (if there was one) because chart view object is not its parent anymore
+    if(pOldChart)
+    {
+        delete pOldChart;
+    }
+}
+
+void MainWindow::UpdateDiagramList(const std::vector<std::string>& available_diagrams)
+{
+#error "Continue implementing the MainWindow class!"
 //    if(index < diagram_container.size())
 //    {
 //        auto pListWidgetItem = new QListWidgetItem();

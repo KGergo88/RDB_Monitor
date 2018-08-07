@@ -76,7 +76,9 @@ HEADERS += \
     sources/main_window.hpp \
     sources/backend.hpp \
     sources/data_processing_interface.hpp \
-    sources/measurement_data_protocol.hpp
+    sources/measurement_data_protocol.hpp \
+    sources/backend_signal_interface.hpp \
+    sources/gui_signal_interface.h
 
 DISTFILES += \
     README

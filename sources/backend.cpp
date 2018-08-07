@@ -30,21 +30,58 @@
 
 
 Backend::Backend() : QObject(),
-                     serial_network_handler(&serial_port, &measurement_data_protocol, std::bind(&Backend::StoreNewDiagram, this, std::placeholders::_1))
+                     serial_port(),
+                     measurement_data_protocol(),
+                     serial_network_handler(&serial_port, &measurement_data_protocol, std::bind(&Backend::StoreNewDiagrams, this, std::placeholders::_1))
 
 {
 
 }
 
-void Backend::StoreNewDiagram(DiagramSpecialized&& diagram)
+void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface)
 {
+    if(new_gui_signal_interface)
+    {
+        gui_signal_interface = new_gui_signal_interface;
+#warning "Make the connections here..."
+    }
+    else
+    {
+        std::string errorMessage = "There was no gui_signal_interface set in Backend::RegisterGuiSignalInterface!";
+        throw errorMessage;
+    }
+}
+
+void Backend::StoreNewDiagrams(std::vector<std::unique_ptr<DiagramSpecialized> >&& new_diagrams)
+{
+#warning "The diagrams needs to be checked and eventually rejected here..."
     std::lock_guard<std::mutex> lock(mutex_diagram_container);
+    auto this_is_the_first_diagram = diagram_container.empty();
 
-    // Adding the diagram to the container that stores them for the GUI
-    diagram_container.push_back(diagram);
+    // Adding the diagrams to the diagram_container
+    for(const auto& i : new_diagrams)
+    {
+        diagram_container.push_back(*i);
+    }
 
-//    // Emitting a signal to add this diagram to the end of the diagram list
-//    emit pMainWindow->signalAddToDiagramList(pMainWindow->diagram_container.size() - 1);
+    NotifyAboutDiagramContainerChange();
+
+    if(this_is_the_first_diagram)
+    {
+        emit ShowThisDiagram(*diagram_container.begin());
+    }
+}
+
+void Backend::NotifyAboutDiagramContainerChange(void)
+{
+    std::vector<std::string> diagram_titles;
+
+    for(const auto& i : diagram_container)
+    {
+        diagram_titles.push_back(i.GetTitle());
+    }
+
+    emit DiagramListHasChanged(diagram_titles);
 }
 
 void Backend::ReportStatus(const std::string& message)
@@ -66,6 +103,6 @@ void Backend::ReportStatus(const std::string& message)
     strftime(&date_and_time_string[0], date_and_time_string.size(), "%T", &timeinfo);
     std::string complete_message = date_and_time_string + " - " + message;
 
-//    // Emitting the signal
-//    emit pMainWindow->signalReportStatus(complete_message);
+    // Emitting the signal
+    emit NewStatusMessage(complete_message);
 }

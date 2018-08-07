@@ -28,7 +28,7 @@
 
 #include "global.hpp"
 #include "backend.hpp"
-
+#include "main_window.hpp"
 
 
 int main(int argc, char **argv)
@@ -40,8 +40,14 @@ int main(int argc, char **argv)
         std::cout << "Running the GUI." << std::endl;
         QApplication q_application(argc, argv);
 
+        Backend backend;
+        MainWindow main_window;
+
+        backend.RegisterGuiSignalInterface(&main_window);
+        main_window.RegisterBackendSignalInterface(&backend);
+
         auto q_application_result = q_application.exec();
-        std::cout << "The GUI has stopped." << std::endl;
+        std::cout << "The GUI has stopped with result: " << q_application_result << std::endl;
 
         std::cout << "The End." << std::endl;
         return q_application_result;

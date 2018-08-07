@@ -33,7 +33,7 @@
 #define DATALINE_HPP
 
 
-
+#warning "Review this class: which functions could be const? Are all the return value specifiers ok like that?"
 template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
 {
