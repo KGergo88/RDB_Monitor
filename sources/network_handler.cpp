@@ -29,13 +29,13 @@ bool NetworkHandler::Run(const std::string& new_port_name)
 {
     bool result = true;
 
-    if(network_connection_interface && data_processor_interface && diagram_collector)
+    if(network_connection_interface && data_processing_interface && diagram_collector)
     {
-        if(network_connection_interface->Open(port_name))
+        if(network_connection_interface->Open(new_port_name))
         {
             if(network_connection_interface->StartListening())
             {
-                QObject::connect(dynamic_cast<QObject *>(network_connection_interface), SIGNAL(DataReceived(std::istream& received_data)), this, SLOT(DataAvailable(std::istream& received_data)));
+                QObject::connect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)), this, SLOT(DataAvailable(std::istream&)));
                 port_name = new_port_name;
                 result = true;
             }
@@ -50,7 +50,7 @@ void NetworkHandler::Stop(void)
     if(network_connection_interface)
     {
         network_connection_interface->Close();
-        QObject::disconnect(dynamic_cast<QObject *>(network_connection_interface), SIGNAL(DataReceived(std::istream& received_data)), this, SLOT(DataAvailable(std::istream& received_data)));
+        QObject::disconnect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)), this, SLOT(DataAvailable(std::istream&)));
     }
 }
 
@@ -58,7 +58,14 @@ void NetworkHandler::DataAvailable(std::istream& received_data)
 {
     if(diagram_collector)
     {
-        auto assembled_diagrams = data_processor_interface->ProcessData(port_name, received_data);
+        auto assembled_diagrams = data_processing_interface->ProcessData(port_name, received_data);
+        /*
+#warning "You get a SIGSEV here!"
+        std::move(assembled_diagrams);
+        std::vector<std::unique_ptr<DiagramSpecialized> > temp;
+        diagram_collector(std::move(temp));
+
         diagram_collector(std::move(assembled_diagrams));
+        */
     }
 }

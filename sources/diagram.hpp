@@ -33,14 +33,13 @@
 #define DIAGRAM_HPP
 
 
-#warning "Review this class: which functions could be const? Are all the return value specifiers ok like that?"
+
 template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
 public:
     Diagram(const std::string& newDiagramTitle = "", const std::string& newAxisXTitle = "") : DiagramTitle(newDiagramTitle), AxisXTitle(newAxisXTitle) {}
 
     Diagram(const Diagram&  newDiagram) = default;
-
     Diagram(Diagram&& newDiagram) = default;
 
     ~Diagram() {}
@@ -48,10 +47,25 @@ public:
     Diagram& operator=(const Diagram&  newDiagram) = default;
     Diagram& operator=(Diagram&& newDiagram) = default;
 
-    inline const std::string&   GetTitle(void) const { return DiagramTitle; }
-    inline void                 SetTitle(const std::string& newDiagramTitle) { DiagramTitle = newDiagramTitle; }
-    inline const std::string&   GetAxisXTitle(void) const { return AxisXTitle; }
-    inline void                 SetAxisXTitle(const std::string& newAxisXTitle) { AxisXTitle = newAxisXTitle; }
+    inline const std::string& GetTitle(void) const
+    {
+        return DiagramTitle;
+    }
+
+    inline void SetTitle(const std::string& newDiagramTitle)
+    {
+        DiagramTitle = newDiagramTitle;
+    }
+
+    inline const std::string& GetAxisXTitle(void) const
+    {
+        return AxisXTitle;
+    }
+
+    inline void SetAxisXTitle(const std::string& newAxisXTitle)
+    {
+        AxisXTitle = newAxisXTitle;
+    }
     
     inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex) const
     {
@@ -67,7 +81,10 @@ public:
         Data[dataLineIndex].SetTitle(newDataLineTitle);
     }
     
-    inline const T_INDEX GetTheNumberOfDataLines(void) const { return Data.size(); }
+    inline const T_INDEX GetTheNumberOfDataLines(void) const
+    {
+        return Data.size();
+    }
     
     void AddNewDataLine(const std::string& newDataLineTitle = "")
     {
@@ -110,24 +127,16 @@ public:
     }
 
 private:
-    bool CheckDataLineIndex(const T_INDEX& dataLineIndex)
+    void CheckDataLineIndex(const T_INDEX& dataLineIndex) const
     {
-        bool result = false;
-
-        if(Data.size() > dataLineIndex)
+        if(Data.size() <= dataLineIndex)
         {
-            result = true;
-        }
-        else
-        {            
             std::string errorMessage = "The indexed DataLine does not exist: /n Requested index: ";
             errorMessage += std::to_string(dataLineIndex);
             errorMessage += "/nMax index: ";
             errorMessage += std::to_string(Data.size());
             throw errorMessage;
         }    
-
-        return result;
     }
     
     std::string DiagramTitle;

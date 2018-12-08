@@ -27,6 +27,8 @@
 
 MainWindow::MainWindow() : QMainWindow()
 {
+    network_connection_is_open = false;
+
     // Adding the object to the main window that will display the charts with anti-aliasing and the zooming turned off
     pChartView = new QChartView(this);
     pChartView->setRenderHint(QPainter::Antialiasing);
@@ -48,13 +50,6 @@ MainWindow::MainWindow() : QMainWindow()
     qRegisterMetaType<std::size_t>("std::size_t");
     qRegisterMetaType<std::string>("std::string");
 
-    // Registering the connections between the signals and the slots
-    QObject::connect(this,                SIGNAL(signalDisplayDiagram(std::size_t)),   this, SLOT(slotDisplayDiagram(std::size_t)));
-    QObject::connect(this,                SIGNAL(signalAddToDiagramList(std::size_t)), this, SLOT(slotAddToDiagramList(std::size_t)));
-    QObject::connect(this,                SIGNAL(signalReportStatus(std::string)),     this, SLOT(slotReportStatus(std::string)));
-    QObject::connect(pListWidgetDiagrams, SIGNAL(itemSelectionChanged()),              this, SLOT(slotListSelectionChanged()));
-    QObject::connect(pPushButton,         SIGNAL(clicked()),                           this, SLOT(slotPushButtonWasClicked()));
-
     // Setting the minimum size and the title of the main window and showing it maximized
     setMinimumSize(main_window_minimum_width, main_window_minimum_height);
     setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
@@ -66,11 +61,75 @@ void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_back
     if(new_backend_signal_interface)
     {
         backend_signal_interface = new_backend_signal_interface;
-#warning "Make the connections here..."
+
+        // Registering the connections between the signals and the slots
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(NewStatusMessage(const std::string&)),
+                         this,                                             SLOT(DisplayStatusMessage(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(NetworkOperationFinished(const std::string&, const bool&)),
+                         this,                                             SLOT(ProcessNetworkOperationResult(const std::string&, const bool&)));
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
+                         this,                                             SLOT(DisplayDiagram(const DiagramSpecialized&)));
+
+        QObject::connect(pListWidgetDiagrams, &QListWidget::itemSelectionChanged, this, &MainWindow::DiagramListSelectionChanged);
+        QObject::connect(pPushButton,         &QPushButton::clicked,              this, &MainWindow::PushButtonWasClicked);
     }
     else
     {
         std::string errorMessage = "There was no backend_signal_interface set in MainWindow::RegisterBackendSignalInterface!";
+        throw errorMessage;
+    }
+}
+
+void MainWindow::DisplayStatusMessage(const std::string& message_text)
+{
+    auto pListWidgetItem = new QListWidgetItem();
+    pListWidgetItem->setText(QString::fromStdString(message_text));
+    pListWidgetStatus->insertItem(0, pListWidgetItem);
+}
+
+void MainWindow::PushButtonWasClicked(void)
+{
+    std::string network_port_name(pLineEdit->text().toStdString());
+
+    if(!network_connection_is_open)
+    {
+        emit OpenNetworkConnection(network_port_name);
+    }
+    else
+    {
+        emit CloseNetworkConnection(network_port_name);
+    }
+}
+
+void MainWindow::ProcessNetworkOperationResult(const std::string& port_name, const bool& result)
+{
+    if(port_name == pLineEdit->text().toStdString())
+    {
+        if(result)
+        {
+            if(!network_connection_is_open)
+            {
+                pLineEdit->setReadOnly(true);
+                pPushButton->setText(push_button_close_text);
+                //Gui::ReportStatus("The serial port was opened");
+                network_connection_is_open = true;
+            }
+            else
+            {
+                pLineEdit->setReadOnly(false);
+                pPushButton->setText(push_button_open_text);
+                //Gui::ReportStatus("The serial port was closed");
+                network_connection_is_open = false;
+            }
+        }
+        else
+        {
+            //Gui::ReportStatus("The serial port could not be opened. Maybe it is not a valid port name?");
+        }
+    }
+    else
+    {
+        std::string errorMessage = "A signal was received by MainWindow::ProcessNetworkOperationResult with a wrong port_name: " + port_name;
         throw errorMessage;
     }
 }
@@ -107,6 +166,7 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
         DataPointType y_axis_minimum_value = 0;
         DataPointType y_axis_maximum_value = 0;
 
+        #warning "These could be maybe method of the diagram class..."
         for(DataIndexType data_point_counter = 0; data_point_counter < number_of_data_points; ++data_point_counter)
         {
             auto data_point = diagram.GetDataPoint(data_line_counter, data_point_counter);
@@ -162,59 +222,19 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
 
 void MainWindow::UpdateDiagramList(const std::vector<std::string>& available_diagrams)
 {
-#error "Continue implementing the MainWindow class!"
-//    if(index < diagram_container.size())
-//    {
-//        auto pListWidgetItem = new QListWidgetItem();
-//        pListWidgetItem->setText(QString::fromStdString(diagram_container[index].GetTitle()));
-//        pListWidgetDiagrams->addItem(pListWidgetItem);
+    pListWidgetDiagrams->clear();
 
-//        if(pChartView->chart()->series().empty())
-//        {
-//            pListWidgetDiagrams->setCurrentItem(pListWidgetItem);
-//        }
-//    }
+    for(const auto& i : available_diagrams)
+    {
+        auto pListWidgetItem = new QListWidgetItem();
+        pListWidgetItem->setText(QString::fromStdString(i));
+        pListWidgetDiagrams->addItem(pListWidgetItem);
+    }
 }
 
-void MainWindow::slotReportStatus(std::string message)
+void MainWindow::DiagramListSelectionChanged(void)
 {
-    auto pListWidgetItem = new QListWidgetItem();
-    pListWidgetItem->setText(QString::fromStdString(message));
-    pListWidgetStatus->insertItem(0, pListWidgetItem);
-}
-
-void MainWindow::slotListSelectionChanged(void)
-{
-//    emit slotDisplayDiagram(pListWidgetDiagrams->currentRow());
-}
-
-void MainWindow::slotPushButtonWasClicked(void)
-{
-//    if(network_connection)
-//    {
-//        if(!network_connection->IsOpen())
-//        {
-//            std::string serial_port_device(pLineEdit->text().toStdString());
-
-//            if(network_connection->Open(serial_port_device))
-//            {
-//                pLineEdit->setReadOnly(true);
-//                pPushButton->setText(push_button_close_text);
-//                Gui::ReportStatus("The serial port was opened");
-//            }
-//            else
-//            {
-//                Gui::ReportStatus("The serial port could not be opened. Maybe it is not a valid port name?");
-//            }
-//        }
-//        else
-//        {
-//            network_connection->Close();
-//            pLineEdit->setReadOnly(false);
-//            pPushButton->setText(push_button_open_text);
-//            Gui::ReportStatus("The serial port was closed");
-//        }
-//    }
+    emit RequestForDiagram(static_cast<DataIndexType>(pListWidgetDiagrams->currentRow()));
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)
@@ -226,37 +246,37 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::SetSizes(void)
 {
-//    int window_width = size().width();
-//    int window_height = size().height();
+    int window_width = size().width();
+    int window_height = size().height();
 
-//    pChartView->setGeometry(chartview_fixposition_x,
-//                            chartview_fixposition_y,
-//                            (window_width * chartview_width_relative_to_main_window),
-//                            (window_height * chartview_height_relative_to_main_window));
-//    int chart_view_width = pChartView->width();
-//    int chart_view_height = pChartView->height();
+    pChartView->setGeometry(chartview_fixposition_x,
+                            chartview_fixposition_y,
+                            (static_cast<int>(static_cast<qreal>(window_width) * chartview_width_relative_to_main_window)),
+                            (static_cast<int>(static_cast<qreal>(window_height) * chartview_height_relative_to_main_window)));
+    int chart_view_width = pChartView->width();
+    int chart_view_height = pChartView->height();
 
-//    pListWidgetDiagrams->setGeometry(chart_view_width,
-//                                     listwidgetdiagrams_fixposition_y,
-//                                     (window_width - chart_view_width),
-//                                     chart_view_height);
-//    int list_widget_diagrams_width = pListWidgetDiagrams->width();
-//    int list_widget_diagrams_height = pListWidgetDiagrams->height();
+    pListWidgetDiagrams->setGeometry(chart_view_width,
+                                     listwidgetdiagrams_fixposition_y,
+                                     (window_width - chart_view_width),
+                                     chart_view_height);
+    int list_widget_diagrams_width = pListWidgetDiagrams->width();
+    int list_widget_diagrams_height = pListWidgetDiagrams->height();
 
-//    pListWidgetStatus->setGeometry(listwidgetstatus_fixposition_x,
-//                                   chart_view_height,
-//                                   chart_view_width,
-//                                   (window_height - list_widget_diagrams_height));
-//    int list_widget_status_height = pListWidgetStatus->height();
+    pListWidgetStatus->setGeometry(listwidgetstatus_fixposition_x,
+                                   chart_view_height,
+                                   chart_view_width,
+                                   (window_height - list_widget_diagrams_height));
+    int list_widget_status_height = pListWidgetStatus->height();
 
-//    pLineEdit->setGeometry(chart_view_width,
-//                           chart_view_height,
-//                           list_widget_diagrams_width,
-//                           (list_widget_status_height * lineedit_height_relative_to_listwidgetstatus));
-//    int line_edit_height = pLineEdit->height();
+    pLineEdit->setGeometry(chart_view_width,
+                           chart_view_height,
+                           list_widget_diagrams_width,
+                           (static_cast<int>(static_cast<qreal>(list_widget_status_height) * lineedit_height_relative_to_listwidgetstatus)));
+    int line_edit_height = pLineEdit->height();
 
-//    pPushButton->setGeometry(chart_view_width,
-//                             (chart_view_height + line_edit_height),
-//                             list_widget_diagrams_width,
-//                             line_edit_height);
+    pPushButton->setGeometry(chart_view_width,
+                             (chart_view_height + line_edit_height),
+                             list_widget_diagrams_width,
+                             line_edit_height);
 }

@@ -49,10 +49,10 @@ public:
     using diagram_collector_type = std::function<void(std::vector<std::unique_ptr<DiagramSpecialized> >&&)>;
 
     NetworkHandler(NetworkConnectionInterface *new_network_connection_interface,
-                   DataProcessingInterface *new_data_processor_interface,
+                   DataProcessingInterface *new_data_processing_interface,
                    diagram_collector_type new_diagram_collector)
                               : network_connection_interface(new_network_connection_interface),
-                                data_processor_interface(new_data_processor_interface),
+                                data_processing_interface(new_data_processing_interface),
                                 diagram_collector(new_diagram_collector)
     {
         if(!network_connection_interface)
@@ -60,7 +60,7 @@ public:
             std::string errorMessage = "There was no network_connection_interface set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
-        if(!data_processor_interface)
+        if(!data_processing_interface)
         {
             std::string errorMessage = "There was no data_processor_interface set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
@@ -89,7 +89,7 @@ private slots:
 
 private:
     NetworkConnectionInterface* network_connection_interface;
-    DataProcessingInterface* data_processor_interface;
+    DataProcessingInterface* data_processing_interface;
     diagram_collector_type diagram_collector;
     std::string port_name;
 };

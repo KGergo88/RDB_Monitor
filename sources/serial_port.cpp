@@ -54,15 +54,15 @@ bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NA
         try
         {
             port = std::make_unique<QSerialPort>();
-
             port->setPortName(QString::fromStdString(port_name));
-            if(port->open(QIODevice::ReadWrite))
+            port->setBaudRate(SERIAL_PORT_DEFAULT_BAUDRATE);
+            port->setDataBits(QSerialPort::Data8);
+            port->setStopBits(QSerialPort::OneStop);
+            port->setParity(QSerialPort::NoParity);
+            port->setFlowControl(QSerialPort::NoFlowControl);
+
+            if(port->open(QIODevice::ReadOnly))
             {
-                port->setBaudRate(SERIAL_PORT_DEFAULT_BAUDRATE);
-                port->setDataBits(QSerialPort::Data8);
-                port->setStopBits(QSerialPort::OneStop);
-                port->setParity(QSerialPort::NoParity);
-                port->setFlowControl(QSerialPort::NoFlowControl);
                 result = true;
             }
             else
@@ -74,6 +74,7 @@ bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NA
         catch(...)
         {
             std::cerr << "Could not open the SerialPort. Device: " << port_name << std::endl;
+            port.reset();
         }
     }
     else
@@ -120,7 +121,8 @@ bool SerialPort::StartListening(void)
 
     if(IsOpen())
     {
-        QObject::connect(port.get(), &QSerialPort::readyRead, this, &SerialPort::ReadDataFromPort);
+        QObject::connect(port.get(), &QSerialPort::readyRead,       this, &SerialPort::ReadDataFromPort);
+        QObject::connect(port.get(), &QSerialPort::errorOccurred,   this, &SerialPort::HandleErrors);
         result = true;
     }
 
@@ -132,8 +134,15 @@ void SerialPort::ReadDataFromPort(void)
     std::lock_guard<std::mutex> lock_listener(mutex_listener);
 
     std::stringstream received_data_stream;
-    QByteArray received_data;
 
     received_data_stream << port->readAll().toStdString();
     emit DataReceived(received_data_stream);
+}
+
+void SerialPort::HandleErrors(QSerialPort::SerialPortError error)
+{
+    if(QSerialPort::ReadError == error)
+    {
+        std::cerr << (QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(port->portName()).arg(port->errorString())).toStdString() << std::endl;
+    }
 }

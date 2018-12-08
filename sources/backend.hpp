@@ -73,6 +73,11 @@ signals:
     void ShowThisDiagram(const DiagramSpecialized& diagram) override;
     void DiagramListHasChanged(const std::vector<std::string>& available_diagrams) override;
 
+private slots:
+    void OpenNetwokConnection(const std::string&);
+    void CloseNetworkConnection(const std::string&);
+    void RequestForDiagram(const DataIndexType& diagram_index);
+
 private:
     SerialPort serial_port;
     MeasurementDataProtocol measurement_data_protocol;

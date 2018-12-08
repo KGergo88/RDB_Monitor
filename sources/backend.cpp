@@ -33,7 +33,6 @@ Backend::Backend() : QObject(),
                      serial_port(),
                      measurement_data_protocol(),
                      serial_network_handler(&serial_port, &measurement_data_protocol, std::bind(&Backend::StoreNewDiagrams, this, std::placeholders::_1))
-
 {
 
 }
@@ -43,7 +42,12 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
     if(new_gui_signal_interface)
     {
         gui_signal_interface = new_gui_signal_interface;
-#warning "Make the connections here..."
+
+        //QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SLOT(StartsToRun(void)), this, SIGNAL());
+        //QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SLOT(ShuttingDown(void)), this, SIGNAL());
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenNetworkConnection(const std::string&)),   this, SLOT(OpenNetwokConnection(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(CloseNetworkConnection(const std::string&)),  this, SLOT(CloseNetworkConnection(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(RequestForDiagram(const DataIndexType&)),     this, SLOT(RequestForDiagram(const DataIndexType&)));
     }
     else
     {
@@ -64,11 +68,14 @@ void Backend::StoreNewDiagrams(std::vector<std::unique_ptr<DiagramSpecialized> >
         diagram_container.push_back(*i);
     }
 
-    NotifyAboutDiagramContainerChange();
-
-    if(this_is_the_first_diagram)
+    if(!diagram_container.empty())
     {
-        emit ShowThisDiagram(*diagram_container.begin());
+        NotifyAboutDiagramContainerChange();
+
+        if(this_is_the_first_diagram)
+        {
+            emit ShowThisDiagram(*diagram_container.begin());
+        }
     }
 }
 
@@ -105,4 +112,34 @@ void Backend::ReportStatus(const std::string& message)
 
     // Emitting the signal
     emit NewStatusMessage(complete_message);
+}
+
+void Backend::OpenNetwokConnection(const std::string& port_name)
+{
+    bool result = false;
+
+    if(serial_network_handler.Run(port_name))
+    {
+        result = true;
+    }
+
+    emit NetworkOperationFinished(port_name, result);
+}
+
+void Backend::CloseNetworkConnection(const std::string& port_name)
+{
+    serial_network_handler.Stop();
+    emit NetworkOperationFinished(port_name, true);
+}
+
+void Backend::RequestForDiagram(const DataIndexType& diagram_index)
+{
+    if(diagram_index < diagram_container.size())
+    {
+        emit ShowThisDiagram(diagram_container[diagram_index]);
+    }
+    else
+    {
+#warning "Report this..."
+    }
 }

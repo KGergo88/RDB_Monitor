@@ -39,8 +39,6 @@
 class NetworkConnectionInterface
 {
 public:
-    virtual ~NetworkConnectionInterface() {}
-
     virtual bool Open(const std::string& port_name) = 0;
 
     virtual void Close(void) = 0;
@@ -48,6 +46,9 @@ public:
     virtual bool IsOpen(void) = 0;
 
     virtual bool StartListening(void) = 0;
+
+protected:
+    ~NetworkConnectionInterface() {}
 
 signals:
     virtual void DataReceived(std::istream& received_data) = 0;

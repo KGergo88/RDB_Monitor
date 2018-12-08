@@ -34,22 +34,20 @@
 #define GUI_SIGNAL_INTERFACE_H
 
 
-
+#warning "Maybe you could inherit the inteface classes (removing the \"signal\" here and adding them as public functions) by the emitter and the reciever as well and so both sides would be forced to have this set of functions..."
 class GuiSignalInterface
 {
-public:
-    virtual ~GuiSignalInterface() {}
-
 signals:
     virtual void StartsToRun(void) = 0;
     virtual void ShuttingDown(void) = 0;
     virtual void OpenNetworkConnection(const std::string& port_name) = 0;
     virtual void CloseNetworkConnection(const std::string& port_name) = 0;
     virtual void RequestForDiagram(const DataIndexType& diagram_index) = 0;
+
+protected:
+    ~GuiSignalInterface() {}
 };
 
 Q_DECLARE_INTERFACE(GuiSignalInterface, "GuiSignalInterface")
-
-
 
 #endif // GUI_SIGNAL_INTERFACE_H

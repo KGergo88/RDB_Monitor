@@ -68,12 +68,13 @@ signals:
 
 private slots:
     void ReadDataFromPort(void);
+    void HandleErrors(QSerialPort::SerialPortError error);
 
 private:
     std::mutex mutex_open_close;
     std::mutex mutex_listener;
 
-    std::unique_ptr<QSerialPort> port = nullptr;
+    std::unique_ptr<QSerialPort> port;
 };
 
 

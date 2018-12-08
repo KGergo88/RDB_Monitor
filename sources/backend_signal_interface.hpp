@@ -34,17 +34,19 @@
 #define BACKEND_SIGNAL_INTERFACE_HPP
 
 
-
+#warning "Maybe you could inherit the inteface classes (removing the \"signal\" here and adding them as public functions) by the emitter and the reciever as well and so both sides would be forced to have this set of functions..."
 class BackendSignalInterface
 {
-public:
-    virtual ~BackendSignalInterface() {}
+
+protected:
+    ~BackendSignalInterface() {}
 
 signals:
     virtual void NewStatusMessage(const std::string& message_text) = 0;
     virtual void NetworkOperationFinished(const std::string& port_name, bool result) = 0;
     virtual void ShowThisDiagram(const DiagramSpecialized& diagram) = 0;
     virtual void DiagramListHasChanged(const std::vector<std::string>& available_diagrams) = 0;
+
 };
 
 Q_DECLARE_INTERFACE(BackendSignalInterface, "BackendSignalInterface")

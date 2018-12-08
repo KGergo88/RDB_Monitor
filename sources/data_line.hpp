@@ -33,7 +33,7 @@
 #define DATALINE_HPP
 
 
-#warning "Review this class: which functions could be const? Are all the return value specifiers ok like that?"
+
 template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
 {
@@ -48,8 +48,15 @@ public:
     DataLine& operator=(const DataLine&  newDataLine) = delete;
     DataLine& operator=(DataLine&& newDataLine) = delete;
     
-    inline const std::string&   GetTitle(void) { return DataLineTitle; }
-    inline void                 SetTitle(const std::string& newDataLineTitle) { DataLineTitle = newDataLineTitle; }
+    inline const std::string& GetTitle(void) const
+    {
+        return DataLineTitle;
+    }
+
+    inline void SetTitle(const std::string& newDataLineTitle)
+    {
+        DataLineTitle = newDataLineTitle;
+    }
     
     inline void AddNewDataPoint(const DataPoint<T_DATA_POINT>& newDataPoint)
     {
@@ -61,9 +68,12 @@ public:
         AddNewDataPoint(newDataPoint);
     }
 
-    inline T_INDEX GetTheNumberOfDataPoints(void) { return Data.size(); }
+    inline T_INDEX GetTheNumberOfDataPoints(void) const
+    {
+        return Data.size();
+    }
     
-    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataPointIndex)
+    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataPointIndex) const
     {
         CheckDataPointIndex(dataPointIndex);
 
@@ -73,20 +83,14 @@ public:
     inline void SetDataPoint(const T_INDEX& dataPointIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
     {
         CheckDataPointIndex(dataPointIndex);
-        
+
         Data[dataPointIndex] = newDataPoint;
     }    
     
 private:
-    bool CheckDataPointIndex(const T_INDEX& dataPointIndex)
+    void CheckDataPointIndex(const T_INDEX& dataPointIndex) const
     {
-        bool result = false;
-
-        if(Data.size() > dataPointIndex)
-        {
-            result = true;
-        }
-        else
+        if(Data.size() <= dataPointIndex)
         {
             std::string errorMessage = "The indexed DataPoint does not exist: /n Requested index: ";
             errorMessage += std::to_string(dataPointIndex);
@@ -94,8 +98,6 @@ private:
             errorMessage += std::to_string(Data.size());
             throw errorMessage;
         }
-
-        return result;
     }
     
     std::string DataLineTitle;

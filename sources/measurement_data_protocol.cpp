@@ -30,17 +30,49 @@ MeasurementDataProtocol::MeasurementDataProtocol()
     processing_state = ProcessingStates::WaitingForStartLine;
 }
 
+void MeasurementDataProtocol::ExtractAllDataFromInput(std::istream& input_data)
+{
+    if(input_data)
+    {
+        input_data.seekg(0, input_data.end);
+        std::size_t input_data_length = input_data.tellg();
+        input_data.seekg(0, input_data.beg);
+        auto buffer = std::make_unique<char []>(input_data_length);
+        input_data.read(buffer.get(), input_data_length);
+        available_data.append(buffer.get());
+    }
+}
+
+bool MeasurementDataProtocol::GetLineFromAvailableData(std::string& received_line)
+{
+    bool result = false;
+
+    std::size_t line_ending_position = available_data.find(line_ending);
+    if(std::string::npos != line_ending_position)
+    {
+        received_line.assign(available_data, 0, line_ending_position);
+        available_data.erase(0, (line_ending_position + line_ending.size()));
+        result = true;
+    }
+
+    return result;
+}
+
 std::vector<std::unique_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessData(const std::string& data_source, std::istream& input_data)
 {
     std::vector<std::unique_ptr<DiagramSpecialized> > assembled_diagrams;
+    std::string received_data;
+    std::string actual_line;
+
+    ExtractAllDataFromInput(input_data);
 
     // Processing the input stream until there is data available in it
-    while(!input_data.eof())
+    while(GetLineFromAvailableData(actual_line))
     {
-        std::string actual_line;
-        std::smatch match_results;
+        std::cout << actual_line << std::endl;
 
-        std::getline(input_data, actual_line);
+        /*
+        std::smatch match_results;
 
         try
         {
@@ -147,6 +179,7 @@ std::vector<std::unique_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
         {
             std::cerr << "A regex exception was caught: " << exception.code() << ": " << exception.what() << std::endl;
         }
+        */
     }
 
     return assembled_diagrams;

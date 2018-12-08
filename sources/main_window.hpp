@@ -25,6 +25,7 @@
 #include <string>
 #include <memory>
 
+#include <QObject>
 #include <QtWidgets>
 #include <QtCharts>
 #include <QString>
@@ -69,9 +70,11 @@ signals:
 
 private slots:
     void DisplayStatusMessage(const std::string& message_text);
+    void PushButtonWasClicked(void);
     void ProcessNetworkOperationResult(const std::string& port_name, const bool& result);
     void DisplayDiagram(const DiagramSpecialized& diagram);
     void UpdateDiagramList(const std::vector<std::string>& available_diagrams);
+    void DiagramListSelectionChanged(void);
 
 private:
     static constexpr int main_window_minimum_width = 750;
@@ -91,6 +94,8 @@ private:
     static constexpr qreal y_axis_range_multiplicator = 0.05;
     static constexpr int   y_axis_tick_count = 5;
     static constexpr int   y_axis_minor_tick_count = 0;
+
+    bool network_connection_is_open;
 
     BackendSignalInterface* backend_signal_interface;
 

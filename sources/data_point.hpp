@@ -29,23 +29,23 @@
 #define DATA_POINT_HPP
 
 
-#warning "Review this class: which functions could be const? Are all the return value specifiers ok like that?"
+
 template <typename T_DATA_POINT>
 class DataPoint
 {
 public:
-    DataPoint(const T_DATA_POINT& newX = 0, const T_DATA_POINT& newY = 0) : x(newX), y(newY) {};
-    DataPoint(const DataPoint&  newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {};
-    DataPoint(DataPoint&& newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {};
-    
+    DataPoint(const T_DATA_POINT& newX = 0, const T_DATA_POINT& newY = 0) : x(newX), y(newY) {}
+    DataPoint(const DataPoint&  newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
+    DataPoint(DataPoint&& newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
+
     ~DataPoint() {}
-    
+
     DataPoint& operator=(const DataPoint&  newDataPoint) = delete;
     DataPoint& operator=(DataPoint&& newDataPoint) = delete;
-    
+
     inline const T_DATA_POINT& GetX(void) const {return x;}
     inline const T_DATA_POINT& GetY(void) const {return y;}
-    
+
     inline void SetX(T_DATA_POINT& newX = 0) {x = newX; return x;}
     inline void SetY(T_DATA_POINT& newY = 0) {y = newY; return y;}
     
