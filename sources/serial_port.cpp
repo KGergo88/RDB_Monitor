@@ -97,13 +97,13 @@ void SerialPort::Close()
     std::lock_guard<std::mutex> lock_open_close(mutex_open_close);
     std::lock_guard<std::mutex> lock_listener(mutex_listener);
 
+    QObject::disconnect(port.get(), &QSerialPort::readyRead, this, &SerialPort::ReadLineFromPort);
+
     if(port)
     {
         port->close();
         port.reset();
     }
-
-    QObject::disconnect(port.get(), &QSerialPort::readyRead, this, &SerialPort::ReadLineFromPort);
 }
 
 bool SerialPort::IsOpen()
