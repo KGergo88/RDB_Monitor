@@ -55,8 +55,6 @@ public:
     MeasurementDataProtocol& operator=(const MeasurementDataProtocol&) = delete;
     MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
 
-    void ExtractAllDataFromInput(std::istream& input_data);
-    bool GetLineFromAvailableData(std::string& received_line);
     std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
 
 private:
@@ -66,9 +64,6 @@ private:
         ProcessingHeadline,
         ProcessingDataLines
     };
-
-    // The used line ending in the data stream
-    const std::string line_ending = "\n\r";
 
     // REGEX strings to search the input data for valid measurement session
     const std::string regex_start_line         = R"(^\s*<<<START>>>$)";

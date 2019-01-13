@@ -67,7 +67,7 @@ signals:
     void DataReceived(std::istream& received_data) override;
 
 private slots:
-    void ReadDataFromPort(void);
+    void ReadLineFromPort(void);
     void HandleErrors(QSerialPort::SerialPortError error);
 
 private:

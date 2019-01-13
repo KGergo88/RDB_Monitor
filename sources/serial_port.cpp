@@ -103,7 +103,7 @@ void SerialPort::Close()
         port.reset();
     }
 
-    QObject::disconnect(port.get(), &QSerialPort::readyRead, this, &SerialPort::ReadDataFromPort);
+    QObject::disconnect(port.get(), &QSerialPort::readyRead, this, &SerialPort::ReadLineFromPort);
 }
 
 bool SerialPort::IsOpen()
@@ -121,7 +121,7 @@ bool SerialPort::StartListening(void)
 
     if(IsOpen())
     {
-        QObject::connect(port.get(), &QSerialPort::readyRead,       this, &SerialPort::ReadDataFromPort);
+        QObject::connect(port.get(), &QSerialPort::readyRead,       this, &SerialPort::ReadLineFromPort);
         QObject::connect(port.get(), &QSerialPort::errorOccurred,   this, &SerialPort::HandleErrors);
         result = true;
     }
@@ -129,14 +129,22 @@ bool SerialPort::StartListening(void)
     return result;
 }
 
-void SerialPort::ReadDataFromPort(void)
+void SerialPort::ReadLineFromPort(void)
 {
     std::lock_guard<std::mutex> lock_listener(mutex_listener);
 
-    std::stringstream received_data_stream;
-
-    received_data_stream << port->readAll().toStdString();
-    emit DataReceived(received_data_stream);
+    bool at_least_one_line_was_received = false;
+    std::string received_lines;
+    while(port->canReadLine())
+    {
+        at_least_one_line_was_received = true;
+        received_lines += port->readLine().toStdString();
+    }
+    if(at_least_one_line_was_received)
+    {
+        std::stringstream received_data_stream(received_lines);
+        emit DataReceived(received_data_stream);
+    }
 }
 
 void SerialPort::HandleErrors(QSerialPort::SerialPortError error)
