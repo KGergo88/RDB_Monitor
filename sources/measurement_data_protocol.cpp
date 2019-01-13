@@ -30,9 +30,9 @@ MeasurementDataProtocol::MeasurementDataProtocol()
     processing_state = ProcessingStates::WaitingForStartLine;
 }
 
-std::vector<std::unique_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessData(const std::string& data_source, std::istream& input_data)
+std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessData(const std::string& data_source, std::istream& input_data)
 {
-    std::vector<std::unique_ptr<DiagramSpecialized> > assembled_diagrams;
+    std::vector<std::shared_ptr<DiagramSpecialized> > assembled_diagrams;
     std::string received_data;
     std::string actual_line;
 
@@ -69,7 +69,7 @@ std::vector<std::unique_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
                             if(0 == column_index)
                             {
                                 auto current_date_and_time = std::time(nullptr);
-                                actual_diagram = std::make_unique<DiagramSpecialized>(data_source + " - " + std::string(ctime(&current_date_and_time)) , match_results[1]);
+                                actual_diagram = std::make_shared<DiagramSpecialized>(data_source + " - " + std::string(ctime(&current_date_and_time)) , match_results[1]);
                             }
                             else
                             {
@@ -132,7 +132,7 @@ std::vector<std::unique_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
                     {
                         if(std::regex_match(actual_line, std::regex(regex_end_line)))
                         {
-                            assembled_diagrams.push_back(std::move(actual_diagram));
+                            assembled_diagrams.push_back(actual_diagram);
                         }
                         processing_state = ProcessingStates::WaitingForStartLine;
                     }

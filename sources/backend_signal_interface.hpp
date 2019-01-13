@@ -46,7 +46,6 @@ signals:
     virtual void NetworkOperationFinished(const std::string& port_name, bool result) = 0;
     virtual void ShowThisDiagram(const DiagramSpecialized& diagram) = 0;
     virtual void DiagramListHasChanged(const std::vector<std::string>& available_diagrams) = 0;
-
 };
 
 Q_DECLARE_INTERFACE(BackendSignalInterface, "BackendSignalInterface")

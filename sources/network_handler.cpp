@@ -59,13 +59,7 @@ void NetworkHandler::DataAvailable(std::istream& received_data)
     if(diagram_collector)
     {
         auto assembled_diagrams = data_processing_interface->ProcessData(port_name, received_data);
-        /*
-#warning "You get a SIGSEV here!"
-        std::move(assembled_diagrams);
-        std::vector<std::unique_ptr<DiagramSpecialized> > temp;
-        diagram_collector(std::move(temp));
 
-        diagram_collector(std::move(assembled_diagrams));
-        */
+        diagram_collector(assembled_diagrams);
     }
 }

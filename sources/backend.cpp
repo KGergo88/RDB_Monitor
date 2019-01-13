@@ -56,10 +56,9 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
     }
 }
 
-void Backend::StoreNewDiagrams(std::vector<std::unique_ptr<DiagramSpecialized> >&& new_diagrams)
+void Backend::StoreNewDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams)
 {
 #warning "The diagrams needs to be checked and eventually rejected here..."
-    std::lock_guard<std::mutex> lock(mutex_diagram_container);
     auto this_is_the_first_diagram = diagram_container.empty();
 
     // Adding the diagrams to the diagram_container
@@ -93,8 +92,6 @@ void Backend::NotifyAboutDiagramContainerChange(void)
 
 void Backend::ReportStatus(const std::string& message)
 {
-    std::lock_guard<std::mutex> lock(mutex_report_status);
-
     time_t rawtime;
     tm timeinfo;
     std::string date_and_time_string;

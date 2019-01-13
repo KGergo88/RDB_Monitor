@@ -39,7 +39,7 @@ class DataProcessingInterface
 public:
     virtual ~DataProcessingInterface() {}
 
-    virtual std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) = 0;
+    virtual std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) = 0;
 };
 
 #endif // DATA_PROCESSING_INTERFACE_HPP

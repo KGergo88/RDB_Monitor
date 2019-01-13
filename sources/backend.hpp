@@ -61,7 +61,7 @@ public:
 
     void RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface);
 
-    void StoreNewDiagrams(std::vector<std::unique_ptr<DiagramSpecialized> >&& new_diagrams);
+    void StoreNewDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams);
 
     void NotifyAboutDiagramContainerChange(void);
 
@@ -84,9 +84,6 @@ private:
     NetworkHandler serial_network_handler;
 
     GuiSignalInterface *gui_signal_interface;
-
-    std::mutex mutex_diagram_container;
-    std::mutex mutex_report_status;
 
     std::vector<DiagramSpecialized> diagram_container;
 };

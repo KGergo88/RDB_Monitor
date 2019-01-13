@@ -69,6 +69,8 @@ void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_back
                          this,                                             SLOT(ProcessNetworkOperationResult(const std::string&, const bool&)));
         QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
                          this,                                             SLOT(DisplayDiagram(const DiagramSpecialized&)));
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(DiagramListHasChanged(const std::vector<std::string>&)),
+                         this,                                             SLOT(UpdateDiagramList(const std::vector<std::string>&)));
 
         QObject::connect(pListWidgetDiagrams, &QListWidget::itemSelectionChanged, this, &MainWindow::DiagramListSelectionChanged);
         QObject::connect(pPushButton,         &QPushButton::clicked,              this, &MainWindow::PushButtonWasClicked);

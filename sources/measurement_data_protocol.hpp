@@ -55,7 +55,7 @@ public:
     MeasurementDataProtocol& operator=(const MeasurementDataProtocol&) = delete;
     MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
 
-    std::vector<std::unique_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
+    std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
 
 private:
     enum class ProcessingStates : uint8_t
@@ -75,7 +75,7 @@ private:
 
     ProcessingStates processing_state;
     std::string available_data;
-    std::unique_ptr<DiagramSpecialized> actual_diagram;
+    std::shared_ptr<DiagramSpecialized> actual_diagram;
 };
 
 

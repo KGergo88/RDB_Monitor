@@ -46,7 +46,7 @@ class NetworkHandler : public QObject
 
 public:
 
-    using diagram_collector_type = std::function<void(std::vector<std::unique_ptr<DiagramSpecialized> >&&)>;
+    using diagram_collector_type = std::function<void(std::vector<std::shared_ptr<DiagramSpecialized> >&)>;
 
     NetworkHandler(NetworkConnectionInterface *new_network_connection_interface,
                    DataProcessingInterface *new_data_processing_interface,
