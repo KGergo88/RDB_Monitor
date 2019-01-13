@@ -43,6 +43,7 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
     {
         gui_signal_interface = new_gui_signal_interface;
 
+#warning "What's up with these connections?"
         //QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SLOT(StartsToRun(void)), this, SIGNAL());
         //QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SLOT(ShuttingDown(void)), this, SIGNAL());
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenNetworkConnection(const std::string&)),   this, SLOT(OpenNetwokConnection(const std::string&)));
@@ -118,14 +119,20 @@ void Backend::OpenNetwokConnection(const std::string& port_name)
     if(serial_network_handler.Run(port_name))
     {
         result = true;
+        emit ReportStatus("The connection \"" + port_name + "\" was successfully opened!");
     }
-
+    else
+    {
+        emit ReportStatus("The connection \"" + port_name + "\" could not be opened...maybe wrong name?");
+    }
     emit NetworkOperationFinished(port_name, result);
 }
 
 void Backend::CloseNetworkConnection(const std::string& port_name)
 {
     serial_network_handler.Stop();
+
+    emit ReportStatus("The connection \"" + port_name + "\" was successfully closed!");
     emit NetworkOperationFinished(port_name, true);
 }
 
@@ -137,6 +144,7 @@ void Backend::RequestForDiagram(const DataIndexType& diagram_index)
     }
     else
     {
-#warning "Report this..."
+        std::string errorMessage = "ERROR! The requested diagram (index " + std::to_string(diagram_index )+ " ) does not exist!";
+        throw errorMessage;
     }
 }

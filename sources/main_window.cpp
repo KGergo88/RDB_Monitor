@@ -113,20 +113,14 @@ void MainWindow::ProcessNetworkOperationResult(const std::string& port_name, con
             {
                 pLineEdit->setReadOnly(true);
                 pPushButton->setText(push_button_close_text);
-                //Gui::ReportStatus("The serial port was opened");
                 network_connection_is_open = true;
             }
             else
             {
                 pLineEdit->setReadOnly(false);
                 pPushButton->setText(push_button_open_text);
-                //Gui::ReportStatus("The serial port was closed");
                 network_connection_is_open = false;
             }
-        }
-        else
-        {
-            //Gui::ReportStatus("The serial port could not be opened. Maybe it is not a valid port name?");
         }
     }
     else
@@ -167,6 +161,7 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
         // Variables to store the min/max Y axis values
         DataPointType y_axis_minimum_value = 0;
         DataPointType y_axis_maximum_value = 0;
+
 
         #warning "These could be maybe method of the diagram class..."
         for(DataIndexType data_point_counter = 0; data_point_counter < number_of_data_points; ++data_point_counter)
