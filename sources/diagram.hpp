@@ -23,8 +23,10 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "global.hpp"
+#include "data_point.hpp"
 #include "data_line.hpp"
 
 
@@ -119,6 +121,55 @@ public:
         Data[dataLineIndex].SetDataPoint(dataPointIndex, newDataPoint);
     }    
 
+    std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > GetExtremeValues(const T_INDEX& dataLineIndex) const
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        auto min_x_value = Data[dataLineIndex].GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
+        auto max_x_value = Data[dataLineIndex].GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
+        auto min_y_value = Data[dataLineIndex].GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+        auto max_y_value = Data[dataLineIndex].GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+
+        std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > extreme_values(DataPoint<T_DATA_POINT>(min_x_value, min_y_value),
+                                                                                    DataPoint<T_DATA_POINT>(max_x_value, max_y_value));
+
+        return extreme_values;
+    }
+
+    std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > GetExtremeValues(void) const
+    {
+        if(0 < Data.size())
+        {
+            DataLine<T_DATA_POINT, T_INDEX> data_points_with_min_x_values;
+            DataLine<T_DATA_POINT, T_INDEX> data_points_with_max_x_values;
+            DataLine<T_DATA_POINT, T_INDEX> data_points_with_min_y_values;
+            DataLine<T_DATA_POINT, T_INDEX> data_points_with_max_y_values;
+
+            for(const auto& i : Data)
+            {
+                data_points_with_min_x_values.AddNewDataPoint(i.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareXValues));
+                data_points_with_max_x_values.AddNewDataPoint(i.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareXValues));
+                data_points_with_min_y_values.AddNewDataPoint(i.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareYValues));
+                data_points_with_max_y_values.AddNewDataPoint(i.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareYValues));
+            }
+
+            auto min_x_value = data_points_with_min_x_values.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
+            auto max_x_value = data_points_with_max_x_values.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
+            auto min_y_value = data_points_with_min_y_values.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+            auto max_y_value = data_points_with_max_y_values.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+
+            std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > extreme_values(DataPoint<T_DATA_POINT>(min_x_value, min_y_value),
+                                                                                        DataPoint<T_DATA_POINT>(max_x_value, max_y_value));
+
+            return extreme_values;
+        }
+        else
+        {
+            std::string errorMessage = "The Diagram is empty!";
+            throw errorMessage;
+        }
+    }
+
     void EraseContent(void)
     {
         DiagramTitle = "";
@@ -136,7 +187,7 @@ private:
             errorMessage += "/nMax index: ";
             errorMessage += std::to_string(Data.size());
             throw errorMessage;
-        }    
+        }
     }
     
     std::string DiagramTitle;

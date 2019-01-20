@@ -23,6 +23,8 @@
 
 #include <string>
 #include <vector>
+#include <functional>
+#include <algorithm>
 
 #include "global.hpp"
 #include "data_point.hpp"
@@ -85,7 +87,33 @@ public:
         CheckDataPointIndex(dataPointIndex);
 
         Data[dataPointIndex] = newDataPoint;
-    }    
+    }
+
+    inline const DataPoint<T_DATA_POINT>& GetDataPointWithMinValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
+    {
+        auto min_value = std::min_element(Data.begin(), Data.end(), compare);
+
+        if(Data.end() == min_value)
+        {
+            std::string errorMessage = "The DataLine is empty!";
+            throw errorMessage;
+        }
+
+        return *min_value;
+    }
+
+    inline const DataPoint<T_DATA_POINT>& GetDataPointWithMaxValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
+    {
+        auto max_value = std::max_element(Data.begin(), Data.end(), compare);
+
+        if(Data.end() == max_value)
+        {
+            std::string errorMessage = "The DataLine is empty!";
+            throw errorMessage;
+        }
+
+        return *max_value;
+    }
     
 private:
     void CheckDataPointIndex(const T_INDEX& dataPointIndex) const

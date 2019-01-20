@@ -146,9 +146,8 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
 
     // We will add every DataLine of the Diagram to the chart
     DataIndexType number_of_data_lines = diagram.GetTheNumberOfDataLines();
-    // Variables to store the min/max X axis values
-    DataPointType x_axis_minimum_value = 0;
-    DataPointType x_axis_maximum_value = 0;
+    // Variables to store the min/max values of the diagram
+    auto diagram_extreme_values = diagram.GetExtremeValues();
 
     for(DataIndexType data_line_counter = 0; data_line_counter < number_of_data_lines; ++data_line_counter)
     {
@@ -158,42 +157,21 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
         pLineSeries->setName(QString::fromStdString(diagram.GetDataLineTitle(data_line_counter)));
         // Setting the data with the DataPoints of the DataLine
         DataIndexType number_of_data_points = diagram.GetTheNumberOfDataPoints(data_line_counter);
-        // Variables to store the min/max Y axis values
-        DataPointType y_axis_minimum_value = 0;
-        DataPointType y_axis_maximum_value = 0;
+        // Variable to store the min/max values of the DataLine
+        auto data_line_extreme_values = diagram.GetExtremeValues(data_line_counter);
 
-
-        #warning "These could be maybe method of the diagram class..."
         for(DataIndexType data_point_counter = 0; data_point_counter < number_of_data_points; ++data_point_counter)
         {
             auto data_point = diagram.GetDataPoint(data_line_counter, data_point_counter);
             pLineSeries->append(data_point.GetX(), data_point.GetY());
-
-            // Updating the min/max axis values
-            if(data_point.GetX() < x_axis_minimum_value)
-            {
-                x_axis_minimum_value = data_point.GetX();
-            }
-            if(x_axis_maximum_value < data_point.GetX())
-            {
-                x_axis_maximum_value = data_point.GetX();
-            }
-            if(data_point.GetY() < y_axis_minimum_value)
-            {
-                y_axis_minimum_value = data_point.GetY();
-            }
-            if(y_axis_maximum_value < data_point.GetY())
-            {
-                y_axis_maximum_value = data_point.GetY();
-            }
         }
 
         // Adding the line series to the chart
         pNewChart->addSeries(pLineSeries);
         auto pYAxis = new QValueAxis;
         pYAxis->setTitleText(pLineSeries->name());
-        qreal y_axis_range_minimum = y_axis_minimum_value - (std::abs(y_axis_minimum_value) * y_axis_range_multiplicator);
-        qreal y_axis_range_maximum = y_axis_maximum_value + (std::abs(y_axis_maximum_value) * y_axis_range_multiplicator);
+        qreal y_axis_range_minimum = data_line_extreme_values.first.GetY() - (std::abs(data_line_extreme_values.first.GetY()) * y_axis_range_multiplicator);
+        qreal y_axis_range_maximum = data_line_extreme_values.second.GetY() + (std::abs(data_line_extreme_values.second.GetY()) * y_axis_range_multiplicator);
         pYAxis->setTickCount(y_axis_tick_count);
         pYAxis->setMinorTickCount(y_axis_minor_tick_count);
         pYAxis->setRange(y_axis_range_minimum, y_axis_range_maximum);
@@ -204,7 +182,7 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
     }
 
     // Setting up the X axis
-    pXAxis->setRange(x_axis_minimum_value, x_axis_maximum_value);
+    pXAxis->setRange(diagram_extreme_values.first.GetX(), diagram_extreme_values.second.GetX());
 
     // Saving the the current pChart from the pChartView
     auto pOldChart = pChartView->chart();
