@@ -43,9 +43,6 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
     {
         gui_signal_interface = new_gui_signal_interface;
 
-#warning "What's up with these connections?"
-        //QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SLOT(StartsToRun(void)), this, SIGNAL());
-        //QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SLOT(ShuttingDown(void)), this, SIGNAL());
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenNetworkConnection(const std::string&)),   this, SLOT(OpenNetwokConnection(const std::string&)));
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(CloseNetworkConnection(const std::string&)),  this, SLOT(CloseNetworkConnection(const std::string&)));
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(RequestForDiagram(const DataIndexType&)),     this, SLOT(RequestForDiagram(const DataIndexType&)));

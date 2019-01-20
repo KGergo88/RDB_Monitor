@@ -34,7 +34,7 @@
 #define BACKEND_SIGNAL_INTERFACE_HPP
 
 
-#warning "Maybe you could inherit the inteface classes (removing the \"signal\" here and adding them as public functions) by the emitter and the reciever as well and so both sides would be forced to have this set of functions..."
+
 class BackendSignalInterface
 {
 
