@@ -60,6 +60,9 @@ void NetworkHandler::DataAvailable(std::istream& received_data)
     {
         auto assembled_diagrams = data_processing_interface->ProcessData(port_name, received_data);
 
-        diagram_collector(assembled_diagrams);
+        if(!assembled_diagrams.empty())
+        {
+            diagram_collector(assembled_diagrams);
+        }
     }
 }

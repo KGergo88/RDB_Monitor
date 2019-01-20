@@ -138,7 +138,7 @@ public:
 
     std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > GetExtremeValues(void) const
     {
-        if(0 < Data.size())
+        if(!Data.empty())
         {
             DataLine<T_DATA_POINT, T_INDEX> data_points_with_min_x_values;
             DataLine<T_DATA_POINT, T_INDEX> data_points_with_max_x_values;

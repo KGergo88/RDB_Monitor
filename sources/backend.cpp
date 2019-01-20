@@ -68,14 +68,12 @@ void Backend::StoreNewDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >
         diagram_container.push_back(*i);
     }
 
-    if(!diagram_container.empty())
-    {
-        NotifyAboutDiagramContainerChange();
+    ReportStatus(std::to_string(new_diagrams.size()) + " new diagram was added to the list.");
+    NotifyAboutDiagramContainerChange();
 
-        if(this_is_the_first_diagram)
-        {
-            emit ShowThisDiagram(*diagram_container.begin());
-        }
+    if(this_is_the_first_diagram)
+    {
+        emit ShowThisDiagram(*diagram_container.begin());
     }
 }
 
@@ -119,11 +117,11 @@ void Backend::OpenNetwokConnection(const std::string& port_name)
     if(serial_network_handler.Run(port_name))
     {
         result = true;
-        emit ReportStatus("The connection \"" + port_name + "\" was successfully opened!");
+        ReportStatus("The connection \"" + port_name + "\" was successfully opened!");
     }
     else
     {
-        emit ReportStatus("The connection \"" + port_name + "\" could not be opened...maybe wrong name?");
+        ReportStatus("The connection \"" + port_name + "\" could not be opened...maybe wrong name?");
     }
     emit NetworkOperationFinished(port_name, result);
 }
@@ -132,8 +130,8 @@ void Backend::CloseNetworkConnection(const std::string& port_name)
 {
     serial_network_handler.Stop();
 
-    emit ReportStatus("The connection \"" + port_name + "\" was successfully closed!");
-    emit NetworkOperationFinished(port_name, true);
+    ReportStatus("The connection \"" + port_name + "\" was successfully closed!");
+    NetworkOperationFinished(port_name, true);
 }
 
 void Backend::RequestForDiagram(const DataIndexType& diagram_index)
