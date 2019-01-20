@@ -71,9 +71,6 @@ private slots:
     void HandleErrors(QSerialPort::SerialPortError error);
 
 private:
-#warning "After the new design decisions, the application is going to be single threaded, so these can be removed..."
-    std::mutex mutex_open_close;
-    std::mutex mutex_listener;
 
     std::unique_ptr<QSerialPort> port;
 };

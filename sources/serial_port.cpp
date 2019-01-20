@@ -32,9 +32,6 @@ SerialPort::SerialPort() : QObject()
 
 SerialPort::~SerialPort()
 {
-    std::lock_guard<std::mutex> lock_open_close(mutex_open_close);
-    std::lock_guard<std::mutex> lock_listener(mutex_listener);
-
     if(port)
     {
         port->close();
@@ -44,9 +41,6 @@ SerialPort::~SerialPort()
 
 bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NAME)
 {
-    std::lock_guard<std::mutex> lock_open_close(mutex_open_close);
-    std::lock_guard<std::mutex> lock_listener(mutex_listener);
-
     bool result = false;
 
     if(!port)
@@ -94,9 +88,6 @@ bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NA
 
 void SerialPort::Close()
 {
-    std::lock_guard<std::mutex> lock_open_close(mutex_open_close);
-    std::lock_guard<std::mutex> lock_listener(mutex_listener);
-
     QObject::disconnect(port.get(), &QSerialPort::readyRead, this, &SerialPort::ReadLineFromPort);
 
     if(port)
@@ -108,15 +99,11 @@ void SerialPort::Close()
 
 bool SerialPort::IsOpen()
 {
-    std::lock_guard<std::mutex> lock_open_close(mutex_open_close);
-
     return (nullptr != port);
 }
 
 bool SerialPort::StartListening(void)
 {
-    std::lock_guard<std::mutex> lock_listener(mutex_listener);
-
     bool result = false;
 
     if(IsOpen())
@@ -131,8 +118,6 @@ bool SerialPort::StartListening(void)
 
 void SerialPort::ReadLineFromPort(void)
 {
-    std::lock_guard<std::mutex> lock_listener(mutex_listener);
-
     bool at_least_one_line_was_received = false;
     std::string received_lines;
     while(port->canReadLine())
