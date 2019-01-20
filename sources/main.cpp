@@ -21,79 +21,37 @@
 
 
 
-#include <cstdlib>
-
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <algorithm>
-#include <vector>
-#include <memory>
-#include <thread>
-#include <atomic>
-#include <signal.h>
+
+#include <QApplication>
 
 #include "global.hpp"
-#include "diagram.hpp"
-#include "gui.hpp"
-#include "serial_port.hpp"
-#include "data_processor.hpp"
+#include "backend.hpp"
+#include "main_window.hpp"
 
 
-
-std::atomic_bool shutdown_worker_thread;
-
-
-
-void WorkerThread(void)
-{
-    while(!Gui::IsRunning());
-
-    while(!shutdown_worker_thread)
-    {
-        if(SerialPort::GetInstance().IsOpen())
-        {
-            auto received_data = SerialPort::GetInstance().ReceiveMeasurementData();
-            if(received_data)
-            {
-                auto diagram_container = DataProcessor::GetInstance().ProcessData("SerialPort", *received_data);
-                if(!diagram_container.empty())
-                {
-                    for(auto &i : diagram_container)
-                    {
-                        Gui::AddToDiagramList(std::move(*i.release()));
-                    }
-                }
-                else
-                {
-                    std::cerr << "We could not assemble any diagram from the input data..." << std::endl;
-                }
-            }
-        }
-    }
-}
 
 int main(int argc, char **argv)
 {
     try
     {
-        shutdown_worker_thread = false;
+        std::cout << "Hello RDB!" << std::endl;
 
-        std::cout << "Hello RDB!" << std::endl << std::endl;
+        std::cout << "Running the GUI." << std::endl;
+        QApplication q_application(argc, argv);
 
-        std::thread worker_thread(WorkerThread);
+        Backend backend;
+        MainWindow main_window;
 
-        Gui::Run(argc, argv);
-        std::cout << "The GUI has stopped." << std::endl;
+        backend.RegisterGuiSignalInterface(&main_window);
+        main_window.RegisterBackendSignalInterface(&backend);
 
-        std::cout << "Stopping the worker thread." << std::endl;
-        shutdown_worker_thread = true;
-
-        worker_thread.join();
-        std::cout << "The worker thread has stopped." << std::endl;
+        auto q_application_result = q_application.exec();
+        std::cout << "The GUI has stopped with result: " << q_application_result << std::endl;
 
         std::cout << "The End." << std::endl;
-        return EXIT_SUCCESS;
+        return q_application_result;
     }
     catch(const std::string& exception_text)
     {

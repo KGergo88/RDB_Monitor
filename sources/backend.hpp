@@ -22,59 +22,72 @@
 
 
 #include <iostream>
-#include <sstream>
-#include <memory>
+#include <functional>
 #include <mutex>
 
-#include <QObject>
-#include <QSerialPort>
-#include <QSerialPortInfo>
+#include <QApplication>
 
 #include "global.hpp"
-#include "network_connection_interface.hpp"
+#include "backend_signal_interface.hpp"
+#include "gui_signal_interface.h"
+#include "diagram.hpp"
+#include "serial_port.hpp"
+#include "measurement_data_protocol.hpp"
+#include "network_handler.hpp"
 
 
 
-#ifndef SERIAL_PORT_HPP
-#define SERIAL_PORT_HPP
+#ifndef GUI_FRAMEWORK_HPP
+#define GUI_FRAMEWORK_HPP
 
 
 
-class SerialPort : public QObject, public NetworkConnectionInterface
+class Backend : public QObject, public BackendSignalInterface
 {
     Q_OBJECT
-    Q_INTERFACES(NetworkConnectionInterface)
+    Q_INTERFACES(BackendSignalInterface)
 
 public:
-    SerialPort();
-    ~SerialPort() override;
+    static constexpr std::size_t report_date_and_time_string_size = 10;
 
-    SerialPort(const SerialPort&) = delete;
-    SerialPort(SerialPort&&) = delete;
+    Backend();
+    Backend(const Backend& new_backend) = delete;
+    Backend(Backend&& new_backend) = delete;
 
-    SerialPort& operator=(const SerialPort&) = delete;
-    SerialPort& operator=(SerialPort&&) = delete;
+    ~Backend() = default;
 
-    bool Open(const std::string& port_name) override;
+    Backend& operator=(const Backend&  new_backend) = delete;
+    Backend& operator=(Backend&& new_backend) = delete;
 
-    void Close(void) override;
+    void RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface);
 
-    bool IsOpen(void) override;
+    void StoreNewDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams);
 
-    bool StartListening(void) override;
+    void NotifyAboutDiagramContainerChange(void);
+
+    void ReportStatus(const std::string& message);
 
 signals:
-    void DataReceived(std::istream& received_data) override;
+    void NewStatusMessage(const std::string& message_text) override;
+    void NetworkOperationFinished(const std::string& port_name, bool result) override;
+    void ShowThisDiagram(const DiagramSpecialized& diagram) override;
+    void DiagramListHasChanged(const std::vector<std::string>& available_diagrams) override;
 
 private slots:
-    void ReadLineFromPort(void);
-    void HandleErrors(QSerialPort::SerialPortError error);
+    void OpenNetwokConnection(const std::string&);
+    void CloseNetworkConnection(const std::string&);
+    void RequestForDiagram(const DataIndexType& diagram_index);
 
 private:
+    SerialPort serial_port;
+    MeasurementDataProtocol measurement_data_protocol;
+    NetworkHandler serial_network_handler;
 
-    std::unique_ptr<QSerialPort> port;
+    GuiSignalInterface *gui_signal_interface;
+
+    std::vector<DiagramSpecialized> diagram_container;
 };
 
 
 
-#endif // SERIAL_PORT_HPP
+#endif /* GUI_FRAMEWORK_HPP */

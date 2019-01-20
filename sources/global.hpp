@@ -23,11 +23,15 @@
 
 #include <cstdint>
 
+
+
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
+
+
 using DataPointType = double;
-using DataIndexType = uint64_t;
+using DataIndexType = std::size_t;
 
 template <typename T_DATA_POINT, typename T_INDEX>
 class Diagram;
@@ -44,12 +48,17 @@ using DataPointSpecialized = DataPoint<DataPointType>;
 #define APPLICATION_NAME                ("RDB Diplomaterv Monitor v1.0.2")
 
 #ifdef _WIN32
-    #define SERIAL_PORT_DEFAULT_DEVICE_NAME ("COM3")
+    #define SERIAL_PORT_DEFAULT_PORT_NAME ("COM3")
 #else
-    #define SERIAL_PORT_DEFAULT_DEVICE_NAME ("/dev/ttyACM0")
+    #define SERIAL_PORT_DEFAULT_PORT_NAME ("/dev/ttyACM0")
 #endif
+
+constexpr uint32_t SERIAL_PORT_DEFAULT_BAUDRATE = 115200;
+constexpr std::size_t SERIAL_PORT_MAX_READ_LENGTH_IN_BYTES = 100 * 1024;
 
 #define DATA_START_LINE                 ("<<<START>>>")
 #define DATA_END_LINE                   ("<<<END>>>")
+
+
 
 #endif /* GLOBAL_HPP */

@@ -21,49 +21,48 @@
 
 
 
-#include "global.hpp"
+#include "network_handler.hpp"
 
 
 
-#ifndef DATA_POINT_HPP
-#define DATA_POINT_HPP
-
-
-
-template <typename T_DATA_POINT>
-class DataPoint
+bool NetworkHandler::Run(const std::string& new_port_name)
 {
-public:
-    DataPoint(const T_DATA_POINT& newX = 0, const T_DATA_POINT& newY = 0) : x(newX), y(newY) {}
-    DataPoint(const DataPoint&  newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
-    DataPoint(DataPoint&& newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
+    bool result = true;
 
-    ~DataPoint() {}
+    if(network_connection_interface && data_processing_interface && diagram_collector)
+    {
+        if(network_connection_interface->Open(new_port_name))
+        {
+            if(network_connection_interface->StartListening())
+            {
+                QObject::connect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)), this, SLOT(DataAvailable(std::istream&)));
+                port_name = new_port_name;
+                result = true;
+            }
+        }
+    }
 
-    DataPoint& operator=(const DataPoint&  newDataPoint) = delete;
-    DataPoint& operator=(DataPoint&& newDataPoint) = delete;
+    return result;
+}
 
-    inline const T_DATA_POINT& GetX(void) const {return x;}
-    inline const T_DATA_POINT& GetY(void) const {return y;}
+void NetworkHandler::Stop(void)
+{
+    if(network_connection_interface)
+    {
+        network_connection_interface->Close();
+        QObject::disconnect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)), this, SLOT(DataAvailable(std::istream&)));
+    }
+}
 
-    inline static const T_DATA_POINT& GetXValueOf(const DataPoint& object) {object.GetX();}
-    inline static const T_DATA_POINT& GetYValueOf(const DataPoint& object) {object.GetY();}
+void NetworkHandler::DataAvailable(std::istream& received_data)
+{
+    if(diagram_collector)
+    {
+        auto assembled_diagrams = data_processing_interface->ProcessData(port_name, received_data);
 
-    inline void SetX(T_DATA_POINT& newX = 0) {x = newX; return x;}
-    inline void SetY(T_DATA_POINT& newY = 0) {y = newY; return y;}
-
-    inline static void SetXValueOf(const DataPoint& object, T_DATA_POINT& newX = 0) {object.SetX(newX);}
-    inline static void SetYValueOf(const DataPoint& object, T_DATA_POINT& newY = 0) {object.SetY(newY);}
-
-    inline static bool CompareXValues(const DataPoint& object_A, const DataPoint& object_B) {return (GetXValueOf(object_A) < GetXValueOf(object_B));}
-    inline static bool CompareYValues(const DataPoint& object_A, const DataPoint& object_B) {return (GetYValueOf(object_A) < GetYValueOf(object_B));}
-
-private:
-    T_DATA_POINT x;
-    T_DATA_POINT y;
-};
-
-
-
-#endif /* DATAPOINT_HPP */
-
+        if(!assembled_diagrams.empty())
+        {
+            diagram_collector(assembled_diagrams);
+        }
+    }
+}

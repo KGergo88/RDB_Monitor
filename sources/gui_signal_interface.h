@@ -21,49 +21,33 @@
 
 
 
+#include <vector>
+#include <string>
+
+#include <QtPlugin>
+
 #include "global.hpp"
 
 
 
-#ifndef DATA_POINT_HPP
-#define DATA_POINT_HPP
+#ifndef GUI_SIGNAL_INTERFACE_H
+#define GUI_SIGNAL_INTERFACE_H
 
 
 
-template <typename T_DATA_POINT>
-class DataPoint
+class GuiSignalInterface
 {
-public:
-    DataPoint(const T_DATA_POINT& newX = 0, const T_DATA_POINT& newY = 0) : x(newX), y(newY) {}
-    DataPoint(const DataPoint&  newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
-    DataPoint(DataPoint&& newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
+signals:
+    virtual void StartsToRun(void) = 0;
+    virtual void ShuttingDown(void) = 0;
+    virtual void OpenNetworkConnection(const std::string& port_name) = 0;
+    virtual void CloseNetworkConnection(const std::string& port_name) = 0;
+    virtual void RequestForDiagram(const DataIndexType& diagram_index) = 0;
 
-    ~DataPoint() {}
-
-    DataPoint& operator=(const DataPoint&  newDataPoint) = delete;
-    DataPoint& operator=(DataPoint&& newDataPoint) = delete;
-
-    inline const T_DATA_POINT& GetX(void) const {return x;}
-    inline const T_DATA_POINT& GetY(void) const {return y;}
-
-    inline static const T_DATA_POINT& GetXValueOf(const DataPoint& object) {object.GetX();}
-    inline static const T_DATA_POINT& GetYValueOf(const DataPoint& object) {object.GetY();}
-
-    inline void SetX(T_DATA_POINT& newX = 0) {x = newX; return x;}
-    inline void SetY(T_DATA_POINT& newY = 0) {y = newY; return y;}
-
-    inline static void SetXValueOf(const DataPoint& object, T_DATA_POINT& newX = 0) {object.SetX(newX);}
-    inline static void SetYValueOf(const DataPoint& object, T_DATA_POINT& newY = 0) {object.SetY(newY);}
-
-    inline static bool CompareXValues(const DataPoint& object_A, const DataPoint& object_B) {return (GetXValueOf(object_A) < GetXValueOf(object_B));}
-    inline static bool CompareYValues(const DataPoint& object_A, const DataPoint& object_B) {return (GetYValueOf(object_A) < GetYValueOf(object_B));}
-
-private:
-    T_DATA_POINT x;
-    T_DATA_POINT y;
+protected:
+    ~GuiSignalInterface() {}
 };
 
+Q_DECLARE_INTERFACE(GuiSignalInterface, "GuiSignalInterface")
 
-
-#endif /* DATAPOINT_HPP */
-
+#endif // GUI_SIGNAL_INTERFACE_H

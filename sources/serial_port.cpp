@@ -23,119 +23,119 @@
 
 #include "serial_port.hpp"
 
-SerialPort::SerialPort() : io_service(), port(io_service)
+
+
+SerialPort::SerialPort() : QObject()
 {
 
 }
 
 SerialPort::~SerialPort()
 {
-    Close();
+    if(port)
+    {
+        port->close();
+        port.reset();
+    }
 }
 
-bool SerialPort::Open(const std::string& device_to_open)
+bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NAME)
 {
     bool result = false;
 
-    if(!port.is_open())
+    if(!port)
     {
         try
         {
-            port.open(device_to_open);
-            port.set_option(boost::asio::serial_port::baud_rate(baud_rate));
+            port = std::make_unique<QSerialPort>();
+            port->setPortName(QString::fromStdString(port_name));
+            port->setBaudRate(SERIAL_PORT_DEFAULT_BAUDRATE);
+            port->setDataBits(QSerialPort::Data8);
+            port->setStopBits(QSerialPort::OneStop);
+            port->setParity(QSerialPort::NoParity);
+            port->setFlowControl(QSerialPort::NoFlowControl);
 
-            if(port.is_open())
+            if(port->open(QIODevice::ReadOnly))
             {
-                device_name = device_to_open;
                 result = true;
             }
             else
             {
-                std::cerr << "Could not open the SerialPort. Device: " << device_to_open << std::endl;
+                std::cerr << "Could not open the SerialPort. Device: " << port_name << std::endl;
+                port.reset();
             }
         }
         catch(...)
         {
-            std::cerr << "Could not open the SerialPort. Device: " << device_to_open << std::endl;
+            std::cerr << "Could not open the SerialPort. Device: " << port_name << std::endl;
+            port.reset();
         }
     }
     else
     {
-        if(device_name == device_to_open)
+        if(port_name == port->portName().toStdString())
         {
             result = true;
         }
         else
         {
-            std::cerr << "Another serial port was already open: " << device_name << std::endl;
+            std::cerr << "Another serial port was already openend with this object: " << port_name << std::endl;
         }
     }
 
     return result;
 }
 
-bool SerialPort::Close()
+void SerialPort::Close()
+{
+    QObject::disconnect(port.get(), &QSerialPort::readyRead, this, &SerialPort::ReadLineFromPort);
+
+    if(port)
+    {
+        port->close();
+        port.reset();
+    }
+}
+
+bool SerialPort::IsOpen()
+{
+    return (nullptr != port);
+}
+
+bool SerialPort::StartListening(void)
 {
     bool result = false;
 
-    if(port.is_open())
+    if(IsOpen())
     {
-        //This flag is needed to prevent starting new reads and to suppress error messages...
-        ShutdownWasRequested = true;
-        port.close();
-        if(!port.is_open())
-        {
-            result = true;
-        }
-        else
-        {
-            std::cerr << "Could not close the serial port. Device name: " << device_name << std::endl;
-        }
-        ShutdownWasRequested = false;
-    }
-    else
-    {
+        QObject::connect(port.get(), &QSerialPort::readyRead,       this, &SerialPort::ReadLineFromPort);
+        QObject::connect(port.get(), &QSerialPort::errorOccurred,   this, &SerialPort::HandleErrors);
         result = true;
     }
 
     return result;
 }
 
-bool SerialPort::IsOpen()
+void SerialPort::ReadLineFromPort(void)
 {
-    return (port.is_open() && !ShutdownWasRequested);
-}
-
-std::shared_ptr<std::istream> SerialPort::ReceiveMeasurementData(void)
-{
-    std::shared_ptr<std::istream> received_data(nullptr);
-
-    if(port.is_open() && !ShutdownWasRequested)
+    bool at_least_one_line_was_received = false;
+    std::string received_lines;
+    while(port->canReadLine())
     {
-        port.get_io_service().reset();
-        boost::asio::async_read_until(port, buffer, DATA_END_LINE, boost::bind(&SerialPort::AsyncFinished, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
-        port.get_io_service().run();
-
-        //This is needed for the case when we are waiting for a transmission, but the serial port closed in the meantime.
-        if(port.is_open() && !ShutdownWasRequested)
-        {
-            received_data = std::make_shared<std::istream>(&buffer);
-        }
+        at_least_one_line_was_received = true;
+        received_lines += port->readLine().toStdString();
     }
-
-    return received_data;
+    if(at_least_one_line_was_received)
+    {
+        std::stringstream received_data_stream(received_lines);
+        emit DataReceived(received_data_stream);
+    }
 }
 
-void SerialPort::AsyncFinished(const boost::system::error_code& error, std::size_t bytes_transferred)
+void SerialPort::HandleErrors(QSerialPort::SerialPortError error)
 {
-    //The finished event is only interesting for us if the port is open, so it was not raised because of a cancelled operation.
-    if(port.is_open() && !ShutdownWasRequested)
+    if(QSerialPort::ReadError == error)
     {
-        (void) bytes_transferred;
-
-        if(error)
-        {
-            std::cerr << "SerialPort::AsyncFinished: The error was set: " << error.message() << std::endl;
-        }
+        std::cerr << (QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(port->portName()).arg(port->errorString())).toStdString() << std::endl;
     }
 }

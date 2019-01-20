@@ -22,59 +22,62 @@
 
 
 #include <iostream>
-#include <sstream>
 #include <memory>
-#include <mutex>
-
-#include <QObject>
-#include <QSerialPort>
-#include <QSerialPortInfo>
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <functional>
+#include <ctime>
+#include <cctype>
+#include <regex>
+#include <type_traits>
 
 #include "global.hpp"
-#include "network_connection_interface.hpp"
+#include "data_processing_interface.hpp"
+#include "diagram.hpp"
 
 
 
-#ifndef SERIAL_PORT_HPP
-#define SERIAL_PORT_HPP
+#ifndef MEAUREMENT_DATA_PROTOCOL_HPP
+#define MEAUREMENT_DATA_PROTOCOL_HPP
 
 
 
-class SerialPort : public QObject, public NetworkConnectionInterface
+class MeasurementDataProtocol : public DataProcessingInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(NetworkConnectionInterface)
-
 public:
-    SerialPort();
-    ~SerialPort() override;
+    MeasurementDataProtocol();
+    virtual ~MeasurementDataProtocol() = default;
 
-    SerialPort(const SerialPort&) = delete;
-    SerialPort(SerialPort&&) = delete;
+    MeasurementDataProtocol(const MeasurementDataProtocol&) = delete;
+    MeasurementDataProtocol(MeasurementDataProtocol&&) = delete;
 
-    SerialPort& operator=(const SerialPort&) = delete;
-    SerialPort& operator=(SerialPort&&) = delete;
+    MeasurementDataProtocol& operator=(const MeasurementDataProtocol&) = delete;
+    MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
 
-    bool Open(const std::string& port_name) override;
-
-    void Close(void) override;
-
-    bool IsOpen(void) override;
-
-    bool StartListening(void) override;
-
-signals:
-    void DataReceived(std::istream& received_data) override;
-
-private slots:
-    void ReadLineFromPort(void);
-    void HandleErrors(QSerialPort::SerialPortError error);
+    std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
 
 private:
+    enum class ProcessingStates : uint8_t
+    {
+        WaitingForStartLine,
+        ProcessingHeadline,
+        ProcessingDataLines
+    };
 
-    std::unique_ptr<QSerialPort> port;
+    // REGEX strings to search the input data for valid measurement session
+    const std::string regex_start_line         = R"(^\s*<<<START>>>$)";
+    const std::string regex_headline           = R"(^\s*(\w+,){2,}$)";
+    const std::string regex_headline_analyzer  = R"(^\s*(\w+),)";
+    const std::string regex_data_line          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
+    const std::string regex_data_line_analyzer = R"(^\s*((?:\+|\-)?\d+),)";
+    const std::string regex_end_line           = R"(^\s*<<<END>>>$)";
+
+    ProcessingStates processing_state;
+    std::string available_data;
+    std::shared_ptr<DiagramSpecialized> actual_diagram;
 };
 
 
 
-#endif // SERIAL_PORT_HPP
+#endif // MEAUREMENT_DATA_PROTOCOL_HPP

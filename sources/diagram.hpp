@@ -23,12 +23,18 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "global.hpp"
+#include "data_point.hpp"
 #include "data_line.hpp"
+
+
 
 #ifndef DIAGRAM_HPP
 #define DIAGRAM_HPP
+
+
 
 template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
@@ -36,7 +42,6 @@ public:
     Diagram(const std::string& newDiagramTitle = "", const std::string& newAxisXTitle = "") : DiagramTitle(newDiagramTitle), AxisXTitle(newAxisXTitle) {}
 
     Diagram(const Diagram&  newDiagram) = default;
-
     Diagram(Diagram&& newDiagram) = default;
 
     ~Diagram() {}
@@ -44,12 +49,27 @@ public:
     Diagram& operator=(const Diagram&  newDiagram) = default;
     Diagram& operator=(Diagram&& newDiagram) = default;
 
-    inline const std::string&   GetTitle(void) const { return DiagramTitle; }
-    inline void                 SetTitle(const std::string& newDiagramTitle) { DiagramTitle = newDiagramTitle; }
-    inline const std::string&   GetAxisXTitle(void) const { return AxisXTitle; }
-    inline void                 SetAxisXTitle(const std::string& newAxisXTitle) { AxisXTitle = newAxisXTitle; }
+    inline const std::string& GetTitle(void) const
+    {
+        return DiagramTitle;
+    }
+
+    inline void SetTitle(const std::string& newDiagramTitle)
+    {
+        DiagramTitle = newDiagramTitle;
+    }
+
+    inline const std::string& GetAxisXTitle(void) const
+    {
+        return AxisXTitle;
+    }
+
+    inline void SetAxisXTitle(const std::string& newAxisXTitle)
+    {
+        AxisXTitle = newAxisXTitle;
+    }
     
-    inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex)
+    inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
@@ -63,7 +83,10 @@ public:
         Data[dataLineIndex].SetTitle(newDataLineTitle);
     }
     
-    inline const T_INDEX GetTheNumberOfDataLines(void) { return Data.size(); }
+    inline const T_INDEX GetTheNumberOfDataLines(void) const
+    {
+        return Data.size();
+    }
     
     void AddNewDataLine(const std::string& newDataLineTitle = "")
     {
@@ -77,14 +100,14 @@ public:
         Data[dataLineIndex].AddNewDataPoint(newDataPoint);
     }
 
-    inline const T_INDEX GetTheNumberOfDataPoints(const T_INDEX& dataLineIndex)
+    inline const T_INDEX GetTheNumberOfDataPoints(const T_INDEX& dataLineIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
         return Data[dataLineIndex].GetTheNumberOfDataPoints();
     }
 
-    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex)
+    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
@@ -98,6 +121,55 @@ public:
         Data[dataLineIndex].SetDataPoint(dataPointIndex, newDataPoint);
     }    
 
+    std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > GetExtremeValues(const T_INDEX& dataLineIndex) const
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        auto min_x_value = Data[dataLineIndex].GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
+        auto max_x_value = Data[dataLineIndex].GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
+        auto min_y_value = Data[dataLineIndex].GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+        auto max_y_value = Data[dataLineIndex].GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+
+        std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > extreme_values(DataPoint<T_DATA_POINT>(min_x_value, min_y_value),
+                                                                                    DataPoint<T_DATA_POINT>(max_x_value, max_y_value));
+
+        return extreme_values;
+    }
+
+    std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > GetExtremeValues(void) const
+    {
+        if(!Data.empty())
+        {
+            DataLine<T_DATA_POINT, T_INDEX> data_points_with_min_x_values;
+            DataLine<T_DATA_POINT, T_INDEX> data_points_with_max_x_values;
+            DataLine<T_DATA_POINT, T_INDEX> data_points_with_min_y_values;
+            DataLine<T_DATA_POINT, T_INDEX> data_points_with_max_y_values;
+
+            for(const auto& i : Data)
+            {
+                data_points_with_min_x_values.AddNewDataPoint(i.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareXValues));
+                data_points_with_max_x_values.AddNewDataPoint(i.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareXValues));
+                data_points_with_min_y_values.AddNewDataPoint(i.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareYValues));
+                data_points_with_max_y_values.AddNewDataPoint(i.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareYValues));
+            }
+
+            auto min_x_value = data_points_with_min_x_values.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
+            auto max_x_value = data_points_with_max_x_values.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
+            auto min_y_value = data_points_with_min_y_values.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+            auto max_y_value = data_points_with_max_y_values.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+
+            std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > extreme_values(DataPoint<T_DATA_POINT>(min_x_value, min_y_value),
+                                                                                        DataPoint<T_DATA_POINT>(max_x_value, max_y_value));
+
+            return extreme_values;
+        }
+        else
+        {
+            std::string errorMessage = "The Diagram is empty!";
+            throw errorMessage;
+        }
+    }
+
     void EraseContent(void)
     {
         DiagramTitle = "";
@@ -106,29 +178,23 @@ public:
     }
 
 private:
-    bool CheckDataLineIndex(const T_INDEX& dataLineIndex)
+    void CheckDataLineIndex(const T_INDEX& dataLineIndex) const
     {
-        bool result = false;
-
-        if(Data.size() > dataLineIndex)
+        if(Data.size() <= dataLineIndex)
         {
-            result = true;
-        }
-        else
-        {            
             std::string errorMessage = "The indexed DataLine does not exist: /n Requested index: ";
             errorMessage += std::to_string(dataLineIndex);
             errorMessage += "/nMax index: ";
             errorMessage += std::to_string(Data.size());
             throw errorMessage;
-        }    
-
-        return result;
+        }
     }
     
     std::string DiagramTitle;
     std::string AxisXTitle;
     std::vector<DataLine<T_DATA_POINT, T_INDEX> > Data;
 };
+
+
 
 #endif /* DIAGRAM_HPP */

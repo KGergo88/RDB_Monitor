@@ -21,49 +21,25 @@
 
 
 
+#include <vector>
+#include <memory>
+#include <string>
+
 #include "global.hpp"
 
 
 
-#ifndef DATA_POINT_HPP
-#define DATA_POINT_HPP
+#ifndef DATA_PROCESSING_INTERFACE_HPP
+#define DATA_PROCESSING_INTERFACE_HPP
 
 
 
-template <typename T_DATA_POINT>
-class DataPoint
+class DataProcessingInterface
 {
 public:
-    DataPoint(const T_DATA_POINT& newX = 0, const T_DATA_POINT& newY = 0) : x(newX), y(newY) {}
-    DataPoint(const DataPoint&  newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
-    DataPoint(DataPoint&& newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
+    virtual ~DataProcessingInterface() {}
 
-    ~DataPoint() {}
-
-    DataPoint& operator=(const DataPoint&  newDataPoint) = delete;
-    DataPoint& operator=(DataPoint&& newDataPoint) = delete;
-
-    inline const T_DATA_POINT& GetX(void) const {return x;}
-    inline const T_DATA_POINT& GetY(void) const {return y;}
-
-    inline static const T_DATA_POINT& GetXValueOf(const DataPoint& object) {object.GetX();}
-    inline static const T_DATA_POINT& GetYValueOf(const DataPoint& object) {object.GetY();}
-
-    inline void SetX(T_DATA_POINT& newX = 0) {x = newX; return x;}
-    inline void SetY(T_DATA_POINT& newY = 0) {y = newY; return y;}
-
-    inline static void SetXValueOf(const DataPoint& object, T_DATA_POINT& newX = 0) {object.SetX(newX);}
-    inline static void SetYValueOf(const DataPoint& object, T_DATA_POINT& newY = 0) {object.SetY(newY);}
-
-    inline static bool CompareXValues(const DataPoint& object_A, const DataPoint& object_B) {return (GetXValueOf(object_A) < GetXValueOf(object_B));}
-    inline static bool CompareYValues(const DataPoint& object_A, const DataPoint& object_B) {return (GetYValueOf(object_A) < GetYValueOf(object_B));}
-
-private:
-    T_DATA_POINT x;
-    T_DATA_POINT y;
+    virtual std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) = 0;
 };
 
-
-
-#endif /* DATAPOINT_HPP */
-
+#endif // DATA_PROCESSING_INTERFACE_HPP
