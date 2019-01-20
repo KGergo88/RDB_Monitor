@@ -90,7 +90,7 @@ The rules:
 ================
 
 The RDB Diplomaterv Monitor was developed in C++14 and it depends on the following external components:
-	- Qt5 v5.11.1 or newer
+        - Qt5 v5.12.0 or newer
                 - The used components are Core, Widgets, and Charts SerialPort
 		- You can download it from the www.qt.io website
 
@@ -99,7 +99,7 @@ The RDB Diplomaterv Monitor was developed in C++14 and it depends on the followi
 3 - Portability
 ===============
 
-The RDB Diplomaterv Monitor was developed on an Ubuntu 18.04 LTS Linux but it tries to ensure compatibility with Windows 10 as much as possible as well.
+The RDB Diplomaterv Monitor was developed on an Ubuntu 18.10 Linux but it tries to ensure compatibility with Windows 10 as much as possible.
 
 
 
@@ -112,6 +112,16 @@ The RDB Diplomaterv Monitor can be compiled only using the Qt Creator IDE at the
 
 5 - Release notes
 =================
+
+v2.0.0 - Architectural rework
+    Details:
+        - Improvement of the GUI especially the diagram view area
+        - New status report messages were added so that the user has more info during runtime
+        - The program now is a single-threaded application utiling an event based design
+        - Implementation of the new design with signal interfaces
+        - Further improvement of the data contained classes: DataPoint, DataLine and Diagram
+        - Removal of the BOOST from the project
+        - The SerialPort class is now implemented with the SerialPort library of the Qt framework
 
 v1.0.2 - Shutdown failure patch
     Fixes:

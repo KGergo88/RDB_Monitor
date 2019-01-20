@@ -3,4 +3,5 @@ build/
 netbeans/
 qt/
 cppcheck/
+documentation/
 RDB_Diplomaterv_Monitor.pro.user*
