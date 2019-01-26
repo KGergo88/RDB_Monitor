@@ -87,23 +87,38 @@ void Backend::NotifyAboutDiagramContainerChange(void)
 
 void Backend::ReportStatus(const std::string& message)
 {
-    time_t rawtime;
-    tm timeinfo;
-    std::string date_and_time_string;
+    // The format string needs to be defined as a string literal so that the compiler can check it's content
+    #define STATUS_REPORT_FORMAT_STRING ("%02d:%02d:%02d - %s")
+    // This is the pre-calculated length of the status report, this can be used for checks
+    std::size_t status_report_length = sizeof("HH:MM:SS - ") + message.size();
 
     // Getting the current time
-    time(&rawtime);
-    localtime_r(&rawtime, &timeinfo);
-
-    // Resizing the string containing the current time to an appropriate size
-    date_and_time_string.resize(report_date_and_time_string_size);
+    // Under Windows, the warning might arise that the localtime() is deprecated and the localtime_s() should be used instead.
+    // This warning will be ignored because GCC does not support it and for keeping the code simple.
+    time_t raw_time;
+    struct tm* local_time_values;
+    raw_time = time(nullptr);
+    local_time_values = localtime(&raw_time);
 
     // Assembling the status message from the time and the input text
-    strftime(&date_and_time_string[0], date_and_time_string.size(), "%T", &timeinfo);
-    std::string complete_message = date_and_time_string + " - " + message;
+    auto report_message = std::make_unique<char[]>(status_report_length);
+    auto snprintf_result = snprintf(report_message.get(), status_report_length, STATUS_REPORT_FORMAT_STRING,
+                                    local_time_values->tm_hour,
+                                    local_time_values->tm_min,
+                                    local_time_values->tm_sec,
+                                    message.c_str());
 
-    // Emitting the signal
-    emit NewStatusMessage(complete_message);
+    // If everything was ok with the snprintf call
+    // We can not check it with the report_message because of the coding,
+    // the sizes will not necessarily match with the return value of the snprintf()
+    if(0 < snprintf_result)
+    {
+        emit NewStatusMessage(std::string(report_message.get()));
+    }
+    else
+    {
+        throw("ERROR! The snprintf() has reported a format error in Backend::ReportStatus()!");
+    }
 }
 
 void Backend::OpenNetwokConnection(const std::string& port_name)

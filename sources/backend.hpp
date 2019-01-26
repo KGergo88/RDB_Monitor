@@ -23,7 +23,8 @@
 
 #include <iostream>
 #include <functional>
-#include <mutex>
+#include <cstdio>
+#include <ctime>
 
 #include <QApplication>
 
@@ -48,8 +49,6 @@ class Backend : public QObject, public BackendSignalInterface
     Q_INTERFACES(BackendSignalInterface)
 
 public:
-    static constexpr std::size_t report_date_and_time_string_size = 10;
-
     Backend();
     Backend(const Backend& new_backend) = delete;
     Backend(Backend&& new_backend) = delete;
