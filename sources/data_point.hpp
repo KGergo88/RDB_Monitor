@@ -46,8 +46,8 @@ public:
     inline const T_DATA_POINT& GetX(void) const {return x;}
     inline const T_DATA_POINT& GetY(void) const {return y;}
 
-    inline static const T_DATA_POINT& GetXValueOf(const DataPoint& object) {object.GetX();}
-    inline static const T_DATA_POINT& GetYValueOf(const DataPoint& object) {object.GetY();}
+    inline static const T_DATA_POINT& GetXValueOf(const DataPoint& object) {return object.GetX();}
+    inline static const T_DATA_POINT& GetYValueOf(const DataPoint& object) {return object.GetY();}
 
     inline void SetX(T_DATA_POINT& newX = 0) {x = newX; return x;}
     inline void SetY(T_DATA_POINT& newY = 0) {y = newY; return y;}

@@ -24,7 +24,6 @@
 #include <iostream>
 #include <sstream>
 #include <memory>
-#include <mutex>
 
 #include <QObject>
 #include <QSerialPort>
