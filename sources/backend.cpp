@@ -32,7 +32,11 @@
 Backend::Backend() : QObject(),
                      serial_port(),
                      measurement_data_protocol(),
-                     serial_network_handler(&serial_port, &measurement_data_protocol, std::bind(&Backend::StoreNewDiagrams, this, std::placeholders::_1))
+                     serial_network_handler(&serial_port,
+                                            &measurement_data_protocol,
+                                            std::bind(&Backend::StoreNewDiagrams, this, std::placeholders::_1),
+                                            std::bind(&Backend::ReportStatus, this, std::placeholders::_1)),
+                     gui_signal_interface(nullptr)
 {
 
 }

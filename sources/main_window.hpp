@@ -105,7 +105,7 @@ private:
     QLineEdit*      pLineEdit;
     QPushButton*    pPushButton;
 
-    void resizeEvent(QResizeEvent* event);
+    void resizeEvent(QResizeEvent* event) override;
     void SetSizes(void);
 };
 

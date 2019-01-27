@@ -27,15 +27,16 @@
 
 bool NetworkHandler::Run(const std::string& new_port_name)
 {
-    bool result = true;
+    bool result = false;
 
-    if(network_connection_interface && data_processing_interface && diagram_collector)
+    if(network_connection_interface && data_processing_interface && diagram_collector && error_collector)
     {
         if(network_connection_interface->Open(new_port_name))
         {
             if(network_connection_interface->StartListening())
             {
-                QObject::connect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)), this, SLOT(DataAvailable(std::istream&)));
+                QObject::connect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
+                QObject::connect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
                 port_name = new_port_name;
                 result = true;
             }
@@ -50,7 +51,8 @@ void NetworkHandler::Stop(void)
     if(network_connection_interface)
     {
         network_connection_interface->Close();
-        QObject::disconnect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)), this, SLOT(DataAvailable(std::istream&)));
+        QObject::disconnect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
+        QObject::disconnect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
     }
 }
 
@@ -64,5 +66,13 @@ void NetworkHandler::DataAvailable(std::istream& received_data)
         {
             diagram_collector(assembled_diagrams);
         }
+    }
+}
+
+void NetworkHandler::ErrorReport(const std::string& error_message)
+{
+    if(error_collector)
+    {
+        error_collector(error_message);
     }
 }

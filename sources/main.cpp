@@ -34,6 +34,8 @@
 
 int main(int argc, char **argv)
 {
+    int result = EXIT_FAILURE;
+
     try
     {
         std::cout << "Hello RDB!" << std::endl;
@@ -51,7 +53,7 @@ int main(int argc, char **argv)
         std::cout << "The GUI has stopped with result: " << q_application_result << std::endl;
 
         std::cout << "The End." << std::endl;
-        return q_application_result;
+        result = q_application_result;
     }
     catch(const std::string& exception_text)
     {
@@ -61,4 +63,6 @@ int main(int argc, char **argv)
     {
         std::cerr << "An exception was caught without any detailed info!" << std::endl;
     }
+
+    return result;
 }

@@ -138,15 +138,14 @@ std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
                     }
                     break;
                 default:
-                    std::string errorMessage = ("The DataProcessor::ProcessData's statemachine switched to an undefined state: " + std::to_string(static_cast<std::underlying_type<ProcessingStates>::type>(processing_state)));
                     processing_state = ProcessingStates::WaitingForStartLine;
-                    throw errorMessage;
+                    throw("The DataProcessor::ProcessData's statemachine switched to an undefined state: " + std::to_string(static_cast<std::underlying_type<ProcessingStates>::type>(processing_state)));
                     break;
             }
         }
         catch(const std::regex_error& exception)
         {
-            std::cerr << "A regex exception was caught: " << exception.code() << ": " << exception.what() << std::endl;
+            throw("A regex exception was caught: " + std::to_string(exception.code()) + ": " + exception.what());
         }
     }
 

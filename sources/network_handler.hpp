@@ -47,13 +47,16 @@ class NetworkHandler : public QObject
 public:
 
     using diagram_collector_type = std::function<void(std::vector<std::shared_ptr<DiagramSpecialized> >&)>;
+    using error_collector_type = std::function<void(const std::string&)>;
 
     NetworkHandler(NetworkConnectionInterface *new_network_connection_interface,
                    DataProcessingInterface *new_data_processing_interface,
-                   diagram_collector_type new_diagram_collector)
+                   diagram_collector_type new_diagram_collector,
+                   error_collector_type new_error_collector)
                               : network_connection_interface(new_network_connection_interface),
                                 data_processing_interface(new_data_processing_interface),
-                                diagram_collector(new_diagram_collector)
+                                diagram_collector(new_diagram_collector),
+                                error_collector(new_error_collector)
     {
         if(!network_connection_interface)
         {
@@ -68,6 +71,11 @@ public:
         if(!diagram_collector)
         {
             std::string errorMessage = "There was no diagram_collector set in NetworkHandler::NetworkHandler!";
+            throw errorMessage;
+        }
+        if(!error_collector)
+        {
+            std::string errorMessage = "There was no error_collector set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
     }
@@ -86,11 +94,13 @@ public:
 
 private slots:
     void DataAvailable(std::istream& received_data);
+    void ErrorReport(const std::string& error_message);
 
 private:
     NetworkConnectionInterface* network_connection_interface;
     DataProcessingInterface* data_processing_interface;
     diagram_collector_type diagram_collector;
+    error_collector_type error_collector;
     std::string port_name;
 };
 

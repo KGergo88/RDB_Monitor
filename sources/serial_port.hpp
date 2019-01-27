@@ -64,6 +64,7 @@ public:
 
 signals:
     void DataReceived(std::istream& received_data) override;
+    void ErrorReport(const std::string& error_message) override;
 
 private slots:
     void ReadLineFromPort(void);

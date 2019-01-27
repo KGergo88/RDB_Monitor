@@ -52,6 +52,7 @@ protected:
 
 signals:
     virtual void DataReceived(std::istream& received_data) = 0;
+    virtual void ErrorReport(const std::string& error_message) = 0;
 };
 
 Q_DECLARE_INTERFACE(NetworkConnectionInterface, "NetworkConnectionInterface")

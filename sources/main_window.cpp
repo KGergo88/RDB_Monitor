@@ -25,7 +25,8 @@
 
 
 
-MainWindow::MainWindow() : QMainWindow()
+MainWindow::MainWindow() : QMainWindow(),
+                           backend_signal_interface(nullptr)
 {
     network_connection_is_open = false;
 
@@ -212,6 +213,7 @@ void MainWindow::DiagramListSelectionChanged(void)
     emit RequestForDiagram(static_cast<DataIndexType>(pListWidgetDiagrams->currentRow()));
 }
 
+// CppCheck marks this function as never used, but in fact it is being called by Qt internally
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
     (void) event;

@@ -61,14 +61,13 @@ bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NA
             }
             else
             {
-                std::cerr << "Could not open the SerialPort. Device: " << port_name << std::endl;
                 port.reset();
             }
         }
         catch(...)
         {
-            std::cerr << "Could not open the SerialPort. Device: " << port_name << std::endl;
             port.reset();
+            throw("Could not open port (" + port_name + "), probably a bad allocation in std::make_unique().");
         }
     }
     else
@@ -79,7 +78,7 @@ bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NA
         }
         else
         {
-            std::cerr << "Another serial port was already openend with this object: " << port_name << std::endl;
+            throw("Another serial port was already openend with this object: " + port_name);
         }
     }
 
@@ -136,6 +135,6 @@ void SerialPort::HandleErrors(QSerialPort::SerialPortError error)
 {
     if(QSerialPort::ReadError == error)
     {
-        std::cerr << (QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(port->portName()).arg(port->errorString())).toStdString() << std::endl;
+        emit ErrorReport((QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(port->portName()).arg(port->errorString())).toStdString());
     }
 }
