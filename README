@@ -100,6 +100,7 @@ The RDB Diplomaterv Monitor was developed in C++14 and it depends on the followi
 ===============
 
 The RDB Diplomaterv Monitor was developed on an Ubuntu 18.10 Linux but it tries to ensure compatibility with Windows 10 as much as possible.
+The tagged versions are tested under both Ubuntu and Windows.
 
 
 
