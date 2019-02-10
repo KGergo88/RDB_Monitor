@@ -11,6 +11,7 @@ Table of contents
 	1 - Description
                 1a - Usage
                 1b - Measurement data protocol
+                1c - JFST protocol
 	2 - Dependencies
 	3 - Portability
 	4 - Building the project
@@ -56,13 +57,15 @@ that was received on the port on the right side of the window. The listed diagra
 
 The data needs to be formatted the following way in order to be processed by the program:
 <<<START>>>
-"X_AXIS_TITLE","Y1_AXIS_TITLE",...,"Yn_AXIS_TITLE",
-"X_AXIS_DATA0","Y1_AXIS_DATA0",...,"Yn_AXIS_DATA0",
-...
-"X_AXIS_DATAn","Y1_AXIS_DATAn",...,"Yn_AXIS_DATAn",
+"X_AXIS_TITLE","Y0_AXIS_TITLE",...,"Yn_AXIS_TITLE",
+"X_AXIS_DATA0","Y0_AXIS_DATA0",...,"Yn_AXIS_DATA0",
+.
+.
+.
+"X_AXIS_DATAn","Y0_AXIS_DATAn",...,"Yn_AXIS_DATAn",
 <<<END>>>
 
-The rules:
+The following requirements have to be fulfilled:
 	- The " symbols are not part of the format they are only marking the beginning and the end of an element
 	- The measurement data is always starting with the pattern "<<<START>>>"
 	- After the starting pattern the headline is transmitted:
@@ -83,6 +86,71 @@ The rules:
 	- The measurement data is always ending with the pattern "<<<END>>>"
 	- This is called a measurement session that contains all data needed to describe a diagram
 	- If there was an error detected in one of the lines then the whole session is invalid
+
+
+
+1c - JFST Protocol
+=================
+
+JFST stands for "JSON formatted storage and transfer", which means that this protocol can be used for both the storage of the diagrams in a file,
+and for transfering them to the RDB_Diplomaterv_Monitor by a device doing measurements.
+
+The diagram data is encoded by the JFST protocol in the following way:
+[
+    {
+        "DIAGRAM0"
+    },
+    .
+    .
+    .
+    {
+        "DIAGRAMn"
+    }
+]
+
+,where "DIAGRAMx" is a description of a diagram. So, the JFST Protocol encodes the data into an array of objects.
+Each object describes a diagram and has the following format:
+
+{
+    "DIAGRAM_TITLE": <STRING>,
+    "CRC_VALUE": <NUMBER> or "NO_CRC",
+    "AXIS_TITLES":
+    [
+        "X_AXIS_TITLE",
+        "Y0_AXIS_TITLE",
+        .
+        .
+        .
+        "Yn_AXIS_TITLE"
+    ]
+    "DATA_POINTS":
+    [
+        {
+            "DATA_POINT0"
+        },
+        .
+        .
+        .
+        {
+            "DATA_POINTn"
+        }
+    ]
+}
+
+,where "DATA_POINTx" is a description of a data point. So, the JFST Protocol encodes the data points into an array of objects.
+Each object describes a data point and has the following format:
+
+{
+    "X_AXIS_TITLE": <NUMBER>,
+    "Y0_AXIS_TITLE": <NUMBER> or "NO_DATA",
+    .
+    .
+    .
+    "Yn_AXIS_TITLE": <NUMBER> or "NO_DATA",
+}
+
+The following requirements have to be fulfilled:
+    - TBD...
 
 
 
