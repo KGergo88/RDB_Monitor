@@ -8,37 +8,38 @@ A monitor program for the RDB Diplomaterv project (https://github.com/KGergo88/R
 Table of contents
 =================
 
-	1 - Description
-                1a - Usage
-                1b - Measurement data protocol
-                1c - JFST protocol
-	2 - Dependencies
-	3 - Portability
-	4 - Building the project
-        5 - Release notes
-        6 - License
+        1 - Introduction
+        2 - Usage
+        3 - Supported protocols
+            3a - Measurement data protocol
+            3b - JFST protocol
+        4 - Dependencies
+        5 - Portability
+        6 - Building the project
+        7 - Release notes
+        8 - License
 
 
 
-1 - Description
-===============
+1 - Introduction
+================
 
-The RDB Diplomaterv Monitor was developed in order to visualise the measurement results of the RDB Diplomaterv project or any other software that produces results
-that are following the measurement data protocol (see chapter 1b).
+The RDB Diplomaterv Monitor was developed in order to visualise the measurement results of the RDB Diplomaterv project.
+Besides this, the program can be used with any other software or device that produces results in one of the supported protocols.
 
-The data that will be displayed are received through a serial port. In the tested environment the ST_LinkV2 debugger of the RDB Diplomaterv project
+At the moment only the serial port can be used for data reception. In the tested environment the ST_LinkV2 debugger of the RDB Diplomaterv project
 was connected to the PC running the RDB Diplomaterv Monitor with a USB cable and the data was received through either a COM port (Windows) or a device in the /dev folder (Linux).
 
 
 
-1a - Usage
-==========
+2 - Usage
+=========
 
-The usage of the prgram is quite straightforward: we need to enter the name of the port we would like to listen to into the textfield in the bottom right corner and then click the
+The usage of the program is quite straightforward: you need to enter the name of the serial port that you want to listen to into the textfield in the bottom right corner and then click the
 "Open Serial Port" button. The port name can be for example "COM3" on Windows or "/dev/ttyACM0" on Linux. The correct name can be found out for example by checking the available ports
-before and after connecting the device to the PC and looking for a port that appeared after making the connection.
+before and after connecting the device to the PC and looking for a port that appeared and was not present before.
 
-The serial port settings that are expected by the program:
+The following serial port settings are expected by the program:
 Baudrate:     115200 bps
 Data bits:    8
 Stop bits:    1
@@ -46,13 +47,38 @@ Parity:       none
 Flow control: none
 
 The status field in the lower side of the window tells whether the port could be opened or not. After successfully connecting to the port, the text on the button will change to
-"Close Serial Port". It should be noted that if any other program listens to the same port that we have opened, then the data on the port will not completely received by the monitor,
-and this might lead to dropped measurement results because of violations of the measurement data protocol. Then the program will listen to the opened serial port and list every diagram
-that was received on the port on the right side of the window. The listed diagrams can be selected for displaying by clicking on them.
+"Close Serial Port". Then the program will listen to the opened serial port and list every diagram
+that was received on the port on the right side of the window. The listed diagrams can be selected for display by clicking on them.
+
+It should be noted that if any other program listens to the same port that you have opened, then the data on the port will not completely received by the monitor,
+and this might lead to dropped measurement results because of violations of the measurement data protocol.
 
 
 
-1b - Measurement data protocol
+3 - Supported protocols
+=======================
+
+The following protocols are supported:
+
+Measurement data protocol:
+    - This is the primary protocol that is used for data reception trough the serial port
+    - It is simple and can be implemented by microcontrollers with limited resources as well
+    - Encodes the names of the measured quantities and the measured values
+    - One session contains data for only one diagram
+    - For detailed description, see the sub-chapter
+
+JFST Protocol:
+    - JFST stands for "JSON formatted storage and transfer"
+    - This protocol can be used for storing diagrams in the file system and also for data transmission between the data source and the monitor software
+    - The protocol is using the JSON format
+    - Encodes the diagram title, the names of the masured quantities and the measured values
+    - It supports CRC value storage
+    - Unlike the measurement data protocol, the data points do not need to contain a value for every measured quantity
+    - One session can data for more than one diagrams
+    - For detailed description, see the sub-chapter
+
+
+3a - Measurement Data Protocol
 ==============================
 
 The data needs to be formatted the following way in order to be processed by the program:
@@ -69,16 +95,16 @@ The following requirements have to be fulfilled:
 	- The " symbols are not part of the format they are only marking the beginning and the end of an element
 	- The measurement data is always starting with the pattern "<<<START>>>"
 	- After the starting pattern the headline is transmitted:
-		- Every headline element is followed by a comma "," 
-		- The headline tells how many different signals were measured and their names
+                - Every headline element is followed by a comma "," and there are no whitespaces before between and after the elements
+                - The headline describes how many different signals were measured and their names
 		- There has to be always at least two headline elements transmitted: the common X axis and at least one signal
 		- The headline elements:
                         - can only contain alphanumeric characters (0..9, A..Z, a..z)
 	- After the headline the measured data is transmitted:
-		- Every dataline element is followed by a comma "," 
+                - Every dataline element is followed by a comma "," and there are no whitespaces before between and after the elements
 		- There has to be as many elements in a data line as there was in the headline
 		- The data line elements are the values that were measured at the same time
-		- The measured signal values in the data line belong to the first data line element, the common X axis value
+                - All the measured signal values in the data line belong to the first data line element, the common X axis value
 		- The data line elements:
 			- are integer values
 			- can have an optional "+" or "-" sign as a prefix, for example "+25" or "-568"
@@ -87,13 +113,22 @@ The following requirements have to be fulfilled:
 	- This is called a measurement session that contains all data needed to describe a diagram
 	- If there was an error detected in one of the lines then the whole session is invalid
 
+Example:
+<<<START>>>
+u32TimeMs,u32SetValue,u32ActualValue,
+0,4000,0,
+10,4000,500,
+20,4000,1000,
+30,4000,1500,
+40,4000,2000,
+50,4000,2500,
+60,4000,3000,
+70,4000,3500,
+80,4000,4000,
+<<<END>>>
 
-
-1c - JFST Protocol
-=================
-
-JFST stands for "JSON formatted storage and transfer", which means that this protocol can be used for both the storage of the diagrams in a file,
-and for transfering them to the RDB_Diplomaterv_Monitor by a device doing measurements.
+3b - JFST Protocol
+==================
 
 The diagram data is encoded by the JFST protocol in the following way:
 [
@@ -154,7 +189,7 @@ The following requirements have to be fulfilled:
 
 
 
-2 - Dependencies
+4 - Dependencies
 ================
 
 The RDB Diplomaterv Monitor was developed in C++14 and it depends on the following external components:
@@ -164,7 +199,7 @@ The RDB Diplomaterv Monitor was developed in C++14 and it depends on the followi
 
 
 
-3 - Portability
+5 - Portability
 ===============
 
 The RDB Diplomaterv Monitor was developed on an Ubuntu 18.10 Linux but it tries to ensure compatibility with Windows 10 as much as possible.
@@ -172,14 +207,14 @@ The tagged versions are tested under both Ubuntu and Windows.
 
 
 
-4 - Building the project
+6 - Building the project
 ========================
 
 The RDB Diplomaterv Monitor can be compiled only using the Qt Creator IDE at the moment.
 
 
 
-5 - Release notes
+7 - Release notes
 =================
 
 v2.0.0 - Architectural rework
@@ -215,7 +250,8 @@ v1.0.0 - First release
             + When it is being switched between them, the memory usage of the program is increasing rapidly with every switch
 
 
-6 - License
+
+8 - License
 ===========
 
 RDB Diplomaterv Monitor

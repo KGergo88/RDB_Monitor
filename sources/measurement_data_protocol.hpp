@@ -66,6 +66,8 @@ private:
     };
 
     // REGEX strings to search the input data for valid measurement session
+#warning "The leading whitespaces can be removed from the patterns"
+#warning "Update the patterns with non capturing ()-s"
     const std::string regex_start_line         = R"(^\s*<<<START>>>$)";
     const std::string regex_headline           = R"(^\s*(\w+,){2,}$)";
     const std::string regex_headline_analyzer  = R"(^\s*(\w+),)";
