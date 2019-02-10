@@ -70,7 +70,9 @@ Measurement data protocol:
 JFST Protocol:
     - JFST stands for "JSON formatted storage and transfer"
     - This protocol can be used for storing diagrams in the file system and also for data transmission between the data source and the monitor software
+    - For the transmission it is aimed for devices with more powerful processing and networking capabilities
     - The protocol is using the JSON format
+    - It is more human-readable than the measurement data protocol, but needs more data to be transmitted
     - Encodes the diagram title, the names of the masured quantities and the measured values
     - It supports CRC value storage
     - Unlike the measurement data protocol, the data points do not need to contain a value for every measured quantity
@@ -113,7 +115,7 @@ The following requirements have to be fulfilled:
 	- This is called a measurement session that contains all data needed to describe a diagram
 	- If there was an error detected in one of the lines then the whole session is invalid
 
-Example:
+Example for a session:
 <<<START>>>
 u32TimeMs,u32SetValue,u32ActualValue,
 0,4000,0,
