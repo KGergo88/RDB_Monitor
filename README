@@ -12,7 +12,7 @@ Table of contents
         2 - Usage
         3 - Supported protocols
             3a - Measurement data protocol
-            3b - JFST protocol
+            3b - JFST Protocol Generation 0
         4 - Dependencies
         5 - Portability
         6 - Building the project
@@ -71,9 +71,10 @@ JFST Protocol:
     - JFST stands for "JSON formatted storage and transfer"
     - This protocol can be used for storing diagrams in the file system and also for data transmission between the data source and the monitor software
     - For the transmission it is aimed for devices with more powerful processing and networking capabilities
-    - The protocol is using the JSON format
+    - The protocol is using the JSON format (for details, see: http://json.org)
+    - The protocol has a generation value that makes backward compatibility possible
     - It is more human-readable than the measurement data protocol, but needs more data to be transmitted
-    - Encodes the diagram title, the names of the masured quantities and the measured values
+    - Encodes more data than the measurement data protocol, like protocol generation, CRC value, dimensions of the measured values, interpolation
     - It supports CRC value storage
     - Unlike the measurement data protocol, the data points do not need to contain a value for every measured quantity
     - One session can data for more than one diagrams
@@ -115,7 +116,7 @@ The following requirements have to be fulfilled:
 	- This is called a measurement session that contains all data needed to describe a diagram
 	- If there was an error detected in one of the lines then the whole session is invalid
 
-Example for a session:
+Example for a measurement data protocol session:
 <<<START>>>
 u32TimeMs,u32SetValue,u32ActualValue,
 0,4000,0,
@@ -129,11 +130,18 @@ u32TimeMs,u32SetValue,u32ActualValue,
 80,4000,4000,
 <<<END>>>
 
-3b - JFST Protocol
-==================
 
+
+3b - JFST Protocol Generation 0
+===============================
+
+The "<TYPE>" texts used in the description are the JSON types.
 The diagram data is encoded by the JFST protocol in the following way:
+
 [
+    {
+        "SESSION_DATA"
+    },
     {
         "DIAGRAM0"
     },
@@ -145,49 +153,185 @@ The diagram data is encoded by the JFST protocol in the following way:
     }
 ]
 
-,where "DIAGRAMx" is a description of a diagram. So, the JFST Protocol encodes the data into an array of objects.
-Each object describes a diagram and has the following format:
+,where "SESSION_DATA" is the description of the session and "DIAGRAMx" is a description of a diagram.
+So, the JFST Protocol encodes session data and the diagrams into an array of objects.
+The object describing the session has the following format:
+
+{
+    "JFST_GENERATION": <NUMBER>
+}
+
+Each object describing a diagram has the following format:
 
 {
     "DIAGRAM_TITLE": <STRING>,
-    "CRC_VALUE": <NUMBER> or "NO_CRC",
-    "AXIS_TITLES":
-    [
-        "X_AXIS_TITLE",
-        "Y0_AXIS_TITLE",
-        .
-        .
-        .
-        "Yn_AXIS_TITLE"
-    ]
-    "DATA_POINTS":
+    "CRC_VALUE": <NUMBER> or "null",
+    "AXIS_DATA":
     [
         {
-            "DATA_POINT0"
+            "AXIS_DATA1"
         },
         .
         .
         .
         {
-            "DATA_POINTn"
+            "AXIS_DATAn"
         }
+    ]
+    "DATA_POINTS":
+    [
+        [
+            "DATA_POINT0"
+        ],
+        .
+        .
+        .
+        [
+            "DATA_POINTn"
+        ]
     ]
 }
 
-,where "DATA_POINTx" is a description of a data point. So, the JFST Protocol encodes the data points into an array of objects.
-Each object describes a data point and has the following format:
+,where "AXIS_DATAx" is a description of an axis and "DATA_POINTx" is a description of a data point.
+So, the JFST Protocol encodes the axis data into an array of objects, where each object describes an axis and has the following format:
 
 {
-    "X_AXIS_TITLE": <NUMBER>,
-    "Y0_AXIS_TITLE": <NUMBER> or "NO_DATA",
-    .
-    .
-    .
-    "Yn_AXIS_TITLE": <NUMBER> or "NO_DATA",
+    "AXIS_TITLE": <STRING>,
+    "DIMENSION": <STRING> or "null",
+    "INTERPOLATION": "LINEAR" or "USE_PREVIOUS_VALUE" or "USE_NEXT_VALUE" or "null"
 }
 
+The data points are encoded into an array of arrays, where each inner array describes a data point and has the following format:
+
+[
+    <NUMBER>,
+    <NUMBER> or "null",
+    .
+    .
+    .
+    <NUMBER> or "null",
+]
+
 The following requirements have to be fulfilled:
-    - TBD...
+    - Each session is an array of objects
+    - The first object "SESSION_DATA" is describing the current session
+        - TBD...
+
+Example for a JFST session:
+
+[
+    {
+        "JFST_GENERATION": 0
+    },
+    {
+        "DIAGRAM_TITLE": "20190211_PI_ControllerMeasurements",
+        "CRC_VALUE": "null",
+        "AXIS_DATA":
+        [
+                {
+                    "AXIS_TITLE": "u32Time",
+                    "DIMENSION": "ms",
+                    "INTERPOLATION": "null"
+                },
+                {
+                    "AXIS_TITLE": "dSetValue",
+                    "DIMENSION": "null",
+                    "INTERPOLATION": "LINEAR"
+                },
+                {
+                    "AXIS_TITLE": "dActualValue",
+                    "DIMENSION": "null",
+                    "INTERPOLATION": "USE_PREVIOUS_VALUE"
+                },
+                {
+                    "AXIS_TITLE": "u8Temperature",
+                    "DIMENSION": "C",
+                    "INTERPOLATION": "LINEAR"
+                }
+        ],
+        "DATA_POINTS":
+        [
+            [
+                0,
+                20.0,
+                10.0,
+                24
+            ],
+            [
+                100,
+                20.0,
+                12.5,
+                "null"
+            ],
+            [
+                200,
+                20.0,
+                17.5,
+                23
+            ],
+            [
+                300,
+                20.0,
+                19.9,
+                "null"
+            ]
+        ]
+    },
+    {
+        "DIAGRAM_TITLE": "20190211_PI_ControllerMeasurementsWithNewSettings",
+        "CRC_VALUE": "2456721678566",
+        "AXIS_DATA":
+        [
+                {
+                    "AXIS_TITLE": "u32Time",
+                    "DIMENSION": "ms",
+                    "INTERPOLATION": "null"
+                },
+                {
+                    "AXIS_TITLE": "dSetValue",
+                    "DIMENSION": "null",
+                    "INTERPOLATION": "LINEAR"
+                },
+                {
+                    "AXIS_TITLE": "dActualValue",
+                    "DIMENSION": "null",
+                    "INTERPOLATION": "USE_PREVIOUS_VALUE"
+                },
+                {
+                    "AXIS_TITLE": "u8Temperature",
+                    "DIMENSION": "C",
+                    "INTERPOLATION": "LINEAR"
+                }
+        ],
+        "DATA_POINTS":
+        [
+            [
+                0,
+                20.0,
+                10.0,
+                24
+            ],
+            [
+                100,
+                20.0,
+                15.5,
+                "null"
+            ],
+            [
+                200,
+                20.0,
+                19.9,
+                23
+            ],
+            [
+                300,
+                20.0,
+                20.1,
+                "null"
+            ]
+        ]
+    }
+]
 
 
 
