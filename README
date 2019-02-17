@@ -70,14 +70,12 @@ Measurement data protocol:
 
 JFST Protocol:
     - JFST stands for "JSON formatted storage and transfer"
-    - This protocol can be used for storing diagrams in the file system and also for data transmission between the data source and the monitor software
-    - For the transmission it is aimed for devices with more powerful processing and networking capabilities
-    - The protocol is using the JSON format (for details, see: http://json.org)
-    - The protocol has a generation value that makes backward compatibility possible
-    - It is more human-readable than the measurement data protocol, but needs more data to be transmitted
-    - Encodes more data than the measurement data protocol, like protocol generation, CRC value, dimensions of the measured values, interpolation
-    - It supports CRC value storage
-    - Unlike the measurement data protocol, the data points do not need to contain a value for every measured quantity
+    - The protocol is using the JSON format (for details, see: http://json.org) to be more human-readable
+    - It can be used for storing diagrams in the file system and also for data transmission between the source and the monitor software
+    - The JFST is aimed for devices with more powerful processing and networking capabilities
+    - It has a generation value that can be used for differentiating between different incompatible JFST versions
+    - The JFTS encodes the diagram data and several metadata as well
+    - The protocol support data points where not every measured value has samples
     - One session can data for more than one diagrams
     - For detailed description, see the sub-chapter
 
@@ -137,8 +135,11 @@ u32TimeMs,u32SetValue,u32ActualValue,
 3b - JFST Protocol Generation 0
 ===============================
 
-The "<TYPE>" texts used in the description are the JSON types.
-The diagram data is encoded by the JFST protocol in the following way:
+The JFST Protocol has two layers, the JSON and the serialisation layers.
+In the OSI model, the JSON would be the application and the serialisation would be the presentation layer.
+
+The JSON layer presents the data in JSON format and support it's file system storage and loading.
+A session is defined the JSON layer following way (the "<TYPE>" texts used in the description are the JSON types):
 
 [
     {
@@ -161,13 +162,13 @@ The object describing the session has the following format:
 
 {
     "JFST_GENERATION": <NUMBER>
+    "CRC_VALUE": <NUMBER> or "null",
 }
 
 Each object describing a diagram has the following format:
 
 {
     "DIAGRAM_TITLE": <STRING>,
-    "CRC_VALUE": <NUMBER> or "null",
     "AXIS_DATA":
     [
         {
@@ -200,7 +201,6 @@ So, the JFST Protocol encodes the axis data into an array of objects, where each
 {
     "AXIS_TITLE": <STRING>,
     "DIMENSION": <STRING> or "null",
-    "INTERPOLATION": "LINEAR" or "USE_PREVIOUS_VALUE" or "USE_NEXT_VALUE" or "null"
 }
 
 The data points are encoded into an array of arrays, where each inner array describes a data point and has the following format:
@@ -218,77 +218,51 @@ The following requirements have to be fulfilled:
     - Each session is an array of objects
     - The first object is the "SESSION_DATA" describing the session:
         - it has a key, "JFST_GENERATION" with a number 0 assigned to it
+        - it has a key, "CRC_VALUE" containing the CRC value:
+                - it has either a number assigned to it if there was a CRC calculated to the session or
+                - it has "null" assigned to it if there was no CRC calculated for the diagram
         - it has no key-value pairs besides the previously described
     - The following objects are the "DIAGRAM_DATAx" describing the diagram x of the section:
         - they have a key, "DIAGRAM_TITLE" with a string that contains the title of the diagram
-        - they have a key, "CRC_VALUE" containing the CRC value:
-                - it has either a number assigned to it if there was a CRC calculated to the diagram or
-                - it has "null" assigned to it if there was no CRC calculated for the diagram (see CRC calculation rules below)
         - they have a key, "AXIS_DATA" with an array assigned to it describing the axes of the diagram:
                 - it has at least two objects in it describing each axis of the diagram:
                         - they have a key, "AXIS_TITLE" with a string that contains the title of the axis
                         - they have a key, "DIMENSION" with a string that contains the dimension of the axis
-                        - they have a key, "INTERPOLATION" describing the interpolation used for the axis:
-                                - it has a string "LINEAR" for linear interpolation or
-                                - it has a string "USE_PREVIOUS_VALUE" for keeping the previous value or
-                                - it has a string "USE_NEXT_VALUE" for switching to the next value or
-                                - it has a "null" assigned to it if there is no interpolation for the axis (see interpolation rules below)
                         - they have no key-value pairs besides the previously described
                 - the first object is describing the horizontal axis
         - they have a key, "DATA_POINTS" with an array assigned to it describing the data points of the diagram:
                 - they have arrays in it describing data samples that belong together:
                         - they have at least two elements
                         - they have numbers for existing data samples and "null" for non-existing data samples
-                        - the array elements are following the order of the array of "AXIS_DATA" (see AXIS_DATA - DATA_POINTS matching rules)
+                        - the array elements are following the order of the elements of the array "AXIS_DATA"
         - they have no key-value pairs besides the previously described
 
-CRC calculation rules:
-    - The generation 0 of the JFST protocol does not support the CRC calculation of the diagrams
-    - The key "CRC_VALUE" has to always have a value "null" assigned to it
-
-Interpolation rules:
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CONTINUE FROM HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    - The interpolation is used to generate values for the "DATA_POINTS" with non-existing data samples
-    - For the horizontal axis, the interpolation can not be applied, so the "INTERPOLATION" values for the horizontal axis has to be always "null"
-    - Because the
-    - The following interpolation types are supported by the generation 0 of the JFST protocol:
-        - Linear interpolation
-
-        - Keeping the previus value
-        - Switching to the next value
-
-AXIS_DATA - DATA_POINTS matching rules:
-
-Example for a JFST session:
+Example for a JSON layer representation of a session:
 
 [
     {
         "JFST_GENERATION": 0
+        "CRC_VALUE": "2456721678566",
     },
     {
         "DIAGRAM_TITLE": "20190211_PI_ControllerMeasurements",
-        "CRC_VALUE": "null",
         "AXIS_DATA":
         [
                 {
                     "AXIS_TITLE": "u32Time",
                     "DIMENSION": "ms",
-                    "INTERPOLATION": "null"
                 },
                 {
                     "AXIS_TITLE": "dSetValue",
                     "DIMENSION": "null",
-                    "INTERPOLATION": "LINEAR"
                 },
                 {
                     "AXIS_TITLE": "dActualValue",
                     "DIMENSION": "null",
-                    "INTERPOLATION": "USE_PREVIOUS_VALUE"
                 },
                 {
                     "AXIS_TITLE": "u8Temperature",
                     "DIMENSION": "C",
-                    "INTERPOLATION": "LINEAR"
                 }
         ],
         "DATA_POINTS":
@@ -321,28 +295,23 @@ Example for a JFST session:
     },
     {
         "DIAGRAM_TITLE": "20190211_PI_ControllerMeasurementsWithNewSettings",
-        "CRC_VALUE": "2456721678566",
         "AXIS_DATA":
         [
                 {
                     "AXIS_TITLE": "u32Time",
                     "DIMENSION": "ms",
-                    "INTERPOLATION": "null"
                 },
                 {
                     "AXIS_TITLE": "dSetValue",
                     "DIMENSION": "null",
-                    "INTERPOLATION": "LINEAR"
                 },
                 {
                     "AXIS_TITLE": "dActualValue",
                     "DIMENSION": "null",
-                    "INTERPOLATION": "USE_PREVIOUS_VALUE"
                 },
                 {
                     "AXIS_TITLE": "u8Temperature",
                     "DIMENSION": "C",
-                    "INTERPOLATION": "LINEAR"
                 }
         ],
         "DATA_POINTS":
@@ -374,6 +343,12 @@ Example for a JFST session:
         ]
     }
 ]
+
+The serialisation layer defines the rules of the conversion between the data of the JSON layer and a stream of bytes.
+Calculation and checking of the CRC value of the data also happens in this layer.
+
+At this point, the serialisation layer is not yet defined.
+Hence, the JFST protocol can only be used for file system storage and loading of sessions.
 
 
 
