@@ -43,6 +43,7 @@ signals:
     virtual void OpenNetworkConnection(const std::string& port_name) = 0;
     virtual void CloseNetworkConnection(const std::string& port_name) = 0;
     virtual void RequestForDiagram(const DataIndexType& diagram_index) = 0;
+    virtual void OpenFile(const std::string& path_to_file) = 0;
 
 protected:
     ~GuiSignalInterface() {}

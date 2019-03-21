@@ -355,7 +355,7 @@ Hence, the JFST protocol can only be used for file system storage and loading of
 4 - Dependencies
 ================
 
-The RDB Diplomaterv Monitor was developed in C++14 and it depends on the following external components:
+The RDB Diplomaterv Monitor was developed in C++17 and it depends on the following external components:
         - Qt5 v5.12.0 or newer
                 - The used components are Core, Widgets, and Charts SerialPort
 		- You can download it from the www.qt.io website

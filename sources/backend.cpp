@@ -47,9 +47,10 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
     {
         gui_signal_interface = new_gui_signal_interface;
 
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenNetworkConnection(const std::string&)),   this, SLOT(OpenNetwokConnection(const std::string&)));
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(CloseNetworkConnection(const std::string&)),  this, SLOT(CloseNetworkConnection(const std::string&)));
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(RequestForDiagram(const DataIndexType&)),     this, SLOT(RequestForDiagram(const DataIndexType&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenNetworkConnection(const std::string&)),  this, SLOT(OpenNetwokConnection(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(CloseNetworkConnection(const std::string&)), this, SLOT(CloseNetworkConnection(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(RequestForDiagram(const DataIndexType&)),    this, SLOT(RequestForDiagram(const DataIndexType&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenFile(const std::string&)),               this, SLOT(OpenFile(const std::string&)));
     }
     else
     {
@@ -159,5 +160,17 @@ void Backend::RequestForDiagram(const DataIndexType& diagram_index)
     {
         std::string errorMessage = "ERROR! The requested diagram (index " + std::to_string(diagram_index )+ " ) does not exist!";
         throw errorMessage;
+    }
+}
+
+void Backend::OpenFile(const std::string& path_to_file)
+{
+    std::cout << "This file was requested: " << path_to_file << std::endl;
+    #warning "This later on needs to be solved with the protocol container method..."
+    if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
+    {
+        #warning "Good question whether the file opening belongs to the protocols or it should rather be done by the backend..."
+        #error "I think it is rather a backend issue to check whether the file exists and to open it. The protocols are expecting an input stream anyway..."
+        measurement_data_protocol.ProcessFile(path_to_file);
     }
 }

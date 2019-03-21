@@ -25,9 +25,14 @@
 
 
 
-MeasurementDataProtocol::MeasurementDataProtocol()
+MeasurementDataProtocol::MeasurementDataProtocol() : DataProcessingInterface("Measurement Data Protocol MDP", ".mdp")
 {
     processing_state = ProcessingStates::WaitingForStartLine;
+}
+
+std::string MeasurementDataProtocol::GetProtocolName(void)
+{
+    return protocol_name;
 }
 
 std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessData(const std::string& data_source, std::istream& input_data)
@@ -150,4 +155,36 @@ std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
     }
 
     return assembled_diagrams;
+}
+
+bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_file)
+{
+    /*
+    bool bResult = false;
+
+    std::string file_extension = std::filesystem::path(path_to_file).extension();
+
+    if(native_file_extension == file_extension)
+    {
+        bResult = true;
+    }
+    return bResult;
+    */
+    #warning "Solve the std::filesystem linking error..."
+    return true;
+}
+
+std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessFile(const std::string& path_to_file)
+{
+    #warning "Solve the std::filesystem linking error..."
+    if(true)//std::filesystem::exists(std::filesystem::path(path_to_file)))
+    {
+        std::ifstream file_stream(path_to_file);
+
+        return ProcessData(path_to_file, file_stream);
+    }
+    else
+    {
+        #warning "handle this case..."
+    }
 }

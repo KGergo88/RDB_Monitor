@@ -39,7 +39,16 @@ class DataProcessingInterface
 public:
     virtual ~DataProcessingInterface() {}
 
+    virtual std::string GetProtocolName(void) = 0;
     virtual std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) = 0;
+    virtual bool CanThisFileBeProcessed(const std::string path_to_file) = 0;
+    virtual std::vector<std::shared_ptr<DiagramSpecialized> > ProcessFile(const std::string& path_to_file) = 0;
+
+protected:
+    DataProcessingInterface(const std::string& new_protocol_name, const std::string& new_file_extension) : protocol_name(new_protocol_name), native_file_extension(new_file_extension) {}
+
+    const std::string protocol_name;
+    const std::string native_file_extension;
 };
 
 #endif // DATA_PROCESSING_INTERFACE_HPP

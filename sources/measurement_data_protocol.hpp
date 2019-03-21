@@ -31,6 +31,8 @@
 #include <cctype>
 #include <regex>
 #include <type_traits>
+#include <filesystem>
+#include <fstream>
 
 #include "global.hpp"
 #include "data_processing_interface.hpp"
@@ -55,7 +57,10 @@ public:
     MeasurementDataProtocol& operator=(const MeasurementDataProtocol&) = delete;
     MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
 
+    std::string GetProtocolName(void) override;
     std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
+    bool CanThisFileBeProcessed(const std::string path_to_file) override;
+    std::vector<std::shared_ptr<DiagramSpecialized> > ProcessFile(const std::string& path_to_file) override;
 
 private:
     enum class ProcessingStates : uint8_t

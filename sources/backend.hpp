@@ -76,6 +76,7 @@ private slots:
     void OpenNetwokConnection(const std::string&);
     void CloseNetworkConnection(const std::string&);
     void RequestForDiagram(const DataIndexType& diagram_index);
+    void OpenFile(const std::string& path_to_file);
 
 private:
     SerialPort serial_port;
