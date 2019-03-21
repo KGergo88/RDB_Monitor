@@ -31,30 +31,68 @@ MainWindow::MainWindow() : QMainWindow(),
     network_connection_is_open = false;
 
     // Adding the object to the main window that will display the charts with anti-aliasing and the zooming turned off
-    pChartView = new QChartView(this);
+    pChartView = new QChartView();
     pChartView->setRenderHint(QPainter::Antialiasing);
     pChartView->setRubberBand(QChartView::NoRubberBand);
 
     // Adding the object to the main window that will list the processed diagrams to be selected to display
-    pListWidgetDiagrams = new QListWidget(this);
+    pListWidgetDiagrams = new QListWidget();
 
     // Adding the object to the main window that will list the status messages
-    pListWidgetStatus = new QListWidget(this);
+    pListWidgetStatus = new QListWidget();
 
     // Adding the object to where the user can enter which serial port will be opened
-    pLineEdit = new QLineEdit((SERIAL_PORT_DEFAULT_PORT_NAME), this);
+    pLineEdit = new QLineEdit(SERIAL_PORT_DEFAULT_PORT_NAME);
 
     // Adding the object with which the user can open and close the serial port
-    pPushButton = new QPushButton(push_button_open_text, this);
+    pPushButton = new QPushButton(push_button_open_text);
 
-    // Registering the types that are used in the signal and slot function prototypes
-    qRegisterMetaType<std::size_t>("std::size_t");
-    qRegisterMetaType<std::string>("std::string");
+    QVBoxLayout *pLeftVerticalLayout = new QVBoxLayout;
+    pLeftVerticalLayout->addWidget(pChartView, chart_view_size_percentage);
+    pLeftVerticalLayout->addWidget(pListWidgetStatus, list_widget_status_size_percentage);
+
+    QVBoxLayout *pRightVerticalLayout = new QVBoxLayout;
+    pRightVerticalLayout->addWidget(pListWidgetDiagrams, list_widget_diagrams_size_percentage);
+    pRightVerticalLayout->addWidget(pLineEdit, line_edit_size_percentage);
+    pRightVerticalLayout->addWidget(pPushButton, push_button_size_percentage);
+
+    QHBoxLayout *pHorizontalLayout = new QHBoxLayout;
+    pHorizontalLayout->addLayout(pLeftVerticalLayout, left_vertical_layout_size_percentage);
+    pHorizontalLayout->addLayout(pRightVerticalLayout, right_vertical_layout_size_percentage);
+
+    QWidget *pCentralWidget = new QWidget;
+    setCentralWidget(pCentralWidget);
+    pCentralWidget->setLayout(pHorizontalLayout);
+
+    pDiagramsMenu = menuBar()->addMenu("Diagrams");
+    pDiagramsMenu->addAction("Load Diagrams", this, &MainWindow::MenuActionDiagramsLoadDiagrams);
+    pDiagramsMenu->addAction("Save Diagrams", this, &MainWindow::MenuActionDiagramsSaveDiagrams);
 
     // Setting the minimum size and the title of the main window and showing it maximized
     setMinimumSize(main_window_minimum_width, main_window_minimum_height);
     setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
+
     showMaximized();
+}
+
+void MainWindow::MenuActionDiagramsLoadDiagrams(void)
+{
+    QFileDialog *pFileDialog = new QFileDialog(nullptr, "Load Diagrams", "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
+    pFileDialog->setAcceptMode(QFileDialog::AcceptOpen);
+    pFileDialog->setModal(true);
+
+    QObject::connect(pFileDialog, &QFileDialog::fileSelected, [=](const QString &file){emit OpenFile(file.toStdString());});
+    pFileDialog->show();
+}
+
+void MainWindow::MenuActionDiagramsSaveDiagrams(void)
+{
+    QFileDialog *pFileDialog = new QFileDialog(nullptr, "Save Diagrams", "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
+    pFileDialog->setAcceptMode(QFileDialog::AcceptSave);
+    pFileDialog->setModal(true);
+
+    QObject::connect(pFileDialog, &QFileDialog::fileSelected, [=](const QString &file){DisplayStatusMessage("Selected file: " + file.toStdString());});
+    pFileDialog->show();
 }
 
 void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_backend_signal_interface)
@@ -211,49 +249,4 @@ void MainWindow::UpdateDiagramList(const std::vector<std::string>& available_dia
 void MainWindow::DiagramListSelectionChanged(void)
 {
     emit RequestForDiagram(static_cast<DataIndexType>(pListWidgetDiagrams->currentRow()));
-}
-
-// CppCheck marks this function as never used, but in fact it is being called by Qt internally
-void MainWindow::resizeEvent(QResizeEvent* event)
-{
-    (void) event;
-
-    SetSizes();
-}
-
-void MainWindow::SetSizes(void)
-{
-    int window_width = size().width();
-    int window_height = size().height();
-
-    pChartView->setGeometry(chartview_fixposition_x,
-                            chartview_fixposition_y,
-                            (static_cast<int>(static_cast<qreal>(window_width) * chartview_width_relative_to_main_window)),
-                            (static_cast<int>(static_cast<qreal>(window_height) * chartview_height_relative_to_main_window)));
-    int chart_view_width = pChartView->width();
-    int chart_view_height = pChartView->height();
-
-    pListWidgetDiagrams->setGeometry(chart_view_width,
-                                     listwidgetdiagrams_fixposition_y,
-                                     (window_width - chart_view_width),
-                                     chart_view_height);
-    int list_widget_diagrams_width = pListWidgetDiagrams->width();
-    int list_widget_diagrams_height = pListWidgetDiagrams->height();
-
-    pListWidgetStatus->setGeometry(listwidgetstatus_fixposition_x,
-                                   chart_view_height,
-                                   chart_view_width,
-                                   (window_height - list_widget_diagrams_height));
-    int list_widget_status_height = pListWidgetStatus->height();
-
-    pLineEdit->setGeometry(chart_view_width,
-                           chart_view_height,
-                           list_widget_diagrams_width,
-                           (static_cast<int>(static_cast<qreal>(list_widget_status_height) * lineedit_height_relative_to_listwidgetstatus)));
-    int line_edit_height = pLineEdit->height();
-
-    pPushButton->setGeometry(chart_view_width,
-                             (chart_view_height + line_edit_height),
-                             list_widget_diagrams_width,
-                             line_edit_height);
 }

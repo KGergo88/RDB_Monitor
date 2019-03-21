@@ -29,6 +29,7 @@
 #include <QtWidgets>
 #include <QtCharts>
 #include <QString>
+#include <QFileDialog>
 
 #include "global.hpp"
 #include "gui_signal_interface.h"
@@ -67,6 +68,7 @@ signals:
     void OpenNetworkConnection(const std::string& port_name) override;
     void CloseNetworkConnection(const std::string& port_name) override;
     void RequestForDiagram(const DataIndexType& diagram_index) override;
+    void OpenFile(const std::string& path_to_file) override;
 
 private slots:
     void DisplayStatusMessage(const std::string& message_text);
@@ -75,21 +77,24 @@ private slots:
     void DisplayDiagram(const DiagramSpecialized& diagram);
     void UpdateDiagramList(const std::vector<std::string>& available_diagrams);
     void DiagramListSelectionChanged(void);
+    void MenuActionDiagramsLoadDiagrams(void);
+    void MenuActionDiagramsSaveDiagrams(void);
 
 private:
-    static constexpr int main_window_minimum_width = 750;
+    static constexpr int main_window_minimum_width = 800;
     static constexpr int main_window_minimum_height = 500;
+
+    static constexpr int chart_view_size_percentage = 90;
+    static constexpr int list_widget_status_size_percentage = 10;
+    static constexpr int list_widget_diagrams_size_percentage = 90;
+    static constexpr int line_edit_size_percentage = 5;
+    static constexpr int push_button_size_percentage = 5;
+    static constexpr int left_vertical_layout_size_percentage = 80;
+    static constexpr int right_vertical_layout_size_percentage = 20;
+
 
     static constexpr const char* const push_button_open_text = "Open Serial Port";
     static constexpr const char* const push_button_close_text = "Close Serial Port";
-
-    static constexpr int   chartview_fixposition_x = 0;
-    static constexpr int   chartview_fixposition_y = 0;
-    static constexpr qreal chartview_width_relative_to_main_window = 0.8;
-    static constexpr qreal chartview_height_relative_to_main_window = 0.9;
-    static constexpr int   listwidgetdiagrams_fixposition_y = 0;
-    static constexpr int   listwidgetstatus_fixposition_x = 0;
-    static constexpr qreal lineedit_height_relative_to_listwidgetstatus = 0.5;
 
     static constexpr qreal y_axis_range_multiplicator = 0.05;
     static constexpr int   y_axis_tick_count = 5;
@@ -104,9 +109,9 @@ private:
     QListWidget*    pListWidgetStatus;
     QLineEdit*      pLineEdit;
     QPushButton*    pPushButton;
-
-    void resizeEvent(QResizeEvent* event) override;
-    void SetSizes(void);
+    QMenuBar*       pMenuBar;
+    QMenu*          pDiagramsMenu;
+    QMenu*          pHelpMenu;
 };
 
 
