@@ -165,12 +165,25 @@ void Backend::RequestForDiagram(const DataIndexType& diagram_index)
 
 void Backend::OpenFile(const std::string& path_to_file)
 {
-    std::cout << "This file was requested: " << path_to_file << std::endl;
-    #warning "This later on needs to be solved with the protocol container method..."
-    if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
+    #warning "Solve the std::filesystem linking error..."
+    if(true)//std::filesystem::exists(std::filesystem::path(path_to_file)))
     {
-        #warning "Good question whether the file opening belongs to the protocols or it should rather be done by the backend..."
-        #error "I think it is rather a backend issue to check whether the file exists and to open it. The protocols are expecting an input stream anyway..."
-        measurement_data_protocol.ProcessFile(path_to_file);
+        #warning "This later on needs to be solved with the protocol container method..."
+        if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
+        {
+            std::ifstream file_stream(path_to_file);
+            #warning "Solve the std::filesystem linking error..."
+            std::string file_name = "file_name";   //std::filesystem::path(path_to_file).filename();
+            auto diagrams_from_file = measurement_data_protocol.ProcessData(file_name, file_stream);
+            StoreNewDiagrams(diagrams_from_file);
+        }
+        else
+        {
+            #warning "handle this case..."
+        }
+    }
+    else
+    {
+        #warning "handle this case..."
     }
 }

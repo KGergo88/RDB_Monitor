@@ -38,6 +38,7 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++17
+QMAKE_LFLAGS += -lstdc++fs
 
 #Linux
 unix {

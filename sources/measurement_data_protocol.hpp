@@ -31,7 +31,6 @@
 #include <cctype>
 #include <regex>
 #include <type_traits>
-#include <filesystem>
 #include <fstream>
 
 #include "global.hpp"
@@ -60,7 +59,6 @@ public:
     std::string GetProtocolName(void) override;
     std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
     bool CanThisFileBeProcessed(const std::string path_to_file) override;
-    std::vector<std::shared_ptr<DiagramSpecialized> > ProcessFile(const std::string& path_to_file) override;
 
 private:
     enum class ProcessingStates : uint8_t

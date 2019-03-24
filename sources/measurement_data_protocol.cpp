@@ -173,18 +173,3 @@ bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_f
     #warning "Solve the std::filesystem linking error..."
     return true;
 }
-
-std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessFile(const std::string& path_to_file)
-{
-    #warning "Solve the std::filesystem linking error..."
-    if(true)//std::filesystem::exists(std::filesystem::path(path_to_file)))
-    {
-        std::ifstream file_stream(path_to_file);
-
-        return ProcessData(path_to_file, file_stream);
-    }
-    else
-    {
-        #warning "handle this case..."
-    }
-}

@@ -9,5 +9,4 @@ u64TimeSinceTestBeginMs,eTestProcessState,i16SpeedSetValueRpm,i16SpeedActualValu
 70,2,-2500,642,4079,
 80,2,-2500,810,3831,
 90,2,-2500,954,3625,
-5100,4,0,0,369,
 <<<END>>>
