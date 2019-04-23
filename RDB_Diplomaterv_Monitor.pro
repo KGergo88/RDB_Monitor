@@ -38,7 +38,7 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++17
-QMAKE_LFLAGS += -lstdc++fs
+LIBS += -lstdc++fs
 
 #Linux
 unix {
@@ -56,6 +56,7 @@ SOURCES += \
     sources/data_line.cpp \
     sources/data_point.cpp \
     sources/diagram.cpp \
+    sources/diagram_container.cpp \
     sources/main.cpp \
     sources/serial_port.cpp \
     sources/network_handler.cpp \
@@ -70,6 +71,7 @@ HEADERS += \
     sources/data_line.hpp \
     sources/data_point.hpp \
     sources/diagram.hpp \
+    sources/diagram_container.h \
     sources/global.hpp \
     sources/serial_port.hpp \
     sources/network_connection_interface.hpp \

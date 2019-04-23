@@ -25,6 +25,7 @@
 #include <functional>
 #include <cstdio>
 #include <ctime>
+#include <fstream>
 #include <filesystem>
 
 #include <QApplication>
@@ -36,6 +37,7 @@
 #include "serial_port.hpp"
 #include "measurement_data_protocol.hpp"
 #include "network_handler.hpp"
+#include "diagram_container.h"
 
 
 
@@ -67,6 +69,8 @@ public:
 
     void ReportStatus(const std::string& message);
 
+    QAbstractItemModel* GetDiagramContainerModel(void) override {return &diagram_model;}
+
 signals:
     void NewStatusMessage(const std::string& message_text) override;
     void NetworkOperationFinished(const std::string& port_name, bool result) override;
@@ -87,6 +91,8 @@ private:
     GuiSignalInterface *gui_signal_interface;
 
     std::vector<DiagramSpecialized> diagram_container;
+
+    DiagramContainer diagram_model;
 };
 
 

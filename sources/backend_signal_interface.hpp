@@ -25,6 +25,7 @@
 #include <string>
 
 #include <QtPlugin>
+#include <QAbstractItemModel>
 
 #include "global.hpp"
 
@@ -40,6 +41,9 @@ class BackendSignalInterface
 
 protected:
     ~BackendSignalInterface() {}
+
+public:
+    virtual QAbstractItemModel* GetDiagramContainerModel(void) = 0;
 
 signals:
     virtual void NewStatusMessage(const std::string& message_text) = 0;

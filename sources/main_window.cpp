@@ -36,7 +36,7 @@ MainWindow::MainWindow() : QMainWindow(),
     pChartView->setRubberBand(QChartView::NoRubberBand);
 
     // Adding the object to the main window that will list the processed diagrams to be selected to display
-    pListWidgetDiagrams = new QListWidget();
+    pTreeView = new QTreeView();
 
     // Adding the object to the main window that will list the status messages
     pListWidgetStatus = new QListWidget();
@@ -52,7 +52,7 @@ MainWindow::MainWindow() : QMainWindow(),
     pLeftVerticalLayout->addWidget(pListWidgetStatus, list_widget_status_size_percentage);
 
     QVBoxLayout *pRightVerticalLayout = new QVBoxLayout;
-    pRightVerticalLayout->addWidget(pListWidgetDiagrams, list_widget_diagrams_size_percentage);
+    pRightVerticalLayout->addWidget(pTreeView, tree_view_size_percentage);
     pRightVerticalLayout->addWidget(pLineEdit, line_edit_size_percentage);
     pRightVerticalLayout->addWidget(pPushButton, push_button_size_percentage);
 
@@ -87,12 +87,7 @@ void MainWindow::MenuActionDiagramsLoadDiagrams(void)
 
 void MainWindow::MenuActionDiagramsSaveDiagrams(void)
 {
-    QFileDialog *pFileDialog = new QFileDialog(nullptr, "Save Diagrams", "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
-    pFileDialog->setAcceptMode(QFileDialog::AcceptSave);
-    pFileDialog->setModal(true);
-
-    QObject::connect(pFileDialog, &QFileDialog::fileSelected, [=](const QString &file){DisplayStatusMessage("Selected file: " + file.toStdString());});
-    pFileDialog->show();
+    #warning "Implement this..."
 }
 
 void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_backend_signal_interface)
@@ -108,11 +103,14 @@ void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_back
                          this,                                             SLOT(ProcessNetworkOperationResult(const std::string&, const bool&)));
         QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
                          this,                                             SLOT(DisplayDiagram(const DiagramSpecialized&)));
-        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(DiagramListHasChanged(const std::vector<std::string>&)),
-                         this,                                             SLOT(UpdateDiagramList(const std::vector<std::string>&)));
-
-        QObject::connect(pListWidgetDiagrams, &QListWidget::itemSelectionChanged, this, &MainWindow::DiagramListSelectionChanged);
+#warning "Implement this..."
+        //QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(DiagramListHasChanged(const std::vector<std::string>&)),
+        //                 this,                                             SLOT(UpdateDiagramList(const std::vector<std::string>&)));
+#warning "Implement this..."
+        //QObject::connect(pListWidgetDiagrams, &QListWidget::itemSelectionChanged, this, &MainWindow::DiagramListSelectionChanged);
         QObject::connect(pPushButton,         &QPushButton::clicked,              this, &MainWindow::PushButtonWasClicked);
+
+        pTreeView->setModel(backend_signal_interface->GetDiagramContainerModel());
     }
     else
     {
@@ -236,17 +234,19 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
 
 void MainWindow::UpdateDiagramList(const std::vector<std::string>& available_diagrams)
 {
-    pListWidgetDiagrams->clear();
+#warning "Implement this..."
+//    pListWidgetDiagrams->clear();
 
-    for(const auto& i : available_diagrams)
-    {
-        auto pListWidgetItem = new QListWidgetItem();
-        pListWidgetItem->setText(QString::fromStdString(i));
-        pListWidgetDiagrams->addItem(pListWidgetItem);
-    }
+//    for(const auto& i : available_diagrams)
+//    {
+//        auto pListWidgetItem = new QListWidgetItem();
+//        pListWidgetItem->setText(QString::fromStdString(i));
+//        pListWidgetDiagrams->addItem(pListWidgetItem);
+//    }
 }
 
 void MainWindow::DiagramListSelectionChanged(void)
 {
-    emit RequestForDiagram(static_cast<DataIndexType>(pListWidgetDiagrams->currentRow()));
+#warning "Implement this..."
+//    emit RequestForDiagram(static_cast<DataIndexType>(pListWidgetDiagrams->currentRow()));
 }

@@ -159,7 +159,6 @@ std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
 
 bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_file)
 {
-    /*
     bool bResult = false;
 
     std::string file_extension = std::filesystem::path(path_to_file).extension();
@@ -169,7 +168,4 @@ bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_f
         bResult = true;
     }
     return bResult;
-    */
-    #warning "Solve the std::filesystem linking error..."
-    return true;
 }

@@ -30,6 +30,7 @@
 #include <QtCharts>
 #include <QString>
 #include <QFileDialog>
+#include <QTreeView>
 
 #include "global.hpp"
 #include "gui_signal_interface.h"
@@ -86,7 +87,7 @@ private:
 
     static constexpr int chart_view_size_percentage = 90;
     static constexpr int list_widget_status_size_percentage = 10;
-    static constexpr int list_widget_diagrams_size_percentage = 90;
+    static constexpr int tree_view_size_percentage = 90;
     static constexpr int line_edit_size_percentage = 5;
     static constexpr int push_button_size_percentage = 5;
     static constexpr int left_vertical_layout_size_percentage = 80;
@@ -105,7 +106,7 @@ private:
     BackendSignalInterface* backend_signal_interface;
 
     QChartView*     pChartView;
-    QListWidget*    pListWidgetDiagrams;
+    QTreeView*      pTreeView;
     QListWidget*    pListWidgetStatus;
     QLineEdit*      pLineEdit;
     QPushButton*    pPushButton;
