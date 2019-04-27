@@ -24,8 +24,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <set>
 #include <memory>
+#include <variant>
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
@@ -37,6 +37,8 @@
 
 #ifndef DIAGRAM_CONTAINER_H
 #define DIAGRAM_CONTAINER_H
+
+//#define DIAGRAM_CONTAINER_DEBUG_MODE
 
 
 
@@ -55,18 +57,31 @@ public:
 
     virtual ~DiagramContainer() override = default;
 
+    std::size_t GetNumberOfDiagrams(void) const {return root_item->CountElementsBelowWithType<Element::DataType_Diagram>();}
+    bool AreDiagramsStored(void) const {return (0 < GetNumberOfDiagrams());}
+
+
+    // Members overridden from the QAbstractItemModel
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 private:
+    // The type definition of the elements of the diagram container
     class Element
     {
     public:
-        explicit Element(const std::string& new_name, Element* new_parent = nullptr) : name(new_name), parent(new_parent) {}
+        // Data type used for elements that do not contain a diagram but is only an entry
+        using DataType_Name = std::string;
+        // Data type used of elements that actually contain a diagram
+        using DataType_Diagram = DiagramSpecialized;
+        // The two above data types combined
+        using DataType = std::variant<DataType_Name, DataType_Diagram>;
+
+        explicit Element(const DataType& new_data, Element* new_parent = nullptr) : data(new_data), parent(new_parent) {}
 
         Element(const Element& new_backend) = delete;
         Element(Element&& new_backend) = delete;
@@ -74,51 +89,31 @@ private:
         Element& operator=(const Element& new_backend) = delete;
         Element& operator=(Element&& new_backend) = delete;
 
-        bool operator<(const Element& other) const {return (name < other.name);}
-
         ~Element() = default;
 
-        bool AmIRootElement(void) const {return (nullptr == parent);}
+        bool IsRoot(void) const {return (nullptr == parent);}
         Element* GetParent(void) {return parent;}
         std::size_t GetNumberOfChildren(void) const {return children.size();}
-        Element& CreateChild(const std::string& childs_name)
-        {
-            children.push_back(std::make_unique<Element>(childs_name, this));
-            return *children.at(children.size() - 1);
-        }
+        Element& CreateChild(const std::string& childs_name);
+        Element* GetChildAddress(const std::size_t& index);
+        template <typename T> bool ContainsType(void) const {return std::holds_alternative<T>(data);}
+        template <typename T> std::size_t CountElementsBelowWithType(void) const;
+        std::string GetDisplayableString(void) const;
+#ifdef DIAGRAM_CONTAINER_DEBUG_MODE
+        void PrintAllElementsBelow(const std::string& identation = "   ") const;
+#endif
 
-        Element* GetChildAddress(const std::size_t& index)
-        {
-            if(index < children.size())
-            {
-                return children.at(index).get();
-            }
-            else
-            {
-                std::string errorMessage = "The indexed DiagramContainer::Element::children does not exist. /n Requested index: ";
-                errorMessage += std::to_string(index);
-                errorMessage += "/nMax index: ";
-                errorMessage += std::to_string(children.size());
-                throw errorMessage;
-            }
-        }
-
-        void PrintAllElementsBelow(const std::string& identation = "   ") const
-        {
-            std::cout << identation << "Name: \"" << name << "\", Address: " << this << std::endl;
-
-            for(const auto& i : children)
-            {
-                i->PrintAllElementsBelow(identation + identation);
-            }
-        }
-
-        std::string name;
+        // The data contained by the element
+        DataType data;
+        // The parent of this element, if there is no parent, it has the value nullptr
         Element* parent;
+        // The elements whose parent is this element
         std::vector<std::unique_ptr<Element> > children;
     };
 
+    // Every element contains only one column
     static constexpr int column_count = 1;
+    // This is root element of the tree, it only contains a string that can be used as header in the view
     std::unique_ptr<Element> root_item;
 };
 
