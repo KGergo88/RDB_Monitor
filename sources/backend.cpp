@@ -61,33 +61,37 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
 
 void Backend::StoreNewDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams)
 {
-    auto this_is_the_first_diagram = diagram_container.empty();
+    auto this_is_the_first_diagram = (0 == diagram_container.GetNumberOfDiagrams());
 
     // Adding the diagrams to the diagram_container
     for(const auto& i : new_diagrams)
     {
-        diagram_container.push_back(*i);
+        diagram_container.AddDiagramFromFile("TestString", *i);
     }
 
     ReportStatus(std::to_string(new_diagrams.size()) + " new diagram was added to the list.");
-    NotifyAboutDiagramContainerChange();
 
-    if(this_is_the_first_diagram)
-    {
-        emit ShowThisDiagram(*diagram_container.begin());
-    }
+#warning "Implement this..."
+//    NotifyAboutDiagramContainerChange();
+//
+//
+//    if(this_is_the_first_diagram)
+//    {
+//        emit ShowThisDiagram(*diagram_container.begin());
+//    }
 }
 
 void Backend::NotifyAboutDiagramContainerChange(void)
 {
-    std::vector<std::string> diagram_titles;
-
-    for(const auto& i : diagram_container)
-    {
-        diagram_titles.push_back(i.GetTitle());
-    }
-
-    emit DiagramListHasChanged(diagram_titles);
+    #warning "Implement this..."
+    //std::vector<std::string> diagram_titles;
+    //
+    //for(const auto& i : diagram_container)
+    //{
+    //    diagram_titles.push_back(i.GetTitle());
+    //}
+    //
+    //emit DiagramListHasChanged(diagram_titles);
 }
 
 void Backend::ReportStatus(const std::string& message)
@@ -152,15 +156,16 @@ void Backend::CloseNetworkConnection(const std::string& port_name)
 
 void Backend::RequestForDiagram(const DataIndexType& diagram_index)
 {
-    if(diagram_index < diagram_container.size())
-    {
-        emit ShowThisDiagram(diagram_container[diagram_index]);
-    }
-    else
-    {
-        std::string errorMessage = "ERROR! The requested diagram (index " + std::to_string(diagram_index )+ " ) does not exist!";
-        throw errorMessage;
-    }
+    #warning "Implement this..."
+//    if(diagram_index < diagram_container.size())
+//    {
+//        emit ShowThisDiagram(diagram_container[diagram_index]);
+//    }
+//    else
+//    {
+//        std::string errorMessage = "ERROR! The requested diagram (index " + std::to_string(diagram_index )+ " ) does not exist!";
+//        throw errorMessage;
+//    }
 }
 
 void Backend::OpenFile(const std::string& path_to_file)

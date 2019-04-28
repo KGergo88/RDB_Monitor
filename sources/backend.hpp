@@ -56,7 +56,7 @@ public:
     Backend(const Backend& new_backend) = delete;
     Backend(Backend&& new_backend) = delete;
 
-    ~Backend() = default;
+    virtual ~Backend() override = default;
 
     Backend& operator=(const Backend&  new_backend) = delete;
     Backend& operator=(Backend&& new_backend) = delete;
@@ -69,7 +69,7 @@ public:
 
     void ReportStatus(const std::string& message);
 
-    QAbstractItemModel* GetDiagramContainerModel(void) override {return &diagram_model;}
+    QAbstractItemModel* GetDiagramContainerModel(void) override {return &diagram_container;}
 
 signals:
     void NewStatusMessage(const std::string& message_text) override;
@@ -90,9 +90,7 @@ private:
 
     GuiSignalInterface *gui_signal_interface;
 
-    std::vector<DiagramSpecialized> diagram_container;
-
-    DiagramContainer diagram_model;
+    DiagramContainer diagram_container;
 };
 
 

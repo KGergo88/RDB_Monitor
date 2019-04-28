@@ -4,9 +4,16 @@
 
 DiagramContainer::DiagramContainer(QObject* parent) : QAbstractItemModel(parent)
 {
-    root_item = std::make_unique<Element>("Available diagrams");
-    root_item->CreateChild("Diagrams loaded from files").CreateChild("No diagram was loaded yet...");
-    root_item->CreateChild("Diagrams received on the network").CreateChild("No diagram was received yet...");
+    // Creating the root element
+    root_element = std::make_unique<Element>(root_element_data);
+
+    // Creating the element that holds the diagrams from the files with an empty element
+    files_element = root_element->CreateChild(files_element_data);
+    files_element->CreateChild(empty_element_data);
+
+    // Creating the element that holds the diagrams from the network with an empty element
+    network_element = root_element->CreateChild(network_element_data);
+    network_element->CreateChild(empty_element_data);
 
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
     std::cout << "Elements contained by the DiagramContainer:" << std::endl;
@@ -14,6 +21,77 @@ DiagramContainer::DiagramContainer(QObject* parent) : QAbstractItemModel(parent)
     std::cout << std::endl;
 #endif
 }
+
+void DiagramContainer::AddDiagramFromFile(const std::string &file_path, const DiagramSpecialized &diagram)
+{
+    AddDiagramToElement(files_element, file_path, diagram);
+}
+
+void DiagramContainer::AddDiagramFromNetwork(const std::string& connection_name, const DiagramSpecialized& diagram)
+{
+    AddDiagramToElement(network_element, connection_name, diagram);
+}
+
+void DiagramContainer::AddDiagramToElement(Element* element, const std::string& file_or_connection_name, const DiagramSpecialized &diagram)
+{
+    // If the empty element is still here then we remove it
+    Element* empty_element = element->GetChildWithNameEntry(empty_element_data);
+    if(nullptr != empty_element)
+    {
+        RemoveChildFromElement(element, empty_element);
+    }
+
+    // Looking for the sub-element that belongs to this file or connection and creating it if it does not exists
+    Element* sub_element = element->GetChildWithNameEntry(file_or_connection_name);
+    if(nullptr == sub_element)
+    {
+        sub_element = AddChildToElement(element, file_or_connection_name);
+    }
+
+    // Adding the diagram to the element that belongs to this file
+    AddChildToElement(sub_element, diagram);
+}
+
+QModelIndex DiagramContainer::GetModelIndexOfElement(Element *element) const
+{
+    QModelIndex result;
+    std::size_t index_of_element;
+
+    if(element->parent->GetIndexOfChild(element, index_of_element))
+    {
+        result = createIndex(index_of_element, (column_count - 1), element);
+    }
+
+    return result;
+}
+
+DiagramContainer::Element* DiagramContainer::AddChildToElement(Element* element, Element::DataType data)
+{
+    Element* result = nullptr;
+
+    beginInsertRows(GetModelIndexOfElement(element), element->GetNumberOfChildren(), (element->GetNumberOfChildren()));
+    result = element->CreateChild(data);
+    endInsertRows();
+
+    return result;
+}
+
+void DiagramContainer::RemoveChildFromElement(Element* element, Element* child)
+{
+    std::size_t index_of_child;
+    if(element->GetIndexOfChild(child, index_of_child))
+    {
+        beginRemoveRows(GetModelIndexOfElement(element), index_of_child, index_of_child);
+        element->KillChild(index_of_child);
+        endRemoveRows();
+    }
+}
+
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 QModelIndex DiagramContainer::index(int row, int column, const QModelIndex &parent) const
 {
@@ -37,7 +115,7 @@ QModelIndex DiagramContainer::index(int row, int column, const QModelIndex &pare
     }
     else
     {
-        parent_element = root_item.get();
+        parent_element = root_element.get();
     }
 
     std::size_t number_of_children = parent_element->GetNumberOfChildren();
@@ -45,7 +123,7 @@ QModelIndex DiagramContainer::index(int row, int column, const QModelIndex &pare
     {
         if(column_count > column)
         {
-            Element* child_element = parent_element->GetChildAddress(row);
+            Element* child_element = parent_element->GetChildWithIndex(row);
             result = createIndex(row, column, child_element);
         }
     }
@@ -69,8 +147,8 @@ QModelIndex DiagramContainer::parent(const QModelIndex &index) const
     if(index.isValid())
     {
         Element* indexed_element = static_cast<Element*>(index.internalPointer());
-        Element* parent_element = indexed_element->GetParent();
-        if(root_item.get() != parent_element)
+        Element* parent_element = indexed_element->parent;
+        if(root_element.get() != parent_element)
         {
             result = createIndex(0, (column_count - 1), parent_element);
         }
@@ -98,7 +176,7 @@ int DiagramContainer::rowCount(const QModelIndex &parent) const
     }
     else
     {
-        result = root_item->GetNumberOfChildren();
+        result = root_element->GetNumberOfChildren();
     }
 
     return result;
@@ -114,6 +192,8 @@ int DiagramContainer::columnCount(const QModelIndex &parent) const
               << " parent.column: " << parent.column()
               << std::endl;
 #endif
+
+    (void) parent;
 
     return column_count;
 }
@@ -163,44 +243,69 @@ QVariant DiagramContainer::headerData(int section, Qt::Orientation orientation, 
 
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
-        result = QVariant(QString::fromStdString(root_item->GetDisplayableString()));
+        result = QVariant(QString::fromStdString(root_element->GetDisplayableString()));
     }
 
     return result;
 }
 
-DiagramContainer::Element& DiagramContainer::Element::CreateChild(const std::string& childs_name)
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+DiagramContainer::Element* DiagramContainer::Element::CreateChild(const DataType& childs_data)
 {
-    children.push_back(std::make_unique<Element>(childs_name, this));
-    return *children.at(children.size() - 1);
+    children.push_back(std::make_unique<Element>(childs_data, this));
+    return children.at(children.size() - 1).get();
 }
 
-DiagramContainer::Element* DiagramContainer::Element::GetChildAddress(const std::size_t& index)
+DiagramContainer::Element* DiagramContainer::Element::GetChildWithIndex(const std::size_t& index)
 {
+    Element* result = nullptr;
     if(index < children.size())
     {
-        return children.at(index).get();
-    }
-    else
-    {
-        std::string errorMessage = "The indexed DiagramContainer::Element::children does not exist. /n Requested index: ";
-        errorMessage += std::to_string(index);
-        errorMessage += "/nMax index: ";
-        errorMessage += std::to_string(children.size());
-        throw errorMessage;
-    }
-}
-
-template <typename T> std::size_t DiagramContainer::Element::CountElementsBelowWithType(void) const
-{
-    std::size_t result = 0;
-
-    for(const auto& i : children)
-    {
-        result += i->CountElementsBelowWithType<T>();
+        result = children.at(index).get();
     }
 
     return result;
+}
+
+DiagramContainer::Element* DiagramContainer::Element::GetChildWithNameEntry(const DataType_Name& name_to_look_for)
+{
+    Element* result = nullptr;
+
+    for(const auto& i: children)
+    {
+        if(i->ContainsType<DataType_Name>())
+        {
+            if(std::get<DataType_Name>(i->data) == name_to_look_for)
+            {
+                result = i.get();
+                break;
+            }
+        }
+    }
+
+    return result;
+}
+
+bool DiagramContainer::Element::GetIndexOfChild(const Element* child, std::size_t& index_of_child)
+{
+    bool bResult = false;
+
+    for(std::size_t i = 0; i < children.size(); i++)
+    {
+        if(children[i].get() == child)
+        {
+            index_of_child = i;
+            bResult = true;
+            break;
+        }
+    }
+
+    return bResult;
 }
 
 std::string DiagramContainer::Element::GetDisplayableString(void) const
