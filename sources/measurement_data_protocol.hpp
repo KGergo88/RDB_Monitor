@@ -57,7 +57,7 @@ public:
     MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
 
     std::string GetProtocolName(void) override;
-    std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(const std::string& data_source, std::istream& input_data) override;
+    std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(std::istream& input_data) override;
     bool CanThisFileBeProcessed(const std::string path_to_file) override;
 
 private:

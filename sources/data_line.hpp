@@ -42,13 +42,13 @@ class DataLine
 public:
     explicit DataLine(const std::string& newDataLineTitle = "") : DataLineTitle(newDataLineTitle) {}
 
-    DataLine(const DataLine&  newDataLine) = default;
+    DataLine(const DataLine& newDataLine) = default;
     DataLine(DataLine&& newDataLine) = default;
     
     ~DataLine() {}
     
-    DataLine& operator=(const DataLine&  newDataLine) = delete;
-    DataLine& operator=(DataLine&& newDataLine) = delete;
+    DataLine& operator=(const DataLine& newDataLine) = default;
+    DataLine& operator=(DataLine&& newDataLine) = default;
     
     inline const std::string& GetTitle(void) const
     {

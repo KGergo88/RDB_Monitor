@@ -40,7 +40,7 @@ class BackendSignalInterface
 {
 
 protected:
-    ~BackendSignalInterface() {}
+    virtual ~BackendSignalInterface() {}
 
 public:
     virtual QAbstractItemModel* GetDiagramContainerModel(void) = 0;
@@ -49,7 +49,6 @@ signals:
     virtual void NewStatusMessage(const std::string& message_text) = 0;
     virtual void NetworkOperationFinished(const std::string& port_name, bool result) = 0;
     virtual void ShowThisDiagram(const DiagramSpecialized& diagram) = 0;
-    virtual void DiagramListHasChanged(const std::vector<std::string>& available_diagrams) = 0;
 };
 
 Q_DECLARE_INTERFACE(BackendSignalInterface, "BackendSignalInterface")

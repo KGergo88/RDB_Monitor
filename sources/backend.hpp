@@ -63,9 +63,9 @@ public:
 
     void RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface);
 
-    void StoreNewDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams);
+    void StoreNetworkDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams);
 
-    void NotifyAboutDiagramContainerChange(void);
+    void StoreFileDiagrams(const std::string path_to_file, std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams);
 
     void ReportStatus(const std::string& message);
 
@@ -75,12 +75,11 @@ signals:
     void NewStatusMessage(const std::string& message_text) override;
     void NetworkOperationFinished(const std::string& port_name, bool result) override;
     void ShowThisDiagram(const DiagramSpecialized& diagram) override;
-    void DiagramListHasChanged(const std::vector<std::string>& available_diagrams) override;
 
 private slots:
     void OpenNetwokConnection(const std::string&);
     void CloseNetworkConnection(const std::string&);
-    void RequestForDiagram(const DataIndexType& diagram_index);
+    void RequestForDiagram(const QModelIndex& model_index);
     void OpenFile(const std::string& path_to_file);
 
 private:

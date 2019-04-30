@@ -34,7 +34,7 @@ Backend::Backend() : QObject(),
                      measurement_data_protocol(),
                      serial_network_handler(&serial_port,
                                             &measurement_data_protocol,
-                                            std::bind(&Backend::StoreNewDiagrams, this, std::placeholders::_1),
+                                            std::bind(&Backend::StoreNetworkDiagrams, this, std::placeholders::_1),
                                             std::bind(&Backend::ReportStatus, this, std::placeholders::_1)),
                      gui_signal_interface(nullptr)
 {
@@ -49,7 +49,7 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
 
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenNetworkConnection(const std::string&)),  this, SLOT(OpenNetwokConnection(const std::string&)));
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(CloseNetworkConnection(const std::string&)), this, SLOT(CloseNetworkConnection(const std::string&)));
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(RequestForDiagram(const DataIndexType&)),    this, SLOT(RequestForDiagram(const DataIndexType&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(RequestForDiagram(const QModelIndex&)),      this, SLOT(RequestForDiagram(const QModelIndex&)));
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenFile(const std::string&)),               this, SLOT(OpenFile(const std::string&)));
     }
     else
@@ -59,39 +59,34 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
     }
 }
 
-void Backend::StoreNewDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams)
+void Backend::StoreNetworkDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams)
 {
-    auto this_is_the_first_diagram = (0 == diagram_container.GetNumberOfDiagrams());
+#warning "Implement this..."
+}
+
+void Backend::StoreFileDiagrams(const std::string path_to_file, std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams)
+{
+    auto container_is_empty = (0 == diagram_container.GetNumberOfDiagrams());
 
     // Adding the diagrams to the diagram_container
     for(const auto& i : new_diagrams)
     {
-        diagram_container.AddDiagramFromFile("TestString", *i);
+        QModelIndex recently_added_diagram = diagram_container.AddDiagramFromFile(path_to_file, *i);
+
+        // Display the diagram if this was the first
+        if(container_is_empty)
+        {
+            container_is_empty = false;
+
+            DiagramSpecialized* first_diagram = diagram_container.GetDiagram(recently_added_diagram);
+            if(first_diagram)
+            {
+                emit ShowThisDiagram(*first_diagram);
+            }
+        }
     }
 
     ReportStatus(std::to_string(new_diagrams.size()) + " new diagram was added to the list.");
-
-#warning "Implement this..."
-//    NotifyAboutDiagramContainerChange();
-//
-//
-//    if(this_is_the_first_diagram)
-//    {
-//        emit ShowThisDiagram(*diagram_container.begin());
-//    }
-}
-
-void Backend::NotifyAboutDiagramContainerChange(void)
-{
-    #warning "Implement this..."
-    //std::vector<std::string> diagram_titles;
-    //
-    //for(const auto& i : diagram_container)
-    //{
-    //    diagram_titles.push_back(i.GetTitle());
-    //}
-    //
-    //emit DiagramListHasChanged(diagram_titles);
 }
 
 void Backend::ReportStatus(const std::string& message)
@@ -154,18 +149,13 @@ void Backend::CloseNetworkConnection(const std::string& port_name)
     NetworkOperationFinished(port_name, true);
 }
 
-void Backend::RequestForDiagram(const DataIndexType& diagram_index)
+void Backend::RequestForDiagram(const QModelIndex& model_index)
 {
-    #warning "Implement this..."
-//    if(diagram_index < diagram_container.size())
-//    {
-//        emit ShowThisDiagram(diagram_container[diagram_index]);
-//    }
-//    else
-//    {
-//        std::string errorMessage = "ERROR! The requested diagram (index " + std::to_string(diagram_index )+ " ) does not exist!";
-//        throw errorMessage;
-//    }
+    DiagramSpecialized* first_diagram = diagram_container.GetDiagram(model_index);
+    if(first_diagram)
+    {
+        emit ShowThisDiagram(*first_diagram);
+    }
 }
 
 void Backend::OpenFile(const std::string& path_to_file)
@@ -175,10 +165,11 @@ void Backend::OpenFile(const std::string& path_to_file)
         if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
         {
             std::ifstream file_stream(path_to_file);
-            std::string file_name = std::filesystem::path(path_to_file).filename();
-            auto diagrams_from_file = measurement_data_protocol.ProcessData(file_name, file_stream);
+            auto diagrams_from_file = measurement_data_protocol.ProcessData(file_stream);
+
             ReportStatus("The file \"" + path_to_file + "\" was successfully opened!");
-            StoreNewDiagrams(diagrams_from_file);
+
+            StoreFileDiagrams(path_to_file, diagrams_from_file);
         }
         else
         {

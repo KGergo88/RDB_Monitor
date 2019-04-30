@@ -40,8 +40,8 @@ public:
 
     ~DataPoint() {}
 
-    DataPoint& operator=(const DataPoint&  newDataPoint) = delete;
-    DataPoint& operator=(DataPoint&& newDataPoint) = delete;
+    DataPoint& operator=(const DataPoint& newDataPoint) = default;
+    DataPoint& operator=(DataPoint&& newDataPoint) = default;
 
     inline const T_DATA_POINT& GetX(void) const {return x;}
     inline const T_DATA_POINT& GetY(void) const {return y;}

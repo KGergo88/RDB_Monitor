@@ -35,7 +35,7 @@ std::string MeasurementDataProtocol::GetProtocolName(void)
     return protocol_name;
 }
 
-std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessData(const std::string& data_source, std::istream& input_data)
+std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessData(std::istream& input_data)
 {
     std::vector<std::shared_ptr<DiagramSpecialized> > assembled_diagrams;
     std::string received_data;
@@ -74,7 +74,7 @@ std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
                             if(0 == column_index)
                             {
                                 auto current_date_and_time = std::time(nullptr);
-                                actual_diagram = std::make_shared<DiagramSpecialized>(data_source + " - " + std::string(ctime(&current_date_and_time)) , match_results[1]);
+                                actual_diagram = std::make_shared<DiagramSpecialized>(std::string(ctime(&current_date_and_time)), match_results[1]);
                             }
                             else
                             {

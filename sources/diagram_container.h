@@ -58,8 +58,9 @@ public:
     virtual ~DiagramContainer() override = default;
 
     std::size_t GetNumberOfDiagrams(void) const {return root_element->CountElementsBelowWithType<Element::DataType_Diagram>();}
-    void AddDiagramFromFile(const std::string& file_path, const DiagramSpecialized& diagram);
-    void AddDiagramFromNetwork(const std::string& connection_name, const DiagramSpecialized& diagram);
+    QModelIndex AddDiagramFromFile(const std::string& file_path, const DiagramSpecialized& diagram);
+    QModelIndex AddDiagramFromNetwork(const std::string& connection_name, const DiagramSpecialized& diagram);
+    DiagramSpecialized* GetDiagram(const QModelIndex& model_index);
 
     // Members overridden from the QAbstractItemModel
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -96,7 +97,7 @@ private:
         Element* CreateChild(const DataType& childs_data);
         Element* GetChildWithIndex(const std::size_t& index);
         Element* GetChildWithNameEntry(const DataType_Name& name_to_look_for);
-        bool GetIndexOfChild(const Element* child, std::size_t& index_of_child);
+        bool GetIndexWithChild(const Element* child, std::size_t& index_of_child);
         void KillTheChildren(void) {children.clear();}
         void KillChild(std::size_t child_index) {children.erase(children.begin() + child_index);}
         template <typename T>
@@ -127,7 +128,7 @@ private:
         std::vector<std::unique_ptr<Element> > children;
     };
 
-    void AddDiagramToElement(Element* element, const std::string& file_or_connection_name, const DiagramSpecialized &diagram);
+    QModelIndex AddDiagramToElement(Element* element, const std::string& file_or_connection_name, const DiagramSpecialized &diagram);
     QModelIndex GetModelIndexOfElement(Element* element) const;
     Element* AddChildToElement(Element* element, Element::DataType data);
     void RemoveChildFromElement(Element* element, Element* child);

@@ -68,7 +68,7 @@ signals:
     void ShuttingDown(void) override;
     void OpenNetworkConnection(const std::string& port_name) override;
     void CloseNetworkConnection(const std::string& port_name) override;
-    void RequestForDiagram(const DataIndexType& diagram_index) override;
+    void RequestForDiagram(const QModelIndex& model_index) override;
     void OpenFile(const std::string& path_to_file) override;
 
 private slots:
@@ -76,10 +76,9 @@ private slots:
     void PushButtonWasClicked(void);
     void ProcessNetworkOperationResult(const std::string& port_name, const bool& result);
     void DisplayDiagram(const DiagramSpecialized& diagram);
-    void UpdateDiagramList(const std::vector<std::string>& available_diagrams);
-    void DiagramListSelectionChanged(void);
     void MenuActionDiagramsLoadDiagrams(void);
     void MenuActionDiagramsSaveDiagrams(void);
+    void TreeviewCurrentSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
 
 private:
     static constexpr int main_window_minimum_width = 800;

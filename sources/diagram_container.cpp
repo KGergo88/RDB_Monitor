@@ -22,17 +22,33 @@ DiagramContainer::DiagramContainer(QObject* parent) : QAbstractItemModel(parent)
 #endif
 }
 
-void DiagramContainer::AddDiagramFromFile(const std::string &file_path, const DiagramSpecialized &diagram)
+QModelIndex DiagramContainer::AddDiagramFromFile(const std::string &file_path, const DiagramSpecialized &diagram)
 {
-    AddDiagramToElement(files_element, file_path, diagram);
+    return AddDiagramToElement(files_element, file_path, diagram);
 }
 
-void DiagramContainer::AddDiagramFromNetwork(const std::string& connection_name, const DiagramSpecialized& diagram)
+QModelIndex DiagramContainer::AddDiagramFromNetwork(const std::string& connection_name, const DiagramSpecialized& diagram)
 {
-    AddDiagramToElement(network_element, connection_name, diagram);
+    return AddDiagramToElement(network_element, connection_name, diagram);
 }
 
-void DiagramContainer::AddDiagramToElement(Element* element, const std::string& file_or_connection_name, const DiagramSpecialized &diagram)
+DiagramSpecialized* DiagramContainer::GetDiagram(const QModelIndex& model_index)
+{
+    DiagramSpecialized* result = nullptr;
+
+    if(model_index.isValid())
+    {
+        Element* requested_element = static_cast<Element*>(model_index.internalPointer());
+        if(requested_element->ContainsType<Element::DataType_Diagram>())
+        {
+            result = &std::get<DiagramSpecialized>(requested_element->data);
+        }
+    }
+
+    return result;
+}
+
+QModelIndex DiagramContainer::AddDiagramToElement(Element* element, const std::string& file_or_connection_name, const DiagramSpecialized &diagram)
 {
     // If the empty element is still here then we remove it
     Element* empty_element = element->GetChildWithNameEntry(empty_element_data);
@@ -49,7 +65,8 @@ void DiagramContainer::AddDiagramToElement(Element* element, const std::string& 
     }
 
     // Adding the diagram to the element that belongs to this file
-    AddChildToElement(sub_element, diagram);
+    Element* new_element = AddChildToElement(sub_element, diagram);
+    return GetModelIndexOfElement(new_element);
 }
 
 QModelIndex DiagramContainer::GetModelIndexOfElement(Element *element) const
@@ -57,7 +74,7 @@ QModelIndex DiagramContainer::GetModelIndexOfElement(Element *element) const
     QModelIndex result;
     std::size_t index_of_element;
 
-    if(element->parent->GetIndexOfChild(element, index_of_element))
+    if(element->parent->GetIndexWithChild(element, index_of_element))
     {
         result = createIndex(index_of_element, (column_count - 1), element);
     }
@@ -79,7 +96,7 @@ DiagramContainer::Element* DiagramContainer::AddChildToElement(Element* element,
 void DiagramContainer::RemoveChildFromElement(Element* element, Element* child)
 {
     std::size_t index_of_child;
-    if(element->GetIndexOfChild(child, index_of_child))
+    if(element->GetIndexWithChild(child, index_of_child))
     {
         beginRemoveRows(GetModelIndexOfElement(element), index_of_child, index_of_child);
         element->KillChild(index_of_child);
@@ -253,8 +270,6 @@ QVariant DiagramContainer::headerData(int section, Qt::Orientation orientation, 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
 DiagramContainer::Element* DiagramContainer::Element::CreateChild(const DataType& childs_data)
 {
     children.push_back(std::make_unique<Element>(childs_data, this));
@@ -291,7 +306,7 @@ DiagramContainer::Element* DiagramContainer::Element::GetChildWithNameEntry(cons
     return result;
 }
 
-bool DiagramContainer::Element::GetIndexOfChild(const Element* child, std::size_t& index_of_child)
+bool DiagramContainer::Element::GetIndexWithChild(const Element* child, std::size_t& index_of_child)
 {
     bool bResult = false;
 

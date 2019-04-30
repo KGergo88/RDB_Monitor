@@ -90,11 +90,22 @@ void MainWindow::MenuActionDiagramsSaveDiagrams(void)
     #warning "Implement this..."
 }
 
+void MainWindow::TreeviewCurrentSelectionChanged(const QModelIndex &current, const QModelIndex &previous)
+{
+    (void) previous;
+
+    emit RequestForDiagram(current);
+}
+
 void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_backend_signal_interface)
 {
+    // If the backend signal interface is valid
     if(new_backend_signal_interface)
     {
+        // Registering the interface
         backend_signal_interface = new_backend_signal_interface;
+        // Setting up the TreeView with the Model from the interface (this needs to be done before establishing the signal connections)
+        pTreeView->setModel(backend_signal_interface->GetDiagramContainerModel());
 
         // Registering the connections between the signals and the slots
         QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(NewStatusMessage(const std::string&)),
@@ -103,14 +114,10 @@ void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_back
                          this,                                             SLOT(ProcessNetworkOperationResult(const std::string&, const bool&)));
         QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
                          this,                                             SLOT(DisplayDiagram(const DiagramSpecialized&)));
-#warning "Implement this..."
-        //QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(DiagramListHasChanged(const std::vector<std::string>&)),
-        //                 this,                                             SLOT(UpdateDiagramList(const std::vector<std::string>&)));
-#warning "Implement this..."
-        //QObject::connect(pListWidgetDiagrams, &QListWidget::itemSelectionChanged, this, &MainWindow::DiagramListSelectionChanged);
-        QObject::connect(pPushButton,         &QPushButton::clicked,              this, &MainWindow::PushButtonWasClicked);
-
-        pTreeView->setModel(backend_signal_interface->GetDiagramContainerModel());
+        QObject::connect(pPushButton,                                      &QPushButton::clicked,
+                         this,                                             &MainWindow::PushButtonWasClicked);
+        QObject::connect(pTreeView->selectionModel(),                      &QItemSelectionModel::currentChanged,
+                         this,                                             &MainWindow::TreeviewCurrentSelectionChanged);
     }
     else
     {
@@ -230,23 +237,4 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
     {
         delete pOldChart;
     }
-}
-
-void MainWindow::UpdateDiagramList(const std::vector<std::string>& available_diagrams)
-{
-#warning "Implement this..."
-//    pListWidgetDiagrams->clear();
-
-//    for(const auto& i : available_diagrams)
-//    {
-//        auto pListWidgetItem = new QListWidgetItem();
-//        pListWidgetItem->setText(QString::fromStdString(i));
-//        pListWidgetDiagrams->addItem(pListWidgetItem);
-//    }
-}
-
-void MainWindow::DiagramListSelectionChanged(void)
-{
-#warning "Implement this..."
-//    emit RequestForDiagram(static_cast<DataIndexType>(pListWidgetDiagrams->currentRow()));
 }

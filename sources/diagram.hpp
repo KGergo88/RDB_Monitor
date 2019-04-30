@@ -41,12 +41,12 @@ class Diagram {
 public:
     Diagram(const std::string& newDiagramTitle = "", const std::string& newAxisXTitle = "") : DiagramTitle(newDiagramTitle), AxisXTitle(newAxisXTitle) {}
 
-    Diagram(const Diagram&  newDiagram) = default;
+    Diagram(const Diagram& newDiagram) = default;
     Diagram(Diagram&& newDiagram) = default;
 
     ~Diagram() {}
 
-    Diagram& operator=(const Diagram&  newDiagram) = default;
+    Diagram& operator=(const Diagram& newDiagram) = default;
     Diagram& operator=(Diagram&& newDiagram) = default;
 
     inline const std::string& GetTitle(void) const
