@@ -58,8 +58,8 @@ public:
     virtual ~DiagramContainer() override = default;
 
     std::size_t GetNumberOfDiagrams(void) const {return root_element->CountElementsBelowWithType<Element::DataType_Diagram>();}
-    QModelIndex AddDiagramFromFile(const std::string& file_path, const DiagramSpecialized& diagram);
-    QModelIndex AddDiagramFromNetwork(const std::string& connection_name, const DiagramSpecialized& diagram);
+    QModelIndex AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DiagramSpecialized& diagram);
+    bool IsThisFileAlreadyStored(const std::string& file_name, const std::string& file_path);
     DiagramSpecialized* GetDiagram(const QModelIndex& model_index);
 
     // Members overridden from the QAbstractItemModel
@@ -75,12 +75,21 @@ private:
     class Element
     {
     public:
-        // Data type used for elements that do not contain a diagram but is only a name entry
+        // Data type used for elements that only contain a string
         using DataType_Name = std::string;
-        // Data type used of elements that actually contain a diagram
+        // Data type used for element that represent a file that was imported
+        struct DataType_File
+        {
+            DataType_File() = default;
+            DataType_File(const std::string& new_name, const std::string& new_path) : name(new_name), path(new_path) {};
+            bool operator==(const DataType_File& other) const {return ((name == other.name) && (path == other.path));}
+            std::string name;
+            std::string path;
+        };
+        // Data type used of elements that contain a diagram
         using DataType_Diagram = DiagramSpecialized;
-        // The two above data types combined
-        using DataType = std::variant<DataType_Name, DataType_Diagram>;
+        // The above data types combined
+        using DataType = std::variant<DataType_Name, DataType_File, DataType_Diagram>;
 
         explicit Element(const DataType& new_data, Element* new_parent = nullptr) : data(new_data), parent(new_parent) {}
 
@@ -96,7 +105,6 @@ private:
         std::size_t GetNumberOfChildren(void) const {return children.size();}
         Element* CreateChild(const DataType& childs_data);
         Element* GetChildWithIndex(const std::size_t& index);
-        Element* GetChildWithNameEntry(const DataType_Name& name_to_look_for);
         bool GetIndexWithChild(const Element* child, std::size_t& index_of_child);
         void KillTheChildren(void) {children.clear();}
         void KillChild(std::size_t child_index) {children.erase(children.begin() + child_index);}
@@ -114,6 +122,25 @@ private:
 
                 return result;
             }
+        template <typename T>
+        Element* GetChildWithData(const T& data_to_look_for)
+        {
+            Element* result = nullptr;
+
+            for(const auto& i: children)
+            {
+                if(std::holds_alternative<T>(i->data))
+                {
+                    if(data_to_look_for == std::get<T>(i->data))
+                    {
+                        result = i.get();
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
 
         std::string GetDisplayableString(void) const;
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
@@ -128,17 +155,18 @@ private:
         std::vector<std::unique_ptr<Element> > children;
     };
 
-    QModelIndex AddDiagramToElement(Element* element, const std::string& file_or_connection_name, const DiagramSpecialized &diagram);
+    QModelIndex AddDiagramToElement(Element* element, const std::string& file_path_or_connection_name, const DiagramSpecialized &diagram);
     QModelIndex GetModelIndexOfElement(Element* element) const;
     Element* AddChildToElement(Element* element, Element::DataType data);
     void RemoveChildFromElement(Element* element, Element* child);
 
     // Every element contains only one column
     static constexpr int column_count = 1;
-    static constexpr char root_element_data[] = "Available diagrams";
-    static constexpr char files_element_data[] = "Diagrams loaded from files";
-    static constexpr char network_element_data[] = "Diagrams received on the network";
-    static constexpr char empty_element_data[] = "No diagrams yet...";
+    // Pre-defined element data
+    static const Element::DataType_Name root_element_data;
+    static const Element::DataType_Name files_element_data;
+    static const Element::DataType_Name network_element_data;
+    static const Element::DataType_Name empty_element_data;
     // This is root element of the tree, it only contains a string that can be used as header in the view
     std::unique_ptr<Element> root_element;
     // The following two members are helper pointers to easily access the elements directly below the root elements

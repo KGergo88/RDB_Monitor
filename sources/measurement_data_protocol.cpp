@@ -35,9 +35,9 @@ std::string MeasurementDataProtocol::GetProtocolName(void)
     return protocol_name;
 }
 
-std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::ProcessData(std::istream& input_data)
+std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istream& input_data)
 {
-    std::vector<std::shared_ptr<DiagramSpecialized> > assembled_diagrams;
+    std::vector<DiagramSpecialized> assembled_diagrams;
     std::string received_data;
     std::string actual_line;
 
@@ -60,7 +60,7 @@ std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
                     }
                     break;
                 case ProcessingStates::ProcessingHeadline:
-                    // If this is a headline but and a dataline
+                    // If this is a headline but not a dataline
                     // (this is needed because with regex it is difficult to define the differences between the data and headlines)
                     if((std::regex_match(actual_line, std::regex(regex_headline))) &&
                        (!std::regex_match(actual_line, std::regex(regex_data_line))))
@@ -74,19 +74,17 @@ std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
                             if(0 == column_index)
                             {
                                 auto current_date_and_time = std::time(nullptr);
-                                actual_diagram = std::make_shared<DiagramSpecialized>(std::string(ctime(&current_date_and_time)), match_results[1]);
+                                actual_diagram = DiagramSpecialized(std::string(ctime(&current_date_and_time)), match_results[1]);
                             }
                             else
                             {
-                                actual_diagram->AddNewDataLine(match_results[1]);
+                                actual_diagram.AddNewDataLine(match_results[1]);
                             }
 
                             ++column_index;
                             headline = match_results.suffix().str();
                         }
 
-                        // A headline was found...
-                        //actual_diagram = make_shared<DiagramSpecialized>(match_results.at());
                         processing_state = ProcessingStates::ProcessingDataLines;
                     }
                     else
@@ -111,12 +109,12 @@ std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
                             }
                             else
                             {
-                                if((column_index - 1) < actual_diagram->GetTheNumberOfDataLines())
+                                if((column_index - 1) < actual_diagram.GetTheNumberOfDataLines())
                                 {
                                     std::stringstream stringstream(match_results[1]);
                                     DataPointType data_point_y_value;
                                     stringstream >> data_point_y_value;
-                                    actual_diagram->AddNewDataPoint((column_index - 1), DataPointSpecialized(data_point_x_value, data_point_y_value));
+                                    actual_diagram.AddNewDataPoint((column_index - 1), DataPointSpecialized(data_point_x_value, data_point_y_value));
                                 }
                                 else
                                 {
@@ -128,7 +126,7 @@ std::vector<std::shared_ptr<DiagramSpecialized> > MeasurementDataProtocol::Proce
                             ++column_index;
                             data_line = match_results.suffix().str();
                         }
-                        if((column_index - 1) != actual_diagram->GetTheNumberOfDataLines())
+                        if((column_index - 1) != actual_diagram.GetTheNumberOfDataLines())
                         {
                             processing_state = ProcessingStates::WaitingForStartLine;
                         }

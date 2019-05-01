@@ -50,7 +50,7 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenNetworkConnection(const std::string&)),  this, SLOT(OpenNetwokConnection(const std::string&)));
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(CloseNetworkConnection(const std::string&)), this, SLOT(CloseNetworkConnection(const std::string&)));
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(RequestForDiagram(const QModelIndex&)),      this, SLOT(RequestForDiagram(const QModelIndex&)));
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenFile(const std::string&)),               this, SLOT(OpenFile(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(ImportFile(const std::string&)),             this, SLOT(ImportFile(const std::string&)));
     }
     else
     {
@@ -59,19 +59,19 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
     }
 }
 
-void Backend::StoreNetworkDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams)
+void Backend::StoreNetworkDiagrams(std::vector<DiagramSpecialized>& new_diagrams)
 {
-#warning "Implement this..."
+    #warning "Implement this..."
 }
 
-void Backend::StoreFileDiagrams(const std::string path_to_file, std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams)
+void Backend::StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DiagramSpecialized>& new_diagrams)
 {
     auto container_is_empty = (0 == diagram_container.GetNumberOfDiagrams());
 
     // Adding the diagrams to the diagram_container
     for(const auto& i : new_diagrams)
     {
-        QModelIndex recently_added_diagram = diagram_container.AddDiagramFromFile(path_to_file, *i);
+        QModelIndex recently_added_diagram = diagram_container.AddDiagramFromFile(file_name, file_path, i);
 
         // Display the diagram if this was the first
         if(container_is_empty)
@@ -158,22 +158,29 @@ void Backend::RequestForDiagram(const QModelIndex& model_index)
     }
 }
 
-void Backend::OpenFile(const std::string& path_to_file)
+void Backend::ImportFile(const std::string& path_to_file)
 {
     if(std::filesystem::exists(std::filesystem::path(path_to_file)))
     {
-        if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
+        std::string file_name = std::filesystem::path(path_to_file).filename();
+        if(!diagram_container.IsThisFileAlreadyStored(file_name, path_to_file))
         {
-            std::ifstream file_stream(path_to_file);
-            auto diagrams_from_file = measurement_data_protocol.ProcessData(file_stream);
+            if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
+            {
+                std::ifstream file_stream(path_to_file);
+                auto diagrams_from_file = measurement_data_protocol.ProcessData(file_stream);
 
-            ReportStatus("The file \"" + path_to_file + "\" was successfully opened!");
-
-            StoreFileDiagrams(path_to_file, diagrams_from_file);
+                StoreFileDiagrams(file_name, path_to_file, diagrams_from_file);
+                ReportStatus("The file \"" + path_to_file + "\" was successfully opened!");
+            }
+            else
+            {
+                ReportStatus("ERROR! The MeasurementDataProtocol cannot process the file: \"" + path_to_file + "\"!");
+            }
         }
         else
         {
-            ReportStatus("ERROR! The MeasurementDataProtocol cannot process the file: \"" + path_to_file + "\"!");
+            ReportStatus("The file \"" + path_to_file + "\" was already imported and will not be imported again!");
         }
     }
     else

@@ -63,9 +63,9 @@ public:
 
     void RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface);
 
-    void StoreNetworkDiagrams(std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams);
+    void StoreNetworkDiagrams(std::vector<DiagramSpecialized>& new_diagrams);
 
-    void StoreFileDiagrams(const std::string path_to_file, std::vector<std::shared_ptr<DiagramSpecialized> >& new_diagrams);
+    void StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DiagramSpecialized>& new_diagrams);
 
     void ReportStatus(const std::string& message);
 
@@ -80,7 +80,7 @@ private slots:
     void OpenNetwokConnection(const std::string&);
     void CloseNetworkConnection(const std::string&);
     void RequestForDiagram(const QModelIndex& model_index);
-    void OpenFile(const std::string& path_to_file);
+    void ImportFile(const std::string& path_to_file);
 
 private:
     SerialPort serial_port;

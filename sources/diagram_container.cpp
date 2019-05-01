@@ -2,6 +2,13 @@
 
 
 
+const DiagramContainer::Element::DataType_Name DiagramContainer::root_element_data("Available diagrams");
+const DiagramContainer::Element::DataType_Name DiagramContainer::files_element_data("Diagrams loaded from files");
+const DiagramContainer::Element::DataType_Name DiagramContainer::network_element_data("Diagrams received on the network");
+const DiagramContainer::Element::DataType_Name DiagramContainer::empty_element_data("No diagrams yet...");
+
+
+
 DiagramContainer::DiagramContainer(QObject* parent) : QAbstractItemModel(parent)
 {
     // Creating the root element
@@ -22,14 +29,41 @@ DiagramContainer::DiagramContainer(QObject* parent) : QAbstractItemModel(parent)
 #endif
 }
 
-QModelIndex DiagramContainer::AddDiagramFromFile(const std::string &file_path, const DiagramSpecialized &diagram)
+QModelIndex DiagramContainer::AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DiagramSpecialized& diagram)
 {
-    return AddDiagramToElement(files_element, file_path, diagram);
+    // If the empty element is still here then we remove it
+    Element* empty_element = files_element->GetChildWithData(empty_element_data);
+    if(nullptr != empty_element)
+    {
+        RemoveChildFromElement(files_element, empty_element);
+    }
+
+    // Looking for the file name element that contains the diagrams of this file and creating it if it does not exists
+    Element::DataType_File file_name_element_data;
+    file_name_element_data.name = file_name;
+    file_name_element_data.path = file_path;
+    Element* file_name_element = files_element->GetChildWithData(file_name_element_data);
+    if(nullptr == file_name_element)
+    {
+        file_name_element = AddChildToElement(files_element, file_name_element_data);
+    }
+
+    // Adding the diagram to the element that represents this file
+    Element* new_element = AddChildToElement(file_name_element, diagram);
+
+    return GetModelIndexOfElement(new_element);
 }
 
-QModelIndex DiagramContainer::AddDiagramFromNetwork(const std::string& connection_name, const DiagramSpecialized& diagram)
+bool DiagramContainer::IsThisFileAlreadyStored(const std::string& file_name, const std::string& file_path)
 {
-    return AddDiagramToElement(network_element, connection_name, diagram);
+    bool bResult = false;
+
+    if(nullptr != files_element->GetChildWithData(Element::DataType_File(file_name, file_path)))
+    {
+        bResult = true;
+    }
+
+    return bResult;
 }
 
 DiagramSpecialized* DiagramContainer::GetDiagram(const QModelIndex& model_index)
@@ -46,27 +80,6 @@ DiagramSpecialized* DiagramContainer::GetDiagram(const QModelIndex& model_index)
     }
 
     return result;
-}
-
-QModelIndex DiagramContainer::AddDiagramToElement(Element* element, const std::string& file_or_connection_name, const DiagramSpecialized &diagram)
-{
-    // If the empty element is still here then we remove it
-    Element* empty_element = element->GetChildWithNameEntry(empty_element_data);
-    if(nullptr != empty_element)
-    {
-        RemoveChildFromElement(element, empty_element);
-    }
-
-    // Looking for the sub-element that belongs to this file or connection and creating it if it does not exists
-    Element* sub_element = element->GetChildWithNameEntry(file_or_connection_name);
-    if(nullptr == sub_element)
-    {
-        sub_element = AddChildToElement(element, file_or_connection_name);
-    }
-
-    // Adding the diagram to the element that belongs to this file
-    Element* new_element = AddChildToElement(sub_element, diagram);
-    return GetModelIndexOfElement(new_element);
 }
 
 QModelIndex DiagramContainer::GetModelIndexOfElement(Element *element) const
@@ -287,25 +300,6 @@ DiagramContainer::Element* DiagramContainer::Element::GetChildWithIndex(const st
     return result;
 }
 
-DiagramContainer::Element* DiagramContainer::Element::GetChildWithNameEntry(const DataType_Name& name_to_look_for)
-{
-    Element* result = nullptr;
-
-    for(const auto& i: children)
-    {
-        if(i->ContainsType<DataType_Name>())
-        {
-            if(std::get<DataType_Name>(i->data) == name_to_look_for)
-            {
-                result = i.get();
-                break;
-            }
-        }
-    }
-
-    return result;
-}
-
 bool DiagramContainer::Element::GetIndexWithChild(const Element* child, std::size_t& index_of_child)
 {
     bool bResult = false;
@@ -330,6 +324,10 @@ std::string DiagramContainer::Element::GetDisplayableString(void) const
     if(std::holds_alternative<Element::DataType_Name>(data))
     {
         result = std::get<Element::DataType_Name>(data);
+    }
+    else if(std::holds_alternative<Element::DataType_File>(data))
+    {
+        result = std::get<Element::DataType_File>(data).name;
     }
     else if(std::holds_alternative<Element::DataType_Diagram>(data))
     {

@@ -64,9 +64,9 @@ MainWindow::MainWindow() : QMainWindow(),
     setCentralWidget(pCentralWidget);
     pCentralWidget->setLayout(pHorizontalLayout);
 
-    pDiagramsMenu = menuBar()->addMenu("Diagrams");
-    pDiagramsMenu->addAction("Load Diagrams", this, &MainWindow::MenuActionDiagramsLoadDiagrams);
-    pDiagramsMenu->addAction("Save Diagrams", this, &MainWindow::MenuActionDiagramsSaveDiagrams);
+    pDiagramsMenu = menuBar()->addMenu(diagram_menu_text);
+    pDiagramsMenu->addAction(diagram_menu_import_diagrams_text, this, &MainWindow::MenuActionDiagramsImportDiagrams);
+    pDiagramsMenu->addAction(diagram_menu_export_diagrams_text, this, &MainWindow::MenuActionDiagramsExportDiagrams);
 
     // Setting the minimum size and the title of the main window and showing it maximized
     setMinimumSize(main_window_minimum_width, main_window_minimum_height);
@@ -75,17 +75,17 @@ MainWindow::MainWindow() : QMainWindow(),
     showMaximized();
 }
 
-void MainWindow::MenuActionDiagramsLoadDiagrams(void)
+void MainWindow::MenuActionDiagramsImportDiagrams(void)
 {
-    QFileDialog *pFileDialog = new QFileDialog(nullptr, "Load Diagrams", "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
+    QFileDialog *pFileDialog = new QFileDialog(nullptr, diagram_menu_import_diagrams_text, "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
     pFileDialog->setAcceptMode(QFileDialog::AcceptOpen);
     pFileDialog->setModal(true);
 
-    QObject::connect(pFileDialog, &QFileDialog::fileSelected, [=](const QString &file){emit OpenFile(file.toStdString());});
+    QObject::connect(pFileDialog, &QFileDialog::fileSelected, [=](const QString &file){emit ImportFile(file.toStdString());});
     pFileDialog->show();
 }
 
-void MainWindow::MenuActionDiagramsSaveDiagrams(void)
+void MainWindow::MenuActionDiagramsExportDiagrams(void)
 {
     #warning "Implement this..."
 }

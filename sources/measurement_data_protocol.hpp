@@ -57,7 +57,7 @@ public:
     MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
 
     std::string GetProtocolName(void) override;
-    std::vector<std::shared_ptr<DiagramSpecialized> > ProcessData(std::istream& input_data) override;
+    std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
     bool CanThisFileBeProcessed(const std::string path_to_file) override;
 
 private:
@@ -77,8 +77,7 @@ private:
     const std::string regex_end_line           = R"(^\s*<<<END>>>$)";
 
     ProcessingStates processing_state;
-    std::string available_data;
-    std::shared_ptr<DiagramSpecialized> actual_diagram;
+    DiagramSpecialized actual_diagram;
 };
 
 

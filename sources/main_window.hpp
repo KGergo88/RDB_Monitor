@@ -56,7 +56,7 @@ public:
     MainWindow(const MainWindow& newGuiWindow) = delete;
     MainWindow(MainWindow&& newGuiWindow) = delete;
 
-    ~MainWindow() = default;
+    ~MainWindow() override = default;
 
     MainWindow& operator=(const MainWindow&  newGuiWindow) = delete;
     MainWindow& operator=(MainWindow&& newGuiWindow) = delete;
@@ -69,15 +69,15 @@ signals:
     void OpenNetworkConnection(const std::string& port_name) override;
     void CloseNetworkConnection(const std::string& port_name) override;
     void RequestForDiagram(const QModelIndex& model_index) override;
-    void OpenFile(const std::string& path_to_file) override;
+    void ImportFile(const std::string& path_to_file) override;
 
 private slots:
     void DisplayStatusMessage(const std::string& message_text);
     void PushButtonWasClicked(void);
     void ProcessNetworkOperationResult(const std::string& port_name, const bool& result);
     void DisplayDiagram(const DiagramSpecialized& diagram);
-    void MenuActionDiagramsLoadDiagrams(void);
-    void MenuActionDiagramsSaveDiagrams(void);
+    void MenuActionDiagramsImportDiagrams(void);
+    void MenuActionDiagramsExportDiagrams(void);
     void TreeviewCurrentSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
 
 private:
@@ -93,8 +93,11 @@ private:
     static constexpr int right_vertical_layout_size_percentage = 20;
 
 
-    static constexpr const char* const push_button_open_text = "Open Serial Port";
-    static constexpr const char* const push_button_close_text = "Close Serial Port";
+    static constexpr char push_button_open_text[] = "Open Serial Port";
+    static constexpr char push_button_close_text[] = "Close Serial Port";
+    static constexpr char diagram_menu_text[] = "Diagrams";
+    static constexpr char diagram_menu_import_diagrams_text[] = "Import Diagrams";
+    static constexpr char diagram_menu_export_diagrams_text[] = "Export Diagrams";
 
     static constexpr qreal y_axis_range_multiplicator = 0.05;
     static constexpr int   y_axis_tick_count = 5;
