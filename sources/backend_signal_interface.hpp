@@ -40,7 +40,7 @@ class BackendSignalInterface
 {
 
 protected:
-    virtual ~BackendSignalInterface() {}
+    ~BackendSignalInterface() {}
 
 public:
     virtual QAbstractItemModel* GetDiagramContainerModel(void) = 0;

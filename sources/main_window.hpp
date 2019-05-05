@@ -70,6 +70,9 @@ signals:
     void CloseNetworkConnection(const std::string& port_name) override;
     void RequestForDiagram(const QModelIndex& model_index) override;
     void ImportFile(const std::string& path_to_file) override;
+    void ExportFileShowCheckBoxes(void) override;
+    void ExportFileHideCheckBoxes(void) override;
+    void ExportFileStoreCheckedDiagrams(const std::string& path_to_file) override;
 
 private slots:
     void DisplayStatusMessage(const std::string& message_text);
@@ -87,14 +90,10 @@ private:
     static constexpr int chart_view_size_percentage = 90;
     static constexpr int list_widget_status_size_percentage = 10;
     static constexpr int tree_view_size_percentage = 90;
-    static constexpr int line_edit_size_percentage = 5;
-    static constexpr int push_button_size_percentage = 5;
+    static constexpr int stacked_layout_size_percentage = 10;
     static constexpr int left_vertical_layout_size_percentage = 80;
     static constexpr int right_vertical_layout_size_percentage = 20;
 
-
-    static constexpr char push_button_open_text[] = "Open Serial Port";
-    static constexpr char push_button_close_text[] = "Close Serial Port";
     static constexpr char diagram_menu_text[] = "Diagrams";
     static constexpr char diagram_menu_import_diagrams_text[] = "Import Diagrams";
     static constexpr char diagram_menu_export_diagrams_text[] = "Export Diagrams";
@@ -103,18 +102,78 @@ private:
     static constexpr int   y_axis_tick_count = 5;
     static constexpr int   y_axis_minor_tick_count = 0;
 
+    class ConnectionManagerWidget : public QWidget
+    {
+        Q_OBJECT
+
+    public:
+        ConnectionManagerWidget(QWidget* parent = nullptr) : QWidget(parent)
+        {
+            layout = new QVBoxLayout(this);
+            line_edit_port_name = new QLineEdit(SERIAL_PORT_DEFAULT_PORT_NAME, this);
+            button_open_close_connection = new QPushButton(button_open_connection_text, this);
+            layout->addWidget(line_edit_port_name);
+            layout->addWidget(button_open_close_connection);
+        }
+
+        ConnectionManagerWidget(const ConnectionManagerWidget&) = delete;
+        ConnectionManagerWidget(ConnectionManagerWidget&&) = delete;
+
+        virtual ~ConnectionManagerWidget() = default;
+
+        ConnectionManagerWidget& operator=(const ConnectionManagerWidget&) = delete;
+        ConnectionManagerWidget& operator=(ConnectionManagerWidget&&) = delete;
+
+        static constexpr char button_open_connection_text[]  = "Open Serial Port";
+        static constexpr char button_close_connection_text[] = "Close Serial Port";
+
+        QVBoxLayout* layout;
+        QLineEdit*   line_edit_port_name;
+        QPushButton* button_open_close_connection;
+    };
+
+    class DiagramExportWidget : public QWidget
+    {
+        Q_OBJECT
+
+    public:
+        DiagramExportWidget(QWidget* parent = nullptr) : QWidget(parent)
+        {
+            layout = new QVBoxLayout(this);
+            QPushButton* button_export = new QPushButton(button_export_text, this);
+            QPushButton* button_cancel = new QPushButton(button_cancel_text, this);
+            layout->addWidget(button_export);
+            layout->addWidget(button_cancel);
+        }
+
+        DiagramExportWidget(const DiagramExportWidget&) = delete;
+        DiagramExportWidget(DiagramExportWidget&&) = delete;
+
+        virtual ~DiagramExportWidget() = default;
+
+        DiagramExportWidget& operator=(const DiagramExportWidget&) = delete;
+        DiagramExportWidget& operator=(DiagramExportWidget&&) = delete;
+
+        static constexpr char button_export_text[] = "Export";
+        static constexpr char button_cancel_text[] = "Cancel";
+
+        QVBoxLayout* layout;
+        QPushButton* button_export;
+        QPushButton* button_cancel;
+    };
+
     bool network_connection_is_open;
 
     BackendSignalInterface* backend_signal_interface;
 
-    QChartView*     pChartView;
-    QTreeView*      pTreeView;
-    QListWidget*    pListWidgetStatus;
-    QLineEdit*      pLineEdit;
-    QPushButton*    pPushButton;
-    QMenuBar*       pMenuBar;
-    QMenu*          pDiagramsMenu;
-    QMenu*          pHelpMenu;
+    QMenuBar*                pMenuBar;
+    QMenu*                   pDiagramsMenu;
+    QChartView*              pChartView;
+    QTreeView*               pTreeView;
+    QListWidget*             pListWidgetStatus;
+    ConnectionManagerWidget* pWidgetConnectionManager;
+    DiagramExportWidget*     pWidgetDiagramExport;
+    QStackedLayout*          pStackedLayout;
 };
 
 

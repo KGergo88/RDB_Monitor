@@ -43,7 +43,7 @@ public:
 
 protected:
     DataProcessingInterface(const std::string& new_protocol_name, const std::string& new_file_extension) : protocol_name(new_protocol_name), native_file_extension(new_file_extension) {}
-    virtual ~DataProcessingInterface() {}
+    ~DataProcessingInterface() {}
 
     const std::string protocol_name;
     const std::string native_file_extension;

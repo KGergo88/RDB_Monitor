@@ -57,10 +57,12 @@ public:
 
     virtual ~DiagramContainer() override = default;
 
-    std::size_t GetNumberOfDiagrams(void) const {return root_element->CountElementsBelowWithType<Element::DataType_Diagram>();}
+    std::size_t GetNumberOfDiagrams(void) const {return root_element->CountElementsWithTypeRecursive<Element::DataType_Diagram>();}
     QModelIndex AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DiagramSpecialized& diagram);
     bool IsThisFileAlreadyStored(const std::string& file_name, const std::string& file_path);
     DiagramSpecialized* GetDiagram(const QModelIndex& model_index);
+    void ShowCheckBoxes(void);
+    void HideCheckBoxes(void);
 
     // Members overridden from the QAbstractItemModel
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -69,6 +71,8 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
 private:
     // The type definition of the elements of the diagram container
@@ -81,7 +85,7 @@ private:
         struct DataType_File
         {
             DataType_File() = default;
-            DataType_File(const std::string& new_name, const std::string& new_path) : name(new_name), path(new_path) {};
+            DataType_File(const std::string& new_name, const std::string& new_path) : name(new_name), path(new_path) {}
             bool operator==(const DataType_File& other) const {return ((name == other.name) && (path == other.path));}
             std::string name;
             std::string path;
@@ -91,7 +95,15 @@ private:
         // The above data types combined
         using DataType = std::variant<DataType_Name, DataType_File, DataType_Diagram>;
 
-        explicit Element(const DataType& new_data, Element* new_parent = nullptr) : data(new_data), parent(new_parent) {}
+        // Pre-set flag value combinations that are used in the class methods
+        // As default, the checkboxes are hidden
+        static constexpr Qt::ItemFlags element_flags_default = Qt::ItemIsEnabled;
+        // The checkboxes can be shown with this flag combination
+        // Unfortunately the current QTreeView implementation does not support the Qt::ItemIsAutoTristate flag so this functionality has to be implemented by the DiagramContainer
+        static constexpr Qt::ItemFlags element_flags_checkable = (element_flags_default | Qt::ItemIsUserCheckable);
+
+        explicit Element(const DataType& new_data, Element* new_parent = nullptr, const Qt::ItemFlags& new_flags = element_flags_default, const Qt::CheckState new_check_state = Qt::Unchecked)
+            : data(new_data), parent(new_parent), flags(new_flags), check_state(new_check_state) {}
 
         Element(const Element& new_backend) = delete;
         Element(Element&& new_backend) = delete;
@@ -103,27 +115,31 @@ private:
 
         bool IsRoot(void) const {return (nullptr == parent);}
         std::size_t GetNumberOfChildren(void) const {return children.size();}
-        Element* CreateChild(const DataType& childs_data);
+        Element* CreateChild(const DataType& childs_data, const Qt::ItemFlags& childs_flags = element_flags_default, const Qt::CheckState& childs_check_state = Qt::CheckState::Unchecked);
         Element* GetChildWithIndex(const std::size_t& index);
         bool GetIndexWithChild(const Element* child, std::size_t& index_of_child);
         void KillTheChildren(void) {children.clear();}
         void KillChild(std::size_t child_index) {children.erase(children.begin() + child_index);}
-        template <typename T>
-            bool ContainsType(void) const {return std::holds_alternative<T>(data);}
-        template <typename T>
-            std::size_t CountElementsBelowWithType(void) const
+        template <typename T> bool ContainsType(void) const {return std::holds_alternative<T>(data);}
+        template <typename T> std::size_t CountElementsWithTypeRecursive(void) const
             {
                 std::size_t result = 0;
 
+                // Checking whether this element has the type
+                if(std::holds_alternative<T>(data))
+                {
+                    result++;
+                }
+
+                // Going trough all the children and calling the same function on them
                 for(const auto& i : children)
                 {
-                    result += i->CountElementsBelowWithType<T>();
+                    result += i->CountElementsWithTypeRecursive<T>();
                 }
 
                 return result;
             }
-        template <typename T>
-        Element* GetChildWithData(const T& data_to_look_for)
+        template <typename T> Element* GetChildWithData(const T& data_to_look_for)
         {
             Element* result = nullptr;
 
@@ -141,10 +157,10 @@ private:
 
             return result;
         }
-
         std::string GetDisplayableString(void) const;
+        void SetFlagsRecursive(const Qt::ItemFlags& new_flags);
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
-        void PrintAllElementsBelow(const std::string& identation = "   ") const;
+        void PrintAllElementsRecursive(const std::string& identation = "   ") const;
 #endif
 
         // The data contained by the element
@@ -153,11 +169,15 @@ private:
         Element* parent;
         // The elements whose parent is this element
         std::vector<std::unique_ptr<Element> > children;
+        // Flags in OR combination that control the visualisation of the element
+        Qt::ItemFlags flags;
+        // Flag that tells whether the element was checked by the user
+        Qt::CheckState check_state;
     };
 
-    QModelIndex AddDiagramToElement(Element* element, const std::string& file_path_or_connection_name, const DiagramSpecialized &diagram);
     QModelIndex GetModelIndexOfElement(Element* element) const;
-    Element* AddChildToElement(Element* element, Element::DataType data);
+    Element* AddChildToElement(Element* element, const Element::DataType& data);
+
     void RemoveChildFromElement(Element* element, Element* child);
 
     // Every element contains only one column

@@ -44,6 +44,9 @@ signals:
     virtual void CloseNetworkConnection(const std::string& port_name) = 0;
     virtual void RequestForDiagram(const QModelIndex& model_index) = 0;
     virtual void ImportFile(const std::string& path_to_file) = 0;
+    virtual void ExportFileShowCheckBoxes(void) = 0;
+    virtual void ExportFileHideCheckBoxes(void) = 0;
+    virtual void ExportFileStoreCheckedDiagrams(const std::string& path_to_file) = 0;
 
 protected:
     ~GuiSignalInterface() {}

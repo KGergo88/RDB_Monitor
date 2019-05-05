@@ -2,12 +2,14 @@
 
 
 
+// --- Static variable definitions of the DiagramContainer class ----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 const DiagramContainer::Element::DataType_Name DiagramContainer::root_element_data("Available diagrams");
 const DiagramContainer::Element::DataType_Name DiagramContainer::files_element_data("Diagrams loaded from files");
 const DiagramContainer::Element::DataType_Name DiagramContainer::network_element_data("Diagrams received on the network");
 const DiagramContainer::Element::DataType_Name DiagramContainer::empty_element_data("No diagrams yet...");
 
-
+// --- Methods of the DiagramContainer class ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 DiagramContainer::DiagramContainer(QObject* parent) : QAbstractItemModel(parent)
 {
@@ -39,9 +41,7 @@ QModelIndex DiagramContainer::AddDiagramFromFile(const std::string file_name, co
     }
 
     // Looking for the file name element that contains the diagrams of this file and creating it if it does not exists
-    Element::DataType_File file_name_element_data;
-    file_name_element_data.name = file_name;
-    file_name_element_data.path = file_path;
+    Element::DataType_File file_name_element_data(file_name, file_path);
     Element* file_name_element = files_element->GetChildWithData(file_name_element_data);
     if(nullptr == file_name_element)
     {
@@ -49,9 +49,9 @@ QModelIndex DiagramContainer::AddDiagramFromFile(const std::string file_name, co
     }
 
     // Adding the diagram to the element that represents this file
-    Element* new_element = AddChildToElement(file_name_element, diagram);
+    Element* new_diagram_element = AddChildToElement(file_name_element, diagram);
 
-    return GetModelIndexOfElement(new_element);
+    return GetModelIndexOfElement(new_diagram_element);
 }
 
 bool DiagramContainer::IsThisFileAlreadyStored(const std::string& file_name, const std::string& file_path)
@@ -82,6 +82,16 @@ DiagramSpecialized* DiagramContainer::GetDiagram(const QModelIndex& model_index)
     return result;
 }
 
+void DiagramContainer::ShowCheckBoxes(void)
+{
+    root_element->SetFlagsRecursive(Element::element_flags_checkable);
+}
+
+void DiagramContainer::HideCheckBoxes(void)
+{
+    root_element->SetFlagsRecursive(Element::element_flags_default);
+}
+
 QModelIndex DiagramContainer::GetModelIndexOfElement(Element *element) const
 {
     QModelIndex result;
@@ -95,12 +105,29 @@ QModelIndex DiagramContainer::GetModelIndexOfElement(Element *element) const
     return result;
 }
 
-DiagramContainer::Element* DiagramContainer::AddChildToElement(Element* element, Element::DataType data)
+DiagramContainer::Element* DiagramContainer::AddChildToElement(Element* element, const Element::DataType& data)
 {
     Element* result = nullptr;
 
+    // Notifying the views that an insertion will happen
     beginInsertRows(GetModelIndexOfElement(element), element->GetNumberOfChildren(), (element->GetNumberOfChildren()));
-    result = element->CreateChild(data);
+
+
+    // The childs check_state will be inherited from the parent in a way to respect the tri-state checkedness
+    Qt::CheckState childs_check_state;
+    if(Qt::CheckState::Checked == element->check_state)
+    {
+        childs_check_state = Qt::CheckState::Checked;
+    }
+    else
+    {
+        childs_check_state = Qt::CheckState::Unchecked;
+    }
+
+    // Creating the child (The childs flags are simply inherited from the parent)
+    result = element->CreateChild(data, element->flags, childs_check_state);
+
+    // Notifying the views that an insertion just happened
     endInsertRows();
 
     return result;
@@ -109,19 +136,22 @@ DiagramContainer::Element* DiagramContainer::AddChildToElement(Element* element,
 void DiagramContainer::RemoveChildFromElement(Element* element, Element* child)
 {
     std::size_t index_of_child;
+
+    // Checking whether the child exists
     if(element->GetIndexWithChild(child, index_of_child))
     {
+        // Notifying the views that a removal will happen
         beginRemoveRows(GetModelIndexOfElement(element), index_of_child, index_of_child);
+
+        // Removing the selected child
         element->KillChild(index_of_child);
+
+        // Notifying the views that a removal just happened
         endRemoveRows();
     }
 }
 
-
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
+// --- Methods of the DiagramContainer class that override the methods of the QAbstractItemModel ------------------------------------------------------------------------------------------------------
 
 QModelIndex DiagramContainer::index(int row, int column, const QModelIndex &parent) const
 {
@@ -202,7 +232,8 @@ int DiagramContainer::rowCount(const QModelIndex &parent) const
 
     if(parent.isValid())
     {
-        result = static_cast<Element*>(parent.internalPointer())->GetNumberOfChildren();
+        Element* indexed_element = static_cast<Element*>(parent.internalPointer());
+        result = indexed_element->GetNumberOfChildren();
     }
     else
     {
@@ -225,6 +256,7 @@ int DiagramContainer::columnCount(const QModelIndex &parent) const
 
     (void) parent;
 
+    // The columnCount has a fixed value in the DiagramContainer, which is defined by the column_count
     return column_count;
 }
 
@@ -245,12 +277,22 @@ QVariant DiagramContainer::data(const QModelIndex &index, int role) const
     if(index.isValid())
     {
         Element* element = static_cast<Element*>(index.internalPointer());
+
         switch(role)
         {
         case Qt::DisplayRole:
             result = QVariant(QString::fromStdString(element->GetDisplayableString()));
             break;
+        case Qt::CheckStateRole:
+            // We will only return a valid QVariant if the element is checkable
+            // This is needed, because otherwise a checkbox would be present for non-checkable elements as well
+            if(element->flags & Qt::ItemIsUserCheckable)
+            {
+                result = QVariant(element->check_state);
+            }
+            break;
         default:
+            // Nothing to do here, an invalid QVariant will be returned...
             break;
         }
     }
@@ -279,13 +321,68 @@ QVariant DiagramContainer::headerData(int section, Qt::Orientation orientation, 
     return result;
 }
 
-
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-DiagramContainer::Element* DiagramContainer::Element::CreateChild(const DataType& childs_data)
+Qt::ItemFlags DiagramContainer::flags(const QModelIndex &index) const
 {
-    children.push_back(std::make_unique<Element>(childs_data, this));
+    Qt::ItemFlags result;
+
+    if(index.isValid())
+    {
+        Element* indexed_element = static_cast<Element*>(index.internalPointer());
+        result = indexed_element->flags;
+    }
+    else
+    {
+        result = root_element->flags;
+    }
+
+    return result;
+}
+
+bool DiagramContainer::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+#ifdef DIAGRAM_CONTAINER_DEBUG_MODE
+    std::cout << "DiagramContainer::columnCount was called!"
+              << " index.internalPointer: " << index.internalPointer()
+              << " index.isValid: " << index.isValid()
+              << " index.row: " << index.row()
+              << " index.column: " << index.column()
+              << " role: " << role
+              << std::endl;
+#endif
+
+    bool bResult = false;
+
+    if(index.isValid())
+    {
+        Element* element = static_cast<Element*>(index.internalPointer());
+
+        switch(role)
+        {
+        case Qt::CheckStateRole:
+            // We only enable setting for elements that are checkable
+            if(element->flags & Qt::ItemIsUserCheckable)
+            {
+                if(value.isValid())
+                {
+                    element->check_state = *static_cast<const Qt::CheckState*>(value.data());
+                    bResult = true;
+                }
+            }
+            break;
+        default:
+            // Nothing to do here, false will be returned...
+            break;
+        }
+    }
+
+    return bResult;
+}
+
+// --- Methods functions of the DiagramContainer::Element class ---------------------------------------------------------------------------------------------------------------------------------------
+
+DiagramContainer::Element* DiagramContainer::Element::CreateChild(const DataType& childs_data, const Qt::ItemFlags& childs_flags, const Qt::CheckState& childs_check_state)
+{
+    children.push_back(std::make_unique<Element>(childs_data, this, childs_flags, childs_check_state));
     return children.at(children.size() - 1).get();
 }
 
@@ -342,14 +439,26 @@ std::string DiagramContainer::Element::GetDisplayableString(void) const
     return result;
 }
 
+void DiagramContainer::Element::SetFlagsRecursive(const Qt::ItemFlags& new_flags)
+{
+    // Setting the flag for this element
+    flags = new_flags;
+
+    // Going trough all the children and calling the same function on them as well
+    for(const auto& i : children)
+    {
+        i->SetFlagsRecursive(new_flags);
+    }
+}
+
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
-void DiagramContainer::Element::PrintAllElementsBelow(const std::string& identation) const
+void DiagramContainer::Element::PrintAllElementsRecursive(const std::string& identation) const
 {
     std::cout << identation << "Name: \"" << name << "\", Address: " << this << std::endl;
 
     for(const auto& i : children)
     {
-        i->PrintAllElementsBelow(identation + identation);
+        i->PrintAllElementsRecursive(identation + identation);
     }
 }
 #endif

@@ -37,30 +37,32 @@ MainWindow::MainWindow() : QMainWindow(),
 
     // Adding the object to the main window that will list the processed diagrams to be selected to display
     pTreeView = new QTreeView();
+    pTreeView->setAnimated(true);
 
     // Adding the object to the main window that will list the status messages
     pListWidgetStatus = new QListWidget();
 
-    // Adding the object to where the user can enter which serial port will be opened
-    pLineEdit = new QLineEdit(SERIAL_PORT_DEFAULT_PORT_NAME);
+    pWidgetConnectionManager = new ConnectionManagerWidget(this);
+    pWidgetDiagramExport = new DiagramExportWidget(this);
 
-    // Adding the object with which the user can open and close the serial port
-    pPushButton = new QPushButton(push_button_open_text);
-
-    QVBoxLayout *pLeftVerticalLayout = new QVBoxLayout;
+    QVBoxLayout *pLeftVerticalLayout = new QVBoxLayout(this);
     pLeftVerticalLayout->addWidget(pChartView, chart_view_size_percentage);
     pLeftVerticalLayout->addWidget(pListWidgetStatus, list_widget_status_size_percentage);
 
-    QVBoxLayout *pRightVerticalLayout = new QVBoxLayout;
-    pRightVerticalLayout->addWidget(pTreeView, tree_view_size_percentage);
-    pRightVerticalLayout->addWidget(pLineEdit, line_edit_size_percentage);
-    pRightVerticalLayout->addWidget(pPushButton, push_button_size_percentage);
+    pStackedLayout = new QStackedLayout(this);
+    pStackedLayout->addWidget(pWidgetConnectionManager);
+    pStackedLayout->addWidget(pWidgetDiagramExport);
+    pStackedLayout->setCurrentWidget(pWidgetConnectionManager);
 
-    QHBoxLayout *pHorizontalLayout = new QHBoxLayout;
+    QVBoxLayout *pRightVerticalLayout = new QVBoxLayout(this);
+    pRightVerticalLayout->addWidget(pTreeView, tree_view_size_percentage);
+    pRightVerticalLayout->addLayout(pStackedLayout, stacked_layout_size_percentage);
+
+    QHBoxLayout *pHorizontalLayout = new QHBoxLayout(this);
     pHorizontalLayout->addLayout(pLeftVerticalLayout, left_vertical_layout_size_percentage);
     pHorizontalLayout->addLayout(pRightVerticalLayout, right_vertical_layout_size_percentage);
 
-    QWidget *pCentralWidget = new QWidget;
+    QWidget *pCentralWidget = new QWidget(this);
     setCentralWidget(pCentralWidget);
     pCentralWidget->setLayout(pHorizontalLayout);
 
@@ -77,17 +79,26 @@ MainWindow::MainWindow() : QMainWindow(),
 
 void MainWindow::MenuActionDiagramsImportDiagrams(void)
 {
-    QFileDialog *pFileDialog = new QFileDialog(nullptr, diagram_menu_import_diagrams_text, "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
-    pFileDialog->setAcceptMode(QFileDialog::AcceptOpen);
-    pFileDialog->setModal(true);
+#warning "Magic strings..."
+    QFileDialog *pImportFileSelectorDialog = new QFileDialog(this, diagram_menu_import_diagrams_text, "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
+    pImportFileSelectorDialog->setAcceptMode(QFileDialog::AcceptOpen);
+    pImportFileSelectorDialog->setModal(true);
 
-    QObject::connect(pFileDialog, &QFileDialog::fileSelected, [=](const QString &file){emit ImportFile(file.toStdString());});
-    pFileDialog->show();
+    QObject::connect(pImportFileSelectorDialog, &QFileDialog::fileSelected, [=](const QString &file){emit ImportFile(file.toStdString());});
+    pImportFileSelectorDialog->show();
 }
 
 void MainWindow::MenuActionDiagramsExportDiagrams(void)
 {
-    #warning "Implement this..."
+#warning "Magic strings..."
+    emit ExportFileShowCheckBoxes();
+
+//    QFileDialog *pExportFileSelectorDialog = new QFileDialog(this, diagram_menu_export_diagrams_text, "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
+//    pExportFileSelectorDialog->setAcceptMode(QFileDialog::AcceptSave);
+//    pExportFileSelectorDialog->setModal(true);
+
+//    QObject::connect(pExportFileSelectorDialog, &QFileDialog::fileSelected, [=](const QString &file){emit ExportFileStoreCheckedDiagrams(file.toStdString());});
+//    pExportFileSelectorDialog->show();
 }
 
 void MainWindow::TreeviewCurrentSelectionChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -108,16 +119,16 @@ void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_back
         pTreeView->setModel(backend_signal_interface->GetDiagramContainerModel());
 
         // Registering the connections between the signals and the slots
-        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(NewStatusMessage(const std::string&)),
-                         this,                                             SLOT(DisplayStatusMessage(const std::string&)));
-        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(NetworkOperationFinished(const std::string&, const bool&)),
-                         this,                                             SLOT(ProcessNetworkOperationResult(const std::string&, const bool&)));
-        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
-                         this,                                             SLOT(DisplayDiagram(const DiagramSpecialized&)));
-        QObject::connect(pPushButton,                                      &QPushButton::clicked,
-                         this,                                             &MainWindow::PushButtonWasClicked);
-        QObject::connect(pTreeView->selectionModel(),                      &QItemSelectionModel::currentChanged,
-                         this,                                             &MainWindow::TreeviewCurrentSelectionChanged);
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface),       SIGNAL(NewStatusMessage(const std::string&)),
+                         this,                                                   SLOT(DisplayStatusMessage(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface),       SIGNAL(NetworkOperationFinished(const std::string&, const bool&)),
+                         this,                                                   SLOT(ProcessNetworkOperationResult(const std::string&, const bool&)));
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface),       SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
+                         this,                                                   SLOT(DisplayDiagram(const DiagramSpecialized&)));
+        QObject::connect(pWidgetConnectionManager->button_open_close_connection, &QPushButton::clicked,
+                         this,                                                   &MainWindow::PushButtonWasClicked);
+        QObject::connect(pTreeView->selectionModel(),                            &QItemSelectionModel::currentChanged,
+                         this,                                                   &MainWindow::TreeviewCurrentSelectionChanged);
     }
     else
     {
@@ -135,7 +146,7 @@ void MainWindow::DisplayStatusMessage(const std::string& message_text)
 
 void MainWindow::PushButtonWasClicked(void)
 {
-    std::string network_port_name(pLineEdit->text().toStdString());
+    std::string network_port_name(pWidgetConnectionManager->line_edit_port_name->text().toStdString());
 
     if(!network_connection_is_open)
     {
@@ -149,20 +160,20 @@ void MainWindow::PushButtonWasClicked(void)
 
 void MainWindow::ProcessNetworkOperationResult(const std::string& port_name, const bool& result)
 {
-    if(port_name == pLineEdit->text().toStdString())
+    if(port_name == pWidgetConnectionManager->line_edit_port_name->text().toStdString())
     {
         if(result)
         {
             if(!network_connection_is_open)
             {
-                pLineEdit->setReadOnly(true);
-                pPushButton->setText(push_button_close_text);
+                pWidgetConnectionManager->line_edit_port_name->setReadOnly(true);
+                pWidgetConnectionManager->line_edit_port_name->setText(ConnectionManagerWidget::button_close_connection_text);
                 network_connection_is_open = true;
             }
             else
             {
-                pLineEdit->setReadOnly(false);
-                pPushButton->setText(push_button_open_text);
+                pWidgetConnectionManager->line_edit_port_name->setReadOnly(false);
+                pWidgetConnectionManager->line_edit_port_name->setText(ConnectionManagerWidget::button_open_connection_text);
                 network_connection_is_open = false;
             }
         }
