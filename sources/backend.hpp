@@ -81,6 +81,9 @@ private slots:
     void CloseNetworkConnection(const std::string&);
     void RequestForDiagram(const QModelIndex& model_index);
     void ImportFile(const std::string& path_to_file);
+    void ExportFileShowCheckBoxes(void);
+    void ExportFileHideCheckBoxes(void);
+    void ExportFileStoreCheckedDiagrams(const std::string& path_to_file);
 
 private:
     SerialPort serial_port;

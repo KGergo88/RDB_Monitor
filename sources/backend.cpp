@@ -47,10 +47,21 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
     {
         gui_signal_interface = new_gui_signal_interface;
 
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(OpenNetworkConnection(const std::string&)),  this, SLOT(OpenNetwokConnection(const std::string&)));
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(CloseNetworkConnection(const std::string&)), this, SLOT(CloseNetworkConnection(const std::string&)));
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(RequestForDiagram(const QModelIndex&)),      this, SLOT(RequestForDiagram(const QModelIndex&)));
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface), SIGNAL(ImportFile(const std::string&)),             this, SLOT(ImportFile(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(OpenNetworkConnection(const std::string&)),
+                         this,                                          SLOT(OpenNetwokConnection(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(CloseNetworkConnection(const std::string&)),
+                         this,                                          SLOT(CloseNetworkConnection(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(RequestForDiagram(const QModelIndex&)),
+                         this,                                          SLOT(RequestForDiagram(const QModelIndex&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(ImportFile(const std::string&)),
+                         this,                                          SLOT(ImportFile(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(ExportFileShowCheckBoxes(void)),
+                         this,                                          SLOT(ExportFileShowCheckBoxes(void)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(ExportFileHideCheckBoxes(void)),
+                         this,                                          SLOT(ExportFileHideCheckBoxes(void)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(ExportFileStoreCheckedDiagrams(const std::string&)),
+                         this,                                          SLOT(ExportFileStoreCheckedDiagrams(const std::string&)));
+
     }
     else
     {
@@ -186,5 +197,40 @@ void Backend::ImportFile(const std::string& path_to_file)
     else
     {
         ReportStatus("ERROR! The path \"" + path_to_file + "\" does not exist!");
+    }
+}
+
+void Backend::ExportFileShowCheckBoxes(void)
+{
+    diagram_container.ShowCheckBoxes();
+}
+
+void Backend::ExportFileHideCheckBoxes(void)
+{
+    diagram_container.HideCheckBoxes();
+}
+
+void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
+{
+    if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
+    {
+        auto checked_diagrams = diagram_container.GetCheckedDiagrams();
+        if(checked_diagrams.size())
+        {
+            auto exported_data = measurement_data_protocol.ExportData(checked_diagrams);
+
+            std::ofstream output_file_stream(path_to_file, (std::ofstream::out | std::ofstream::trunc));
+            output_file_stream << exported_data.rdbuf();
+
+            ReportStatus("The selected diagrams were successfully written to \"" + path_to_file + "\"!");
+        }
+        else
+        {
+            ReportStatus("No diagram was selected! Nothing was exported!");
+        }
+    }
+    else
+    {
+        ReportStatus("ERROR! The MeasurementDataProtocol cannot save diagrams into the file: \"" + path_to_file + "\"!");
     }
 }

@@ -40,6 +40,7 @@ public:
     virtual std::string GetProtocolName(void) = 0;
     virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) = 0;
     virtual bool CanThisFileBeProcessed(const std::string path_to_file) = 0;
+    virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) = 0;
 
 protected:
     DataProcessingInterface(const std::string& new_protocol_name, const std::string& new_file_extension) : protocol_name(new_protocol_name), native_file_extension(new_file_extension) {}

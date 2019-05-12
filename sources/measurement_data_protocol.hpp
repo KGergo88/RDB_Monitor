@@ -59,6 +59,7 @@ public:
     std::string GetProtocolName(void) override;
     std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
     bool CanThisFileBeProcessed(const std::string path_to_file) override;
+    std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
 
 private:
     enum class ProcessingStates : uint8_t
@@ -68,13 +69,26 @@ private:
         ProcessingDataLines
     };
 
-    // REGEX strings to search the input data for valid measurement session
-    const std::string regex_start_line         = R"(^\s*<<<START>>>$)";
-    const std::string regex_headline           = R"(^\s*(\w+,){2,}$)";
-    const std::string regex_headline_analyzer  = R"(^\s*(\w+),)";
-    const std::string regex_data_line          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
-    const std::string regex_data_line_analyzer = R"(^\s*((?:\+|\-)?\d+),)";
-    const std::string regex_end_line           = R"(^\s*<<<END>>>$)";
+    struct Constants
+    {
+        struct Regex
+        {
+            // REGEX strings to search the input data for valid measurement session
+            static constexpr char start_line[]         = R"(^\s*<<<START>>>$)";
+            static constexpr char headline[]           = R"(^\s*(\w+,){2,}$)";
+            static constexpr char headline_analyzer[]  = R"(^\s*(\w+),)";
+            static constexpr char data_line[]          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
+            static constexpr char data_line_analyzer[] = R"(^\s*((?:\+|\-)?\d+),)";
+            static constexpr char end_line[]           = R"(^\s*<<<END>>>$)";
+        };
+
+        struct Export
+        {
+            static constexpr char start_line[]      = "<<<START>>>";
+            static constexpr char end_line[]        = "<<<END>>>";
+            static constexpr char element_separator = ',';
+        };
+    };
 
     ProcessingStates processing_state;
     DiagramSpecialized actual_diagram;

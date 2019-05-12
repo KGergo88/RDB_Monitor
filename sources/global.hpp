@@ -46,7 +46,7 @@ template <typename T_DATA_POINT>
 class DataPoint;
 using DataPointSpecialized = DataPoint<DataPointType>;
 
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.0.0")
+#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
 
 #ifdef _WIN32
     #define SERIAL_PORT_DEFAULT_PORT_NAME ("COM3")
@@ -56,9 +56,6 @@ using DataPointSpecialized = DataPoint<DataPointType>;
 
 constexpr uint32_t SERIAL_PORT_DEFAULT_BAUDRATE = 115200;
 constexpr std::size_t SERIAL_PORT_MAX_READ_LENGTH_IN_BYTES = 100 * 1024;
-
-#define DATA_START_LINE                 ("<<<START>>>")
-#define DATA_END_LINE                   ("<<<END>>>")
 
 
 

@@ -63,6 +63,7 @@ public:
     DiagramSpecialized* GetDiagram(const QModelIndex& model_index);
     void ShowCheckBoxes(void);
     void HideCheckBoxes(void);
+    std::vector<DiagramSpecialized> GetCheckedDiagrams(void);
 
     // Members overridden from the QAbstractItemModel
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -159,6 +160,9 @@ private:
         }
         std::string GetDisplayableString(void) const;
         void SetFlagsRecursive(const Qt::ItemFlags& new_flags);
+        void SetCheckStateRecursive(const Qt::CheckState& new_check_state);
+        void ChildsCheckStateHasChanged(void);
+        void CallFunctionOnElementsRecursive(std::function<void(Element*)> function);
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
         void PrintAllElementsRecursive(const std::string& identation = "   ") const;
 #endif
@@ -177,8 +181,8 @@ private:
 
     QModelIndex GetModelIndexOfElement(Element* element) const;
     Element* AddChildToElement(Element* element, const Element::DataType& data);
-
     void RemoveChildFromElement(Element* element, Element* child);
+    void SetCheckStateOfElement(Element* element, const Qt::CheckState& new_check_state);
 
     // Every element contains only one column
     static constexpr int column_count = 1;

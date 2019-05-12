@@ -84,12 +84,32 @@ DiagramSpecialized* DiagramContainer::GetDiagram(const QModelIndex& model_index)
 
 void DiagramContainer::ShowCheckBoxes(void)
 {
+    root_element->SetCheckStateRecursive(Qt::CheckState::Unchecked);
     root_element->SetFlagsRecursive(Element::element_flags_checkable);
 }
 
 void DiagramContainer::HideCheckBoxes(void)
 {
     root_element->SetFlagsRecursive(Element::element_flags_default);
+}
+
+std::vector<DiagramSpecialized> DiagramContainer::GetCheckedDiagrams(void)
+{
+    std::vector<DiagramSpecialized> checked_diagrams;
+
+    root_element->CallFunctionOnElementsRecursive(
+    [&](Element* element) -> void
+    {
+       if(element->check_state)
+       {
+           if(element->ContainsType<Element::DataType_Diagram>())
+           {
+               checked_diagrams.push_back(std::get<Element::DataType_Diagram>(element->data));
+           }
+       }
+    });
+
+    return checked_diagrams;
 }
 
 QModelIndex DiagramContainer::GetModelIndexOfElement(Element *element) const
@@ -149,6 +169,26 @@ void DiagramContainer::RemoveChildFromElement(Element* element, Element* child)
         // Notifying the views that a removal just happened
         endRemoveRows();
     }
+}
+
+void DiagramContainer::SetCheckStateOfElement(Element* element, const Qt::CheckState& new_check_state)
+{
+    // Setting the new check state for this element and all the elements below this
+    element->SetCheckStateRecursive(new_check_state);
+
+    // Root elements do not have a parent and if there is no parent to notify then there is nothing to do here
+    if(!element->IsRoot())
+    {
+        element->parent->ChildsCheckStateHasChanged();
+    }
+
+    // Notifying the views about the check_state changes
+    // For the sake of simplicity, we are signaling a change for all the elements with the invalid QModelIndex
+    // If this will cause a performance issue, then a more complex solution can be introduced that sends notifications only for the changed elements,
+    // but at the moment this case seams to be highly unlikely because the number of Elements stored in the DiagramContainer are relatively low
+    QVector<int> role;
+    role.append(Qt::CheckStateRole);
+    emit dataChanged(QModelIndex(), QModelIndex(), role);
 }
 
 // --- Methods of the DiagramContainer class that override the methods of the QAbstractItemModel ------------------------------------------------------------------------------------------------------
@@ -364,7 +404,7 @@ bool DiagramContainer::setData(const QModelIndex &index, const QVariant &value, 
             {
                 if(value.isValid())
                 {
-                    element->check_state = *static_cast<const Qt::CheckState*>(value.data());
+                    SetCheckStateOfElement(element, *static_cast<const Qt::CheckState*>(value.data()));
                     bResult = true;
                 }
             }
@@ -441,13 +481,69 @@ std::string DiagramContainer::Element::GetDisplayableString(void) const
 
 void DiagramContainer::Element::SetFlagsRecursive(const Qt::ItemFlags& new_flags)
 {
-    // Setting the flag for this element
+    // Setting the flags for this element
     flags = new_flags;
 
     // Going trough all the children and calling the same function on them as well
     for(const auto& i : children)
     {
         i->SetFlagsRecursive(new_flags);
+    }
+}
+
+void DiagramContainer::Element::SetCheckStateRecursive(const Qt::CheckState& new_check_state)
+{
+    // Setting the check_state for this element
+    check_state = new_check_state;
+
+    // Going trough all the children and calling the same function on them as well
+    for(const auto& i : children)
+    {
+        i->SetCheckStateRecursive(new_check_state);
+    }
+}
+
+void DiagramContainer::Element::ChildsCheckStateHasChanged(void)
+{
+    // It does not make sense to call this function on an element that does not have a child,
+    // but just to be on the safe side, we will check it to avoid invalid access to the children container
+    if(0 < GetNumberOfChildren())
+    {
+        // We say that the accumulated check state is the check state of the first child
+        // If the other children has a different check_state then we will change this to partially checked
+        // This makes sense, since the check_state can have only the following values: Unchecked, PartiallyChecked, Checked
+        Qt::CheckState accumulated_check_state_of_the_children = children[0]->check_state;
+        for(const auto& i : children)
+        {
+            if(accumulated_check_state_of_the_children != i->check_state)
+            {
+                accumulated_check_state_of_the_children = Qt::CheckState::PartiallyChecked;
+            }
+        }
+
+        // If the accumulated check state of the children is the same that this element has, then there is nothing to do
+        if(check_state != accumulated_check_state_of_the_children)
+        {
+            // We need to make sure that the new chec_state is set before notifying the parent about the changes
+            // This is needed because the parent will also take into account of this element's check_state
+            check_state = accumulated_check_state_of_the_children;
+            if(!IsRoot())
+            {
+                parent->ChildsCheckStateHasChanged();
+            }
+        }
+    }
+}
+
+void DiagramContainer::Element::CallFunctionOnElementsRecursive(std::function<void(Element*)> function)
+{
+    // Calling the function on this element
+    function(this);
+
+    // Calling this function on all the children
+    for(const auto& i : children)
+    {
+        i->CallFunctionOnElementsRecursive(function);
     }
 }
 

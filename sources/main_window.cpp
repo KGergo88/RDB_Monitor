@@ -42,29 +42,29 @@ MainWindow::MainWindow() : QMainWindow(),
     // Adding the object to the main window that will list the status messages
     pListWidgetStatus = new QListWidget();
 
-    pWidgetConnectionManager = new ConnectionManagerWidget(this);
-    pWidgetDiagramExport = new DiagramExportWidget(this);
+    pWidgetConnectionManager = new ConnectionManagerWidget();
+    pWidgetDiagramExport = new DiagramExportWidget();
 
-    QVBoxLayout *pLeftVerticalLayout = new QVBoxLayout(this);
+    QVBoxLayout *pLeftVerticalLayout = new QVBoxLayout();
     pLeftVerticalLayout->addWidget(pChartView, chart_view_size_percentage);
     pLeftVerticalLayout->addWidget(pListWidgetStatus, list_widget_status_size_percentage);
 
-    pStackedLayout = new QStackedLayout(this);
+    pStackedLayout = new QStackedLayout();
     pStackedLayout->addWidget(pWidgetConnectionManager);
     pStackedLayout->addWidget(pWidgetDiagramExport);
     pStackedLayout->setCurrentWidget(pWidgetConnectionManager);
 
-    QVBoxLayout *pRightVerticalLayout = new QVBoxLayout(this);
+    QVBoxLayout *pRightVerticalLayout = new QVBoxLayout();
     pRightVerticalLayout->addWidget(pTreeView, tree_view_size_percentage);
     pRightVerticalLayout->addLayout(pStackedLayout, stacked_layout_size_percentage);
 
-    QHBoxLayout *pHorizontalLayout = new QHBoxLayout(this);
+    QHBoxLayout *pHorizontalLayout = new QHBoxLayout();
     pHorizontalLayout->addLayout(pLeftVerticalLayout, left_vertical_layout_size_percentage);
     pHorizontalLayout->addLayout(pRightVerticalLayout, right_vertical_layout_size_percentage);
 
     QWidget *pCentralWidget = new QWidget(this);
-    setCentralWidget(pCentralWidget);
     pCentralWidget->setLayout(pHorizontalLayout);
+    setCentralWidget(pCentralWidget);
 
     pDiagramsMenu = menuBar()->addMenu(diagram_menu_text);
     pDiagramsMenu->addAction(diagram_menu_import_diagrams_text, this, &MainWindow::MenuActionDiagramsImportDiagrams);
@@ -83,22 +83,16 @@ void MainWindow::MenuActionDiagramsImportDiagrams(void)
     QFileDialog *pImportFileSelectorDialog = new QFileDialog(this, diagram_menu_import_diagrams_text, "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
     pImportFileSelectorDialog->setAcceptMode(QFileDialog::AcceptOpen);
     pImportFileSelectorDialog->setModal(true);
+    pImportFileSelectorDialog->show();
 
     QObject::connect(pImportFileSelectorDialog, &QFileDialog::fileSelected, [=](const QString &file){emit ImportFile(file.toStdString());});
-    pImportFileSelectorDialog->show();
 }
 
 void MainWindow::MenuActionDiagramsExportDiagrams(void)
 {
-#warning "Magic strings..."
+    pDiagramsMenu->setEnabled(false);
+    pStackedLayout->setCurrentWidget(pWidgetDiagramExport);
     emit ExportFileShowCheckBoxes();
-
-//    QFileDialog *pExportFileSelectorDialog = new QFileDialog(this, diagram_menu_export_diagrams_text, "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
-//    pExportFileSelectorDialog->setAcceptMode(QFileDialog::AcceptSave);
-//    pExportFileSelectorDialog->setModal(true);
-
-//    QObject::connect(pExportFileSelectorDialog, &QFileDialog::fileSelected, [=](const QString &file){emit ExportFileStoreCheckedDiagrams(file.toStdString());});
-//    pExportFileSelectorDialog->show();
 }
 
 void MainWindow::TreeviewCurrentSelectionChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -126,7 +120,11 @@ void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_back
         QObject::connect(dynamic_cast<QObject*>(backend_signal_interface),       SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
                          this,                                                   SLOT(DisplayDiagram(const DiagramSpecialized&)));
         QObject::connect(pWidgetConnectionManager->button_open_close_connection, &QPushButton::clicked,
-                         this,                                                   &MainWindow::PushButtonWasClicked);
+                         this,                                                   &MainWindow::ConnectionManagerButtonOpenCloseWasClicked);
+        QObject::connect(pWidgetDiagramExport->button_export,                    &QPushButton::clicked,
+                         this,                                                   &MainWindow::DiagramExportButtonExportWasClicked);
+        QObject::connect(pWidgetDiagramExport->button_cancel,                    &QPushButton::clicked,
+                         this,                                                   &MainWindow::DiagramExportButtonCancelWasClicked);
         QObject::connect(pTreeView->selectionModel(),                            &QItemSelectionModel::currentChanged,
                          this,                                                   &MainWindow::TreeviewCurrentSelectionChanged);
     }
@@ -144,7 +142,7 @@ void MainWindow::DisplayStatusMessage(const std::string& message_text)
     pListWidgetStatus->insertItem(0, pListWidgetItem);
 }
 
-void MainWindow::PushButtonWasClicked(void)
+void MainWindow::ConnectionManagerButtonOpenCloseWasClicked(void)
 {
     std::string network_port_name(pWidgetConnectionManager->line_edit_port_name->text().toStdString());
 
@@ -156,6 +154,30 @@ void MainWindow::PushButtonWasClicked(void)
     {
         emit CloseNetworkConnection(network_port_name);
     }
+}
+
+void MainWindow::DiagramExportButtonExportWasClicked(void)
+{
+    QFileDialog *pExportFileSelectorDialog = new QFileDialog(this, diagram_menu_export_diagrams_text, "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
+    pExportFileSelectorDialog->setAcceptMode(QFileDialog::AcceptSave);
+    pExportFileSelectorDialog->setModal(true);
+    pExportFileSelectorDialog->show();
+
+    QObject::connect(pExportFileSelectorDialog, &QFileDialog::fileSelected,
+                     [=](const QString &file)
+                        {
+                            pDiagramsMenu->setEnabled(true);
+                            pStackedLayout->setCurrentWidget(pWidgetConnectionManager);
+                            emit ExportFileStoreCheckedDiagrams(file.toStdString());
+                            emit ExportFileHideCheckBoxes();
+                        });
+}
+
+void MainWindow::DiagramExportButtonCancelWasClicked(void)
+{
+    pDiagramsMenu->setEnabled(true);
+    pStackedLayout->setCurrentWidget(pWidgetConnectionManager);
+    emit ExportFileHideCheckBoxes();
 }
 
 void MainWindow::ProcessNetworkOperationResult(const std::string& port_name, const bool& result)

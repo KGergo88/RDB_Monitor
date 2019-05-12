@@ -76,7 +76,9 @@ signals:
 
 private slots:
     void DisplayStatusMessage(const std::string& message_text);
-    void PushButtonWasClicked(void);
+    void ConnectionManagerButtonOpenCloseWasClicked(void);
+    void DiagramExportButtonExportWasClicked(void);
+    void DiagramExportButtonCancelWasClicked(void);
     void ProcessNetworkOperationResult(const std::string& port_name, const bool& result);
     void DisplayDiagram(const DiagramSpecialized& diagram);
     void MenuActionDiagramsImportDiagrams(void);
@@ -104,8 +106,6 @@ private:
 
     class ConnectionManagerWidget : public QWidget
     {
-        Q_OBJECT
-
     public:
         ConnectionManagerWidget(QWidget* parent = nullptr) : QWidget(parent)
         {
@@ -134,14 +134,12 @@ private:
 
     class DiagramExportWidget : public QWidget
     {
-        Q_OBJECT
-
     public:
         DiagramExportWidget(QWidget* parent = nullptr) : QWidget(parent)
         {
             layout = new QVBoxLayout(this);
-            QPushButton* button_export = new QPushButton(button_export_text, this);
-            QPushButton* button_cancel = new QPushButton(button_cancel_text, this);
+            button_export = new QPushButton(button_export_text, this);
+            button_cancel = new QPushButton(button_cancel_text, this);
             layout->addWidget(button_export);
             layout->addWidget(button_cancel);
         }
@@ -166,7 +164,6 @@ private:
 
     BackendSignalInterface* backend_signal_interface;
 
-    QMenuBar*                pMenuBar;
     QMenu*                   pDiagramsMenu;
     QChartView*              pChartView;
     QTreeView*               pTreeView;
