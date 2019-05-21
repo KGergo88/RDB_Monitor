@@ -32,17 +32,18 @@
 
 #include "global.hpp"
 #include "backend_signal_interface.hpp"
-#include "gui_signal_interface.h"
+#include "gui_signal_interface.hpp"
 #include "diagram.hpp"
 #include "serial_port.hpp"
 #include "measurement_data_protocol.hpp"
 #include "network_handler.hpp"
-#include "diagram_container.h"
+#include "diagram_container.hpp"
+#include "configuration.hpp"
 
 
 
-#ifndef GUI_FRAMEWORK_HPP
-#define GUI_FRAMEWORK_HPP
+#ifndef BACKEND_HPP
+#define BACKEND_HPP
 
 
 
@@ -70,6 +71,9 @@ public:
     void ReportStatus(const std::string& message);
 
     QAbstractItemModel* GetDiagramContainerModel(void) override {return &diagram_container;}
+    std::string GetFileImportDefaultFolder(void) override {return configuration.ImportFolder();}
+    std::string GetFileExportDefaultFolder(void) override {return configuration.ExportFolder();}
+    std::vector<std::string> GetSupportedFileExtensions(void) override;
 
 signals:
     void NewStatusMessage(const std::string& message_text) override;
@@ -93,8 +97,9 @@ private:
     GuiSignalInterface *gui_signal_interface;
 
     DiagramContainer diagram_container;
+    Configuration configuration;
 };
 
 
 
-#endif /* GUI_FRAMEWORK_HPP */
+#endif /* BACKEND_HPP */

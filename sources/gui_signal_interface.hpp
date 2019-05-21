@@ -30,8 +30,8 @@
 
 
 
-#ifndef GUI_SIGNAL_INTERFACE_H
-#define GUI_SIGNAL_INTERFACE_H
+#ifndef GUI_SIGNAL_INTERFACE_HPP
+#define GUI_SIGNAL_INTERFACE_HPP
 
 
 
@@ -54,4 +54,4 @@ protected:
 
 Q_DECLARE_INTERFACE(GuiSignalInterface, "GuiSignalInterface")
 
-#endif // GUI_SIGNAL_INTERFACE_H
+#endif // GUI_SIGNAL_INTERFACE_HPP

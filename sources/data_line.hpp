@@ -31,8 +31,8 @@
 
 
 
-#ifndef DATALINE_HPP
-#define DATALINE_HPP
+#ifndef DATA_LINE_HPP
+#define DATA_LINE_HPP
 
 
 
@@ -134,4 +134,4 @@ private:
 
 
 
-#endif /* DATALINE_HPP */
+#endif /* DATA_LINE_HPP */

@@ -79,8 +79,9 @@ MainWindow::MainWindow() : QMainWindow(),
 
 void MainWindow::MenuActionDiagramsImportDiagrams(void)
 {
-#warning "Magic strings..."
-    QFileDialog *pImportFileSelectorDialog = new QFileDialog(this, diagram_menu_import_diagrams_text, "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
+    auto default_folder = backend_signal_interface->GetFileImportDefaultFolder();
+    auto filter_string = CreateFileDialogFilterString();
+    QFileDialog *pImportFileSelectorDialog = new QFileDialog(this, diagram_menu_export_diagrams_text, QString::fromStdString(default_folder), QString::fromStdString(filter_string));
     pImportFileSelectorDialog->setAcceptMode(QFileDialog::AcceptOpen);
     pImportFileSelectorDialog->setModal(true);
     pImportFileSelectorDialog->show();
@@ -158,7 +159,10 @@ void MainWindow::ConnectionManagerButtonOpenCloseWasClicked(void)
 
 void MainWindow::DiagramExportButtonExportWasClicked(void)
 {
-    QFileDialog *pExportFileSelectorDialog = new QFileDialog(this, diagram_menu_export_diagrams_text, "/home/", "Diagram Files: .mdp .jfst (*.mdp *.jfst)");
+    auto default_folder = backend_signal_interface->GetFileExportDefaultFolder();
+    auto filter_string = CreateFileDialogFilterString();
+
+    QFileDialog *pExportFileSelectorDialog = new QFileDialog(this, diagram_menu_export_diagrams_text, QString::fromStdString(default_folder), QString::fromStdString(filter_string));
     pExportFileSelectorDialog->setAcceptMode(QFileDialog::AcceptSave);
     pExportFileSelectorDialog->setModal(true);
     pExportFileSelectorDialog->show();
@@ -270,4 +274,28 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
     {
         delete pOldChart;
     }
+}
+
+std::string MainWindow::CreateFileDialogFilterString(void)
+{
+    std::string filter_string = file_dialog_filter_string_constant_part;
+    auto file_extensions = backend_signal_interface->GetSupportedFileExtensions();
+
+    for(auto const& extension : file_extensions)
+    {
+        filter_string += extension;
+        filter_string += " ";
+    }
+
+    filter_string += "(";
+    for(auto const& extension : file_extensions)
+    {
+        filter_string += " ";
+        filter_string += "*";
+        filter_string += extension;
+        filter_string += " ";
+    }
+    filter_string += ")";
+
+    return filter_string;
 }

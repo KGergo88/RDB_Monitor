@@ -44,6 +44,9 @@ protected:
 
 public:
     virtual QAbstractItemModel* GetDiagramContainerModel(void) = 0;
+    virtual std::string GetFileImportDefaultFolder(void) = 0;
+    virtual std::string GetFileExportDefaultFolder(void) = 0;
+    virtual std::vector<std::string> GetSupportedFileExtensions(void) = 0;
 
 signals:
     virtual void NewStatusMessage(const std::string& message_text) = 0;

@@ -35,8 +35,8 @@
 
 
 
-#ifndef DIAGRAM_CONTAINER_H
-#define DIAGRAM_CONTAINER_H
+#ifndef DIAGRAM_CONTAINER_HPP
+#define DIAGRAM_CONTAINER_HPP
 
 //#define DIAGRAM_CONTAINER_DEBUG_MODE
 
@@ -200,4 +200,4 @@ private:
     Element* network_element;
 };
 
-#endif // DIAGRAM_CONTAINER_H
+#endif // DIAGRAM_CONTAINER_HPP

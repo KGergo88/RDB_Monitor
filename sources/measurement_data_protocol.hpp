@@ -59,6 +59,7 @@ public:
     std::string GetProtocolName(void) override;
     std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
     bool CanThisFileBeProcessed(const std::string path_to_file) override;
+    std::string GetSupportedFileType(void) override {return native_file_extension;}
     std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
 
 private:

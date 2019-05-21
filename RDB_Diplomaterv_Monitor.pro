@@ -53,6 +53,7 @@ win32 {
 }
 
 SOURCES += \
+    sources/configuration.cpp \
     sources/data_line.cpp \
     sources/data_point.cpp \
     sources/diagram.cpp \
@@ -63,15 +64,18 @@ SOURCES += \
     sources/main_window.cpp \
     sources/backend.cpp \
     sources/measurement_data_protocol.cpp
+    sources/configuration.cpp
 
 HEADERS += \
+    sources/configuration.hpp \
+    sources/data_connection_interface.hpp \
     sources/data_line.hpp \
     sources/data_point.hpp \
     sources/diagram.hpp \
     sources/data_line.hpp \
     sources/data_point.hpp \
     sources/diagram.hpp \
-    sources/diagram_container.h \
+    sources/diagram_container.hpp \
     sources/global.hpp \
     sources/serial_port.hpp \
     sources/network_connection_interface.hpp \
@@ -81,7 +85,8 @@ HEADERS += \
     sources/data_processing_interface.hpp \
     sources/measurement_data_protocol.hpp \
     sources/backend_signal_interface.hpp \
-    sources/gui_signal_interface.h
+    sources/gui_signal_interface.hpp
+    sources/configuration.hpp
 
 DISTFILES += \
     README

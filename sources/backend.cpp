@@ -38,7 +38,7 @@ Backend::Backend() : QObject(),
                                             std::bind(&Backend::ReportStatus, this, std::placeholders::_1)),
                      gui_signal_interface(nullptr)
 {
-
+#warning "This function needs to be changed when implementing the generic protocol handling"
 }
 
 void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface)
@@ -136,6 +136,16 @@ void Backend::ReportStatus(const std::string& message)
     }
 }
 
+std::vector<std::string> Backend::GetSupportedFileExtensions(void)
+{
+#warning "This function needs to be changed when implementing the generic protocol handling"
+    std::vector<std::string> result;
+
+    result.push_back(measurement_data_protocol.GetSupportedFileType());
+
+    return result;
+}
+
 void Backend::OpenNetwokConnection(const std::string& port_name)
 {
     bool result = false;
@@ -171,6 +181,7 @@ void Backend::RequestForDiagram(const QModelIndex& model_index)
 
 void Backend::ImportFile(const std::string& path_to_file)
 {
+#warning "This function needs to be changed when implementing the generic protocol handling"
     if(std::filesystem::exists(std::filesystem::path(path_to_file)))
     {
         std::string file_name = std::filesystem::path(path_to_file).filename();
@@ -180,8 +191,11 @@ void Backend::ImportFile(const std::string& path_to_file)
             {
                 std::ifstream file_stream(path_to_file);
                 auto diagrams_from_file = measurement_data_protocol.ProcessData(file_stream);
-
                 StoreFileDiagrams(file_name, path_to_file, diagrams_from_file);
+
+                // Updating the configuration with the folder of the file that was imported
+                configuration.ImportFolder(std::filesystem::path(path_to_file).parent_path());
+
                 ReportStatus("The file \"" + path_to_file + "\" was successfully opened!");
             }
             else
@@ -212,6 +226,7 @@ void Backend::ExportFileHideCheckBoxes(void)
 
 void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
 {
+#warning "This function needs to be changed when implementing the generic protocol handling"
     if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
     {
         auto checked_diagrams = diagram_container.GetCheckedDiagrams();
@@ -221,6 +236,9 @@ void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
 
             std::ofstream output_file_stream(path_to_file, (std::ofstream::out | std::ofstream::trunc));
             output_file_stream << exported_data.rdbuf();
+
+            // Updating the configuration with the folder of the file that was exported
+            configuration.ExportFolder(std::filesystem::path(path_to_file).parent_path());
 
             ReportStatus("The selected diagrams were successfully written to \"" + path_to_file + "\"!");
         }

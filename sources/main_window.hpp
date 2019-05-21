@@ -33,7 +33,7 @@
 #include <QTreeView>
 
 #include "global.hpp"
-#include "gui_signal_interface.h"
+#include "gui_signal_interface.hpp"
 #include "backend_signal_interface.hpp"
 #include "diagram.hpp"
 #include "network_handler.hpp"
@@ -100,9 +100,13 @@ private:
     static constexpr char diagram_menu_import_diagrams_text[] = "Import Diagrams";
     static constexpr char diagram_menu_export_diagrams_text[] = "Export Diagrams";
 
+    static constexpr char file_dialog_filter_string_constant_part[] = "Diagram Files: ";
+
     static constexpr qreal y_axis_range_multiplicator = 0.05;
     static constexpr int   y_axis_tick_count = 5;
     static constexpr int   y_axis_minor_tick_count = 0;
+
+    std::string CreateFileDialogFilterString(void);
 
     class ConnectionManagerWidget : public QWidget
     {
