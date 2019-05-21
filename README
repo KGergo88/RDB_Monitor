@@ -58,34 +58,24 @@ and this might lead to dropped measurement results because of violations of the 
 3 - Supported protocols
 =======================
 
-For data reception trough the serial port only the measurement data protocol is supported.
-Storing and loading diagrams in the file system only supported in the format described by the JFST protocol.
+Protocols are used for the data reception on the network and for data storage in the filesystem.
+Currently only one protocol, the Measurement Data Protocol is supported (see chapter "3a - Measurement Data Protocol (MDP)").
 
-Measurement data protocol:
-    - This is the primary protocol that is used for data reception trough the serial port
-    - It is simple and can be implemented by microcontrollers with limited resources as well
-    - Encodes the names of the measured quantities and the measured values
-    - One session contains data for only one diagram
-    - For detailed description, see the sub-chapter
-
-JFST Protocol:
-    - JFST stands for "JSON formatted storage and transfer"
-    - The protocol is using the JSON format (for details, see: http://json.org) to be more human-readable
-    - It can be used for storing diagrams in the file system and also for data transmission between the source and the monitor software
-    - The JFST is aimed for devices with more powerful processing and networking capabilities
-    - It has a generation value that can be used for differentiating between different incompatible JFST versions
-    - The JFTS encodes the diagram data and several metadata as well
-    - The protocol support data points where not every measured value has samples
-    - One session can data for more than one diagrams
-    - For detailed description, see the sub-chapter
-
-
-
-3a - Measurement Data Protocol
-==============================
+3a - Measurement Data Protocol (MDP)
+====================================
+- This protocol is used for data reception trough the serial port and for data storage in the file system as well
+- It is simple and can be implemented on microcontrollers with limited resources as well
+- One data transmission is called a session, that contains data for one diagram
+- A session is built up by the following parts:
+    - Start pattern
+    - Optionally the diagram title
+    - The names of the measured quantities and the horizontal axis title
+    - The measured values with the horizontal axis values
+    - End pattern
 
 The data needs to be formatted the following way in order to be processed by the program:
 <<<START>>>
+<DIAGRAM_TITLE>
 "X_AXIS_TITLE","Y0_AXIS_TITLE",...,"Yn_AXIS_TITLE",
 "X_AXIS_DATA0","Y0_AXIS_DATA0",...,"Yn_AXIS_DATA0",
 .
@@ -97,13 +87,14 @@ The data needs to be formatted the following way in order to be processed by the
 The following requirements have to be fulfilled:
 	- The " symbols are not part of the format they are only marking the beginning and the end of an element
 	- The measurement data is always starting with the pattern "<<<START>>>"
-	- After the starting pattern the headline is transmitted:
+        - Then the optional diagram title is transmitted, which can be omitted if not needed, in which case a title will be generated for the diagram.
+        - Then the headline is transmitted:
                 - Every headline element is followed by a comma "," and there are no whitespaces before between and after the elements
                 - The headline describes how many different signals were measured and their names
-		- There has to be always at least two headline elements transmitted: the common X axis and at least one signal
+                - There has to be always at least two headline elements transmitted: the common X axis, which is the horizontal axis and at least one Y axis
 		- The headline elements:
                         - can only contain alphanumeric characters (0..9, A..Z, a..z)
-	- After the headline the measured data is transmitted:
+        - Then the headline the measured data is transmitted:
                 - Every dataline element is followed by a comma "," and there are no whitespaces before between and after the elements
 		- There has to be as many elements in a data line as there was in the headline
 		- The data line elements are the values that were measured at the same time
@@ -111,12 +102,12 @@ The following requirements have to be fulfilled:
 		- The data line elements:
 			- are integer values
 			- can have an optional "+" or "-" sign as a prefix, for example "+25" or "-568"
-			- without a sign prefix are considered to be positive
+                        - without a sign prefix are considered positive
 	- The measurement data is always ending with the pattern "<<<END>>>"
-	- This is called a measurement session that contains all data needed to describe a diagram
+        - This data, starting with the start pattern until the end of the end pattern is called a session that contains all data needed to describe a diagram
 	- If there was an error detected in one of the lines then the whole session is invalid
 
-Example for a measurement data protocol session:
+Examples for a session without diagram title and two measured signals:
 <<<START>>>
 u32TimeMs,u32SetValue,u32ActualValue,
 0,4000,0,
@@ -130,225 +121,23 @@ u32TimeMs,u32SetValue,u32ActualValue,
 80,4000,4000,
 <<<END>>>
 
-
-
-3b - JFST Protocol Generation 0
-===============================
-
-The JFST Protocol has two layers, the JSON and the serialisation layers.
-In the OSI model, the JSON would be the application and the serialisation would be the presentation layer.
-
-The JSON layer presents the data in JSON format and support it's file system storage and loading.
-A session is defined the JSON layer following way (the "<TYPE>" texts used in the description are the JSON types):
-
-[
-    {
-        "SESSION_DATA"
-    },
-    {
-        "DIAGRAM_DATA0"
-    },
-    .
-    .
-    .
-    {
-        "DIAGRAM_DATAn"
-    }
-]
-
-,where "SESSION_DATA" is the description of the session and "DIAGRAM_DATAx" is a description of a diagram.
-So, the JFST Protocol encodes session data and the diagrams into an array of objects.
-The object describing the session has the following format:
-
-{
-    "JFST_GENERATION": <NUMBER>
-    "CRC_VALUE": <NUMBER> or "null",
-}
-
-Each object describing a diagram has the following format:
-
-{
-    "DIAGRAM_TITLE": <STRING>,
-    "AXIS_DATA":
-    [
-        {
-            "AXIS_DATA1"
-        },
-        .
-        .
-        .
-        {
-            "AXIS_DATAn"
-        }
-    ]
-    "DATA_POINTS":
-    [
-        [
-            "DATA_POINT0"
-        ],
-        .
-        .
-        .
-        [
-            "DATA_POINTn"
-        ]
-    ]
-}
-
-,where "AXIS_DATAx" is a description of an axis and "DATA_POINTx" is a description of a data point.
-So, the JFST Protocol encodes the axis data into an array of objects, where each object describes an axis and has the following format:
-
-{
-    "AXIS_TITLE": <STRING>,
-    "DIMENSION": <STRING> or "null",
-}
-
-The data points are encoded into an array of arrays, where each inner array describes a data point and has the following format:
-
-[
-    <NUMBER>,
-    <NUMBER> or "null",
-    .
-    .
-    .
-    <NUMBER> or "null",
-]
-
-The following requirements have to be fulfilled:
-    - Each session is an array of objects
-    - The first object is the "SESSION_DATA" describing the session:
-        - it has a key, "JFST_GENERATION" with a number 0 assigned to it
-        - it has a key, "CRC_VALUE" containing the CRC value:
-                - it has either a number assigned to it if there was a CRC calculated to the session or
-                - it has "null" assigned to it if there was no CRC calculated for the diagram
-        - it has no key-value pairs besides the previously described
-    - The following objects are the "DIAGRAM_DATAx" describing the diagram x of the section:
-        - they have a key, "DIAGRAM_TITLE" with a string that contains the title of the diagram
-        - they have a key, "AXIS_DATA" with an array assigned to it describing the axes of the diagram:
-                - it has at least two objects in it describing each axis of the diagram:
-                        - they have a key, "AXIS_TITLE" with a string that contains the title of the axis
-                        - they have a key, "DIMENSION" with a string that contains the dimension of the axis
-                        - they have no key-value pairs besides the previously described
-                - the first object is describing the horizontal axis
-        - they have a key, "DATA_POINTS" with an array assigned to it describing the data points of the diagram:
-                - they have arrays in it describing data samples that belong together:
-                        - they have at least two elements
-                        - they have numbers for existing data samples and "null" for non-existing data samples
-                        - the array elements are following the order of the elements of the array "AXIS_DATA"
-        - they have no key-value pairs besides the previously described
-
-Example for a JSON layer representation of a session:
-
-[
-    {
-        "JFST_GENERATION": 0
-        "CRC_VALUE": "2456721678566",
-    },
-    {
-        "DIAGRAM_TITLE": "20190211_PI_ControllerMeasurements",
-        "AXIS_DATA":
-        [
-                {
-                    "AXIS_TITLE": "u32Time",
-                    "DIMENSION": "ms",
-                },
-                {
-                    "AXIS_TITLE": "dSetValue",
-                    "DIMENSION": "null",
-                },
-                {
-                    "AXIS_TITLE": "dActualValue",
-                    "DIMENSION": "null",
-                },
-                {
-                    "AXIS_TITLE": "u8Temperature",
-                    "DIMENSION": "C",
-                }
-        ],
-        "DATA_POINTS":
-        [
-            [
-                0,
-                20.0,
-                10.0,
-                24
-            ],
-            [
-                100,
-                20.0,
-                12.5,
-                "null"
-            ],
-            [
-                200,
-                20.0,
-                17.5,
-                23
-            ],
-            [
-                300,
-                20.0,
-                19.9,
-                "null"
-            ]
-        ]
-    },
-    {
-        "DIAGRAM_TITLE": "20190211_PI_ControllerMeasurementsWithNewSettings",
-        "AXIS_DATA":
-        [
-                {
-                    "AXIS_TITLE": "u32Time",
-                    "DIMENSION": "ms",
-                },
-                {
-                    "AXIS_TITLE": "dSetValue",
-                    "DIMENSION": "null",
-                },
-                {
-                    "AXIS_TITLE": "dActualValue",
-                    "DIMENSION": "null",
-                },
-                {
-                    "AXIS_TITLE": "u8Temperature",
-                    "DIMENSION": "C",
-                }
-        ],
-        "DATA_POINTS":
-        [
-            [
-                0,
-                20.0,
-                10.0,
-                24
-            ],
-            [
-                100,
-                20.0,
-                15.5,
-                "null"
-            ],
-            [
-                200,
-                20.0,
-                19.9,
-                23
-            ],
-            [
-                300,
-                20.0,
-                20.1,
-                "null"
-            ]
-        ]
-    }
-]
-
-The serialisation layer defines the rules of the conversion between the data of the JSON layer and a stream of bytes.
-Calculation and checking of the CRC value of the data also happens in this layer.
-
-At this point, the serialisation layer is not yet defined.
-Hence, the JFST protocol can only be used for file system storage and loading of sessions.
+Examples for a session with diagram title and one measured signal:
+<<<START>>>
+<Living room daily temperature>
+u32TimeHour,u8RoomTemperature,
+0,15,
+2,17,
+4,19,
+6,18,
+8,20,
+1022,
+12,24,
+14,26,
+16,24,
+18,22,
+20,20,
+22,18,
+<<<END>>>
 
 
 
@@ -379,6 +168,9 @@ The RDB Diplomaterv Monitor can be compiled only using the Qt Creator IDE at the
 
 7 - Release notes
 =================
+
+v2.1.0 - File handling
+
 
 v2.0.0 - Architectural rework
     Details:

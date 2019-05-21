@@ -200,7 +200,7 @@ void Backend::ImportFile(const std::string& path_to_file)
             }
             else
             {
-                ReportStatus("ERROR! The MeasurementDataProtocol cannot process the file: \"" + path_to_file + "\"!");
+                ReportStatus("ERROR! The MeasurementDataProtocol cannot process the file: \"" + path_to_file + "\" because it has a wrong extension!");
             }
         }
         else
@@ -249,6 +249,6 @@ void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
     }
     else
     {
-        ReportStatus("ERROR! The MeasurementDataProtocol cannot save diagrams into the file: \"" + path_to_file + "\"!");
+        ReportStatus("ERROR! The MeasurementDataProtocol cannot save diagrams into the file: \"" + path_to_file + "\" because it has a wrong extension!");
     }
 }

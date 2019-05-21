@@ -27,7 +27,7 @@
 
 MeasurementDataProtocol::MeasurementDataProtocol() : DataProcessingInterface("Measurement Data Protocol MDP", ".mdp")
 {
-    processing_state = ProcessingStates::WaitingForStartLine;
+    state = Constants::States::WaitingForStartLine;
 }
 
 std::string MeasurementDataProtocol::GetProtocolName(void)
@@ -50,16 +50,40 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
 
         try
         {
-            switch(processing_state)
+            switch(state)
             {
-                case ProcessingStates::WaitingForStartLine:
+                case Constants::States::WaitingForStartLine:
                     // If a start line was found...
                     if(std::regex_match(actual_line, std::regex(Constants::Regex::start_line)))
                     {
-                        processing_state = ProcessingStates::ProcessingHeadline;
+                        state = Constants::States::ProcessingTitleLine;
                     }
                     break;
-                case ProcessingStates::ProcessingHeadline:
+                case Constants::States::ProcessingTitleLine:
+                    // In any case, we will switch to the next state
+                    state = Constants::States::ProcessingHeadline;
+                    // If this is a diagram title line
+                    if(std::regex_search(actual_line, match_results, std::regex(Constants::Regex::title_line)))
+                    {
+                        // Then we create a diagram object with the title
+                        actual_diagram = DiagramSpecialized(match_results[1]);
+                        // Switching to the next state with a break --> a new line will be fetched
+                        break;
+                    }
+                    else
+                    {
+                        // No title was found, we will generate a title from the current date and time and create a diagram object with it
+                        auto current_date_and_time = std::time(nullptr);
+                        std::string current_date_and_time_string = ctime(&current_date_and_time);
+                        // The ctime adds an extra newline to the string, this needs to be removed
+                        current_date_and_time_string.pop_back();
+                        actual_diagram = DiagramSpecialized(current_date_and_time_string);
+                        // Switching to the next state without a break --> a new line will NOT be fetched, because this line is the headline
+                    }
+
+                    // The falltrough is not an error in this case, this behaviour needed because there was no diagram title found, the actual_line contains the headline
+                [[fallthrough]];
+                case Constants::States::ProcessingHeadline:
                     // If this is a headline but not a dataline
                     // (this is needed because with regex it is difficult to define the differences between the data and headlines)
                     if((std::regex_match(actual_line, std::regex(Constants::Regex::headline))) &&
@@ -73,8 +97,7 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                         {
                             if(0 == column_index)
                             {
-                                auto current_date_and_time = std::time(nullptr);
-                                actual_diagram = DiagramSpecialized(std::string(ctime(&current_date_and_time)), match_results[1]);
+                                actual_diagram.SetAxisXTitle(match_results[1]);
                             }
                             else
                             {
@@ -85,21 +108,21 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                             headline = match_results.suffix().str();
                         }
 
-                        processing_state = ProcessingStates::ProcessingDataLines;
+                        state = Constants::States::ProcessingDataLines;
                     }
                     else
                     {
-                        processing_state = ProcessingStates::WaitingForStartLine;
+                        state = Constants::States::WaitingForStartLine;
                     }
                     break;
-                case ProcessingStates::ProcessingDataLines:
+                case Constants::States::ProcessingDataLines:
                     if(std::regex_match(actual_line, std::regex(Constants::Regex::data_line)))
                     {
                         std::string data_line = actual_line;
                         DataIndexType column_index = 0;
                         DataPointType data_point_x_value = 0;
 
-                        // Collecting the labels from the headline
+                        // Collecting the data from the dataline
                         while(std::regex_search(data_line, match_results, std::regex(Constants::Regex::data_line_analyzer)))
                         {
                             if(0 == column_index)
@@ -118,7 +141,7 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                                 }
                                 else
                                 {
-                                    processing_state = ProcessingStates::WaitingForStartLine;
+                                    state = Constants::States::WaitingForStartLine;
                                     break;
                                 }
                             }
@@ -128,7 +151,7 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                         }
                         if((column_index - 1) != actual_diagram.GetTheNumberOfDataLines())
                         {
-                            processing_state = ProcessingStates::WaitingForStartLine;
+                            state = Constants::States::WaitingForStartLine;
                         }
                     }
                     else
@@ -137,12 +160,12 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                         {
                             assembled_diagrams.push_back(actual_diagram);
                         }
-                        processing_state = ProcessingStates::WaitingForStartLine;
+                        state = Constants::States::WaitingForStartLine;
                     }
                     break;
                 default:
-                    processing_state = ProcessingStates::WaitingForStartLine;
-                    throw("The DataProcessor::ProcessData's statemachine switched to an undefined state: " + std::to_string(static_cast<std::underlying_type<ProcessingStates>::type>(processing_state)));
+                    state = Constants::States::WaitingForStartLine;
+                    throw("The DataProcessor::ProcessData's statemachine switched to an unexpected state: " + std::to_string(static_cast<std::underlying_type<Constants::States>::type>(state)));
                     break;
             }
         }
@@ -175,6 +198,8 @@ std::stringstream MeasurementDataProtocol::ExportData(const std::vector<DiagramS
     for(auto const& diagram : diagrams_to_export)
     {
         exported_data << Constants::Export::start_line << std::endl;
+
+        exported_data << Constants::Export::diagram_title_start << diagram.GetTitle() << Constants::Export::diagram_title_end << std::endl;
 
         auto number_of_data_lines = diagram.GetTheNumberOfDataLines();
         if(0 < number_of_data_lines)

@@ -63,19 +63,21 @@ public:
     std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
 
 private:
-    enum class ProcessingStates : uint8_t
-    {
-        WaitingForStartLine,
-        ProcessingHeadline,
-        ProcessingDataLines
-    };
-
     struct Constants
     {
+        enum class States : uint8_t
+        {
+            WaitingForStartLine,
+            ProcessingTitleLine,
+            ProcessingHeadline,
+            ProcessingDataLines
+        };
+
         struct Regex
         {
             // REGEX strings to search the input data for valid measurement session
             static constexpr char start_line[]         = R"(^\s*<<<START>>>$)";
+            static constexpr char title_line[]         = R"(^<(.*)>$)";
             static constexpr char headline[]           = R"(^\s*(\w+,){2,}$)";
             static constexpr char headline_analyzer[]  = R"(^\s*(\w+),)";
             static constexpr char data_line[]          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
@@ -85,13 +87,15 @@ private:
 
         struct Export
         {
-            static constexpr char start_line[]      = "<<<START>>>";
-            static constexpr char end_line[]        = "<<<END>>>";
-            static constexpr char element_separator = ',';
+            static constexpr char start_line[]          = "<<<START>>>";
+            static constexpr char end_line[]            = "<<<END>>>";
+            static constexpr char diagram_title_start[] = "<";
+            static constexpr char diagram_title_end[]   = ">";
+            static constexpr char element_separator     = ',';
         };
     };
 
-    ProcessingStates processing_state;
+    Constants::States state;
     DiagramSpecialized actual_diagram;
 };
 
