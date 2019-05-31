@@ -84,13 +84,35 @@ DiagramSpecialized* DiagramContainer::GetDiagram(const QModelIndex& model_index)
 
 void DiagramContainer::ShowCheckBoxes(void)
 {
-    root_element->SetCheckStateRecursive(Qt::CheckState::Unchecked);
-    root_element->SetFlagsRecursive(Element::element_flags_checkable);
+    // Showing the checkboxes is done trough setting the check state and the flag for every element
+    root_element->CallFunctionOnElementsRecursive([](Element* element){element->check_state = Qt::CheckState::Unchecked;});
+    root_element->CallFunctionOnElementsRecursive(
+        [](Element* element)
+        {
+            // An empty element has the datatype Element::DataType_Name and contains the data defined in empty_element_data
+            bool this_element_is_empty = false;
+            if(element->ContainsType<Element::DataType_Name>())
+            {
+                    if(std::get<Element::DataType_Name>(element->data) == empty_element_data)
+                    {
+                        this_element_is_empty = true;
+                    }
+            }
+
+            // The empty elements shall not have a checkbox so we only setting the checkable flag if this element is not one of those
+            if(!this_element_is_empty)
+            {
+                // Unfortunately the current QTreeView implementation does not support the Qt::ItemIsAutoTristate flag so this functionality has to be implemented by the DiagramContainer
+                element->flags |= Qt::ItemIsUserCheckable;
+            }
+
+        });
 }
 
 void DiagramContainer::HideCheckBoxes(void)
 {
-    root_element->SetFlagsRecursive(Element::element_flags_default);
+    // Hiding the checkboxes is done trough setting the flag for every element
+    root_element->CallFunctionOnElementsRecursive([](Element* element){element->flags &= ~Qt::ItemIsUserCheckable;});
 }
 
 std::vector<DiagramSpecialized> DiagramContainer::GetCheckedDiagrams(void)
@@ -174,7 +196,7 @@ void DiagramContainer::RemoveChildFromElement(Element* element, Element* child)
 void DiagramContainer::SetCheckStateOfElement(Element* element, const Qt::CheckState& new_check_state)
 {
     // Setting the new check state for this element and all the elements below this
-    element->SetCheckStateRecursive(new_check_state);
+    element->CallFunctionOnElementsRecursive([&new_check_state](Element* element){element->check_state = new_check_state;});
 
     // Root elements do not have a parent and if there is no parent to notify then there is nothing to do here
     if(!element->IsRoot())
@@ -477,30 +499,6 @@ std::string DiagramContainer::Element::GetDisplayableString(void) const
     }
 
     return result;
-}
-
-void DiagramContainer::Element::SetFlagsRecursive(const Qt::ItemFlags& new_flags)
-{
-    // Setting the flags for this element
-    flags = new_flags;
-
-    // Going trough all the children and calling the same function on them as well
-    for(const auto& i : children)
-    {
-        i->SetFlagsRecursive(new_flags);
-    }
-}
-
-void DiagramContainer::Element::SetCheckStateRecursive(const Qt::CheckState& new_check_state)
-{
-    // Setting the check_state for this element
-    check_state = new_check_state;
-
-    // Going trough all the children and calling the same function on them as well
-    for(const auto& i : children)
-    {
-        i->SetCheckStateRecursive(new_check_state);
-    }
 }
 
 void DiagramContainer::Element::ChildsCheckStateHasChanged(void)

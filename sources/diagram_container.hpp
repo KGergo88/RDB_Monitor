@@ -88,6 +88,7 @@ private:
             DataType_File() = default;
             DataType_File(const std::string& new_name, const std::string& new_path) : name(new_name), path(new_path) {}
             bool operator==(const DataType_File& other) const {return ((name == other.name) && (path == other.path));}
+            bool operator!=(const DataType_File& other) const {return ((name != other.name) || (path != other.path));}
             std::string name;
             std::string path;
         };
@@ -96,12 +97,8 @@ private:
         // The above data types combined
         using DataType = std::variant<DataType_Name, DataType_File, DataType_Diagram>;
 
-        // Pre-set flag value combinations that are used in the class methods
-        // As default, the checkboxes are hidden
+        // Pre-set flag value
         static constexpr Qt::ItemFlags element_flags_default = Qt::ItemIsEnabled;
-        // The checkboxes can be shown with this flag combination
-        // Unfortunately the current QTreeView implementation does not support the Qt::ItemIsAutoTristate flag so this functionality has to be implemented by the DiagramContainer
-        static constexpr Qt::ItemFlags element_flags_checkable = (element_flags_default | Qt::ItemIsUserCheckable);
 
         explicit Element(const DataType& new_data, Element* new_parent = nullptr, const Qt::ItemFlags& new_flags = element_flags_default, const Qt::CheckState new_check_state = Qt::Unchecked)
             : data(new_data), parent(new_parent), flags(new_flags), check_state(new_check_state) {}
@@ -159,8 +156,6 @@ private:
             return result;
         }
         std::string GetDisplayableString(void) const;
-        void SetFlagsRecursive(const Qt::ItemFlags& new_flags);
-        void SetCheckStateRecursive(const Qt::CheckState& new_check_state);
         void ChildsCheckStateHasChanged(void);
         void CallFunctionOnElementsRecursive(std::function<void(Element*)> function);
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
