@@ -182,7 +182,7 @@ bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_f
 {
     bool bResult = false;
 
-    std::string file_extension = std::filesystem::path(path_to_file).extension();
+    std::string file_extension = std::filesystem::path(path_to_file).extension().string();
 
     if(native_file_extension == file_extension)
     {

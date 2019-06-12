@@ -64,11 +64,10 @@ public:
 
     void RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface);
 
-    void StoreNetworkDiagrams(std::vector<DiagramSpecialized>& new_diagrams);
-
-    void StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DiagramSpecialized>& new_diagrams);
-
     void ReportStatus(const std::string& message);
+
+    void StoreNetworkDiagrams(const std::string& connection_name, std::vector<DiagramSpecialized>& new_diagrams);
+    void StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DiagramSpecialized>& new_diagrams);
 
     QAbstractItemModel* GetDiagramContainerModel(void) override {return &diagram_container;}
     std::string GetFileImportDefaultFolder(void) override {return configuration.ImportFolder();}
@@ -90,6 +89,8 @@ private slots:
     void ExportFileStoreCheckedDiagrams(const std::string& path_to_file);
 
 private:
+    void StoreDiagrams(std::vector<DiagramSpecialized>& new_diagrams, const std::function<QModelIndex(const DiagramSpecialized&)> storage_logic);
+
     SerialPort serial_port;
     MeasurementDataProtocol measurement_data_protocol;
     NetworkHandler serial_network_handler;

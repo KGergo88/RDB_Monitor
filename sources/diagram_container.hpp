@@ -58,12 +58,13 @@ public:
     virtual ~DiagramContainer() override = default;
 
     std::size_t GetNumberOfDiagrams(void) const {return root_element->CountElementsWithTypeRecursive<Element::DataType_Diagram>();}
-    QModelIndex AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DiagramSpecialized& diagram);
     bool IsThisFileAlreadyStored(const std::string& file_name, const std::string& file_path);
     DiagramSpecialized* GetDiagram(const QModelIndex& model_index);
     void ShowCheckBoxes(void);
     void HideCheckBoxes(void);
     std::vector<DiagramSpecialized> GetCheckedDiagrams(void);
+    QModelIndex AddDiagramFromNetwork(const std::string connection_name, const DiagramSpecialized& diagram);
+    QModelIndex AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DiagramSpecialized& diagram);
 
     // Members overridden from the QAbstractItemModel
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -82,20 +83,28 @@ private:
     public:
         // Data type used for elements that only contain a string
         using DataType_Name = std::string;
-        // Data type used for element that represent a file that was imported
+        // Data type used for elements that represent a file that was imported
         struct DataType_File
         {
             DataType_File() = default;
             DataType_File(const std::string& new_name, const std::string& new_path) : name(new_name), path(new_path) {}
             bool operator==(const DataType_File& other) const {return ((name == other.name) && (path == other.path));}
-            bool operator!=(const DataType_File& other) const {return ((name != other.name) || (path != other.path));}
             std::string name;
             std::string path;
+        };
+        // Data type used for elements that represent a network connection
+        struct DataType_Connection
+        {
+            DataType_Connection() = default;
+            DataType_Connection(const std::string& new_name) : name(new_name) {}
+            bool operator==(const DataType_Connection& other) const {return (name == other.name);}
+            std::string name;
+// #warning "In the future more members will come as the generic connection handling will be implemented..."
         };
         // Data type used of elements that contain a diagram
         using DataType_Diagram = DiagramSpecialized;
         // The above data types combined
-        using DataType = std::variant<DataType_Name, DataType_File, DataType_Diagram>;
+        using DataType = std::variant<DataType_Name, DataType_File, DataType_Connection, DataType_Diagram>;
 
         // Pre-set flag value
         static constexpr Qt::ItemFlags element_flags_default = Qt::ItemIsEnabled;
@@ -174,10 +183,12 @@ private:
         Qt::CheckState check_state;
     };
 
+    QModelIndex AddDiagram(Element* type_parent, const DiagramSpecialized& diagram, const std::function<Element*(void)> storage_logic);
     QModelIndex GetModelIndexOfElement(Element* element) const;
     Element* AddChildToElement(Element* element, const Element::DataType& data);
     void RemoveChildFromElement(Element* element, Element* child);
     void SetCheckStateOfElement(Element* element, const Qt::CheckState& new_check_state);
+    void ChangeDiagramTitleOfElement(Element* element, const std::string& new_diagram_title);
 
     // Every element contains only one column
     static constexpr int column_count = 1;

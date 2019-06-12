@@ -34,11 +34,11 @@ Backend::Backend() : QObject(),
                      measurement_data_protocol(),
                      serial_network_handler(&serial_port,
                                             &measurement_data_protocol,
-                                            std::bind(&Backend::StoreNetworkDiagrams, this, std::placeholders::_1),
+                                            std::bind(&Backend::StoreNetworkDiagrams, this, std::placeholders::_1, std::placeholders::_2),
                                             std::bind(&Backend::ReportStatus, this, std::placeholders::_1)),
                      gui_signal_interface(nullptr)
 {
-#warning "This function needs to be changed when implementing the generic protocol handling"
+// #warning "This function needs to be changed when implementing the generic protocol handling"
 }
 
 void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface)
@@ -68,36 +68,6 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
         std::string errorMessage = "There was no gui_signal_interface set in Backend::RegisterGuiSignalInterface!";
         throw errorMessage;
     }
-}
-
-void Backend::StoreNetworkDiagrams(std::vector<DiagramSpecialized>& new_diagrams)
-{
-    #warning "Implement this..."
-}
-
-void Backend::StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DiagramSpecialized>& new_diagrams)
-{
-    auto container_is_empty = (0 == diagram_container.GetNumberOfDiagrams());
-
-    // Adding the diagrams to the diagram_container
-    for(const auto& i : new_diagrams)
-    {
-        QModelIndex recently_added_diagram = diagram_container.AddDiagramFromFile(file_name, file_path, i);
-
-        // Display the diagram if this was the first
-        if(container_is_empty)
-        {
-            container_is_empty = false;
-
-            DiagramSpecialized* first_diagram = diagram_container.GetDiagram(recently_added_diagram);
-            if(first_diagram)
-            {
-                emit ShowThisDiagram(*first_diagram);
-            }
-        }
-    }
-
-    ReportStatus(std::to_string(new_diagrams.size()) + " new diagram was added to the list.");
 }
 
 void Backend::ReportStatus(const std::string& message)
@@ -136,9 +106,27 @@ void Backend::ReportStatus(const std::string& message)
     }
 }
 
+void Backend::StoreNetworkDiagrams(const std::string& connection_name, std::vector<DiagramSpecialized>& new_diagrams)
+{
+    StoreDiagrams(new_diagrams,
+        [&](const DiagramSpecialized& diagram_to_add) -> QModelIndex
+        {
+            return diagram_container.AddDiagramFromNetwork(connection_name, diagram_to_add);
+        });
+}
+
+void Backend::StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DiagramSpecialized>& new_diagrams)
+{
+    StoreDiagrams(new_diagrams,
+        [&](const DiagramSpecialized& diagram_to_add) -> QModelIndex
+        {
+            return diagram_container.AddDiagramFromFile(file_name, file_path, diagram_to_add);
+        });
+}
+
 std::vector<std::string> Backend::GetSupportedFileExtensions(void)
 {
-#warning "This function needs to be changed when implementing the generic protocol handling"
+// #warning "This function needs to be changed when implementing the generic protocol handling"
     std::vector<std::string> result;
 
     result.push_back(measurement_data_protocol.GetSupportedFileType());
@@ -181,10 +169,10 @@ void Backend::RequestForDiagram(const QModelIndex& model_index)
 
 void Backend::ImportFile(const std::string& path_to_file)
 {
-#warning "This function needs to be changed when implementing the generic protocol handling"
+// #warning "This function needs to be changed when implementing the generic protocol handling"
     if(std::filesystem::exists(std::filesystem::path(path_to_file)))
     {
-        std::string file_name = std::filesystem::path(path_to_file).filename();
+        std::string file_name = std::filesystem::path(path_to_file).filename().string();
         if(!diagram_container.IsThisFileAlreadyStored(file_name, path_to_file))
         {
             if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
@@ -194,7 +182,7 @@ void Backend::ImportFile(const std::string& path_to_file)
                 StoreFileDiagrams(file_name, path_to_file, diagrams_from_file);
 
                 // Updating the configuration with the folder of the file that was imported
-                configuration.ImportFolder(std::filesystem::path(path_to_file).parent_path());
+                configuration.ImportFolder(std::filesystem::path(path_to_file).parent_path().string());
 
                 ReportStatus("The file \"" + path_to_file + "\" was successfully opened!");
             }
@@ -226,7 +214,7 @@ void Backend::ExportFileHideCheckBoxes(void)
 
 void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
 {
-#warning "This function needs to be changed when implementing the generic protocol handling"
+// #warning "This function needs to be changed when implementing the generic protocol handling"
     if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
     {
         auto checked_diagrams = diagram_container.GetCheckedDiagrams();
@@ -238,7 +226,7 @@ void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
             output_file_stream << exported_data.rdbuf();
 
             // Updating the configuration with the folder of the file that was exported
-            configuration.ExportFolder(std::filesystem::path(path_to_file).parent_path());
+            configuration.ExportFolder(std::filesystem::path(path_to_file).parent_path().string());
 
             ReportStatus("The selected diagrams were successfully written to \"" + path_to_file + "\"!");
         }
@@ -251,4 +239,30 @@ void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
     {
         ReportStatus("ERROR! The MeasurementDataProtocol cannot save diagrams into the file: \"" + path_to_file + "\" because it has a wrong extension!");
     }
+}
+
+void Backend::StoreDiagrams(std::vector<DiagramSpecialized>& new_diagrams, const std::function<QModelIndex(const DiagramSpecialized&)> storage_logic)
+{
+    auto container_is_empty = (0 == diagram_container.GetNumberOfDiagrams());
+
+    // Adding the diagrams to the diagram_container
+    for(const auto& i : new_diagrams)
+    {
+        // Calling the logic that does the storage for a single diagram, this is provided by the caller
+        auto recently_added_diagram = storage_logic(i);
+
+        // Displaying the diagram if this was the first
+        if(container_is_empty)
+        {
+            container_is_empty = false;
+
+            DiagramSpecialized* first_diagram = diagram_container.GetDiagram(recently_added_diagram);
+            if(first_diagram)
+            {
+                emit ShowThisDiagram(*first_diagram);
+            }
+        }
+    }
+
+    ReportStatus(std::to_string(new_diagrams.size()) + " new diagram was added to the list.");
 }

@@ -64,7 +64,7 @@ void NetworkHandler::DataAvailable(std::istream& received_data)
 
         if(!assembled_diagrams.empty())
         {
-            diagram_collector(assembled_diagrams);
+            diagram_collector(port_name, assembled_diagrams);
         }
     }
 }

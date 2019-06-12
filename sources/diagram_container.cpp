@@ -31,29 +31,6 @@ DiagramContainer::DiagramContainer(QObject* parent) : QAbstractItemModel(parent)
 #endif
 }
 
-QModelIndex DiagramContainer::AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DiagramSpecialized& diagram)
-{
-    // If the empty element is still here then we remove it
-    Element* empty_element = files_element->GetChildWithData(empty_element_data);
-    if(nullptr != empty_element)
-    {
-        RemoveChildFromElement(files_element, empty_element);
-    }
-
-    // Looking for the file name element that contains the diagrams of this file and creating it if it does not exists
-    Element::DataType_File file_name_element_data(file_name, file_path);
-    Element* file_name_element = files_element->GetChildWithData(file_name_element_data);
-    if(nullptr == file_name_element)
-    {
-        file_name_element = AddChildToElement(files_element, file_name_element_data);
-    }
-
-    // Adding the diagram to the element that represents this file
-    Element* new_diagram_element = AddChildToElement(file_name_element, diagram);
-
-    return GetModelIndexOfElement(new_diagram_element);
-}
-
 bool DiagramContainer::IsThisFileAlreadyStored(const std::string& file_name, const std::string& file_path)
 {
     bool bResult = false;
@@ -134,6 +111,66 @@ std::vector<DiagramSpecialized> DiagramContainer::GetCheckedDiagrams(void)
     return checked_diagrams;
 }
 
+QModelIndex DiagramContainer::AddDiagramFromNetwork(const std::string connection_name, const DiagramSpecialized& diagram)
+{
+    return AddDiagram(network_element, diagram,
+            [&]() -> Element*
+            {
+                // Looking for the connection element that contains the diagrams of this file and creating it if it does not exists
+                Element::DataType_Connection connection_element_data(connection_name);
+                Element* connection_element = network_element->GetChildWithData(connection_element_data);
+                if(nullptr == connection_element)
+                {
+                    connection_element = AddChildToElement(network_element, connection_element_data);
+                }
+                return connection_element;
+            });
+}
+
+QModelIndex DiagramContainer::AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DiagramSpecialized& diagram)
+{
+    return AddDiagram(files_element, diagram,
+            [&]() -> Element*
+            {
+                // Looking for the file name element that contains the diagrams of this file and creating it if it does not exists
+                Element::DataType_File file_name_element_data(file_name, file_path);
+                Element* file_name_element = files_element->GetChildWithData(file_name_element_data);
+                if(nullptr == file_name_element)
+                {
+                    file_name_element = AddChildToElement(files_element, file_name_element_data);
+                }
+                return file_name_element;
+            });
+}
+
+QModelIndex DiagramContainer::AddDiagram(Element* type_parent, const DiagramSpecialized& diagram, const std::function<Element*(void)> storage_logic)
+{
+    // The type parent is the top level element that determines the source of the diagram
+    // This must be either the files_element or the network_element helper variable
+    if((files_element != type_parent) && (network_element != type_parent))
+    {
+        throw("ERROR! The DiagramContainer::AddDiagram has received an unknown type_parent!");
+    }
+
+    // If the empty element is still present before the type parent, then we remove it
+    Element* empty_element = type_parent->GetChildWithData(empty_element_data);
+    if(nullptr != empty_element)
+    {
+        RemoveChildFromElement(type_parent, empty_element);
+    }
+
+    // Selecting the parent element to which the diagram will be added
+    // This logic is provided to this function by the caller
+    auto parent_element = storage_logic();
+
+    // Adding the diagram to the element that represents this file
+    Element* new_diagram_element = AddChildToElement(parent_element, diagram);
+    // The diagram elements are always editable
+    new_diagram_element->flags |= Qt::ItemIsEditable;
+
+    return GetModelIndexOfElement(new_diagram_element);
+}
+
 QModelIndex DiagramContainer::GetModelIndexOfElement(Element *element) const
 {
     QModelIndex result;
@@ -141,7 +178,7 @@ QModelIndex DiagramContainer::GetModelIndexOfElement(Element *element) const
 
     if(element->parent->GetIndexWithChild(element, index_of_element))
     {
-        result = createIndex(index_of_element, (column_count - 1), element);
+        result = createIndex(static_cast<int>(index_of_element), (column_count - 1), element);
     }
 
     return result;
@@ -152,10 +189,11 @@ DiagramContainer::Element* DiagramContainer::AddChildToElement(Element* element,
     Element* result = nullptr;
 
     // Notifying the views that an insertion will happen
-    beginInsertRows(GetModelIndexOfElement(element), element->GetNumberOfChildren(), (element->GetNumberOfChildren()));
+    beginInsertRows(GetModelIndexOfElement(element), static_cast<int>(element->GetNumberOfChildren()), static_cast<int>(element->GetNumberOfChildren()));
 
 
     // The childs check_state will be inherited from the parent in a way to respect the tri-state checkedness
+    // (If the parent is partially checked then the child will not be checked)
     Qt::CheckState childs_check_state;
     if(Qt::CheckState::Checked == element->check_state)
     {
@@ -166,7 +204,8 @@ DiagramContainer::Element* DiagramContainer::AddChildToElement(Element* element,
         childs_check_state = Qt::CheckState::Unchecked;
     }
 
-    // Creating the child (The childs flags are simply inherited from the parent)
+    // Creating the child
+    // (The childs flags are simply inherited from the parent)
     result = element->CreateChild(data, element->flags, childs_check_state);
 
     // Notifying the views that an insertion just happened
@@ -183,7 +222,7 @@ void DiagramContainer::RemoveChildFromElement(Element* element, Element* child)
     if(element->GetIndexWithChild(child, index_of_child))
     {
         // Notifying the views that a removal will happen
-        beginRemoveRows(GetModelIndexOfElement(element), index_of_child, index_of_child);
+        beginRemoveRows(GetModelIndexOfElement(element), static_cast<int>(index_of_child), static_cast<int>(index_of_child));
 
         // Removing the selected child
         element->KillChild(index_of_child);
@@ -211,6 +250,31 @@ void DiagramContainer::SetCheckStateOfElement(Element* element, const Qt::CheckS
     QVector<int> role;
     role.append(Qt::CheckStateRole);
     emit dataChanged(QModelIndex(), QModelIndex(), role);
+}
+
+void DiagramContainer::ChangeDiagramTitleOfElement(Element* element, const std::string& new_diagram_title)
+{
+    // The element must be a diagram type
+    if(element->ContainsType<Element::DataType_Diagram>())
+    {
+        // The new title cannot be an empty string
+        if(!new_diagram_title.empty())
+        {
+            // The new title cannot contain tab or new line characters (the search for these shall fail)
+            if(std::string::npos == new_diagram_title.find_first_of("\t\n"))
+            {
+                // The new title cannot contain only spaces (the search for non-space characters shall find something)
+                if(std::string::npos != new_diagram_title.find_first_not_of(" "))
+                {
+                    // Setting the new title
+                    std::get<Element::DataType_Diagram>(element->data).SetTitle(new_diagram_title);
+                    // Notifying the views about the change
+                    auto model_index_of_element = GetModelIndexOfElement(element);
+                    emit dataChanged(model_index_of_element, model_index_of_element);
+                }
+            }
+        }
+    }
 }
 
 // --- Methods of the DiagramContainer class that override the methods of the QAbstractItemModel ------------------------------------------------------------------------------------------------------
@@ -241,11 +305,11 @@ QModelIndex DiagramContainer::index(int row, int column, const QModelIndex &pare
     }
 
     std::size_t number_of_children = parent_element->GetNumberOfChildren();
-    if(number_of_children > row)
+    if(number_of_children > static_cast<std::size_t>(row))
     {
         if(column_count > column)
         {
-            Element* child_element = parent_element->GetChildWithIndex(row);
+            Element* child_element = parent_element->GetChildWithIndex(static_cast<std::size_t>(row));
             result = createIndex(row, column, child_element);
         }
     }
@@ -295,11 +359,11 @@ int DiagramContainer::rowCount(const QModelIndex &parent) const
     if(parent.isValid())
     {
         Element* indexed_element = static_cast<Element*>(parent.internalPointer());
-        result = indexed_element->GetNumberOfChildren();
+        result = static_cast<int>(indexed_element->GetNumberOfChildren());
     }
     else
     {
-        result = root_element->GetNumberOfChildren();
+        result = static_cast<int>(root_element->GetNumberOfChildren());
     }
 
     return result;
@@ -418,8 +482,10 @@ bool DiagramContainer::setData(const QModelIndex &index, const QVariant &value, 
     {
         Element* element = static_cast<Element*>(index.internalPointer());
 
+        // Only the here defined roles are supported
         switch(role)
         {
+        // Changing the checkstate of an element
         case Qt::CheckStateRole:
             // We only enable setting for elements that are checkable
             if(element->flags & Qt::ItemIsUserCheckable)
@@ -430,6 +496,10 @@ bool DiagramContainer::setData(const QModelIndex &index, const QVariant &value, 
                     bResult = true;
                 }
             }
+            break;
+        // Changing the name of a diagram
+        case Qt::EditRole:
+            ChangeDiagramTitleOfElement(element, (*static_cast<const QString*>(value.data())).toStdString());
             break;
         default:
             // Nothing to do here, false will be returned...
