@@ -558,13 +558,17 @@ std::string DiagramContainer::Element::GetDisplayableString(void) const
     {
         result = std::get<Element::DataType_File>(data).name;
     }
+    else if(std::holds_alternative<Element::DataType_Connection>(data))
+    {
+        result = std::get<Element::DataType_Connection>(data).name;
+    }
     else if(std::holds_alternative<Element::DataType_Diagram>(data))
     {
         result = std::get<Element::DataType_Diagram>(data).GetTitle();
     }
     else
     {
-        std::string errorMessage = "The DiagramContainer::data contains neither a \"Element::DataType_Name\" nor a \"Element::DataType_Diagram\".";
+        std::string errorMessage = "The DiagramContainer::data has an unknown type!";
         throw errorMessage;
     }
 

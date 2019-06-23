@@ -12,7 +12,6 @@ Table of contents
         2 - Usage
         3 - Supported protocols
             3a - Measurement data protocol
-            3b - JFST Protocol Generation 0
         4 - Dependencies
         5 - Portability
         6 - Building the project
@@ -170,7 +169,14 @@ The RDB Diplomaterv Monitor can be compiled only using the Qt Creator IDE at the
 =================
 
 v2.1.0 - File handling
-
+    Details:
+        - Added diagram import/export from/to filesystem
+        - Added tree view for the available diagrams
+        - MDP protocol: new, optional diagram title feature
+        - Reorganizing the diagram storage to use the model-view-controller design pattern
+        - Added configuration JSON file handling for default folders and future settings
+        - Using layouts to control the window organization
+        - Added menu bar
 
 v2.0.0 - Architectural rework
     Details:
