@@ -31,6 +31,7 @@ class TestDataPoint : public QObject
 
 private slots:
     void ConstructorsAndGetters(void);
+    void Operators(void);
     void Setters(void);
     void Comparators(void);
 };
