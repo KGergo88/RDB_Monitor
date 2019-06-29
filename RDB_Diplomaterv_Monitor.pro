@@ -27,5 +27,4 @@ SUBDIRS += 	\
     application \
     tests
 
-DISTFILES += \
-    README
+DISTFILES += README

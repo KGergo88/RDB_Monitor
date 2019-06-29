@@ -1,6 +1,7 @@
 #The following folders or files will be ignored by Git:
 build/
 netbeans/
+.vscode/
 qt/
 cppcheck/
 documentation/
