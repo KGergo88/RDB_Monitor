@@ -32,6 +32,10 @@ CONFIG -= app_bundle
 CONFIG += thread
 CONFIG -= qt
 
+# --coverage option is synonym for: -fprofile-arcs -ftest-coverage -lgcov
+QMAKE_CXXFLAGS += --coverage
+QMAKE_LFLAGS += --coverage
+
 #Linux
 unix {
     message("Linux build was selected!")
@@ -48,9 +52,7 @@ win32 {
 
 SOURCES +=                          \
     sources/test_main.cpp           \
-
-HEADERS +=                          \
-    sources/test_data_point.hpp     \
+    sources/test_data_point.cpp
 
 DISTFILES += gtest_dendency.pri
 
