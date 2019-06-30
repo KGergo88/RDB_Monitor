@@ -52,9 +52,9 @@ win32 {
 
 SOURCES +=                          \
     sources/test_main.cpp           \
-    sources/test_data_point.cpp
+    sources/test_data_point.cpp     \
+    sources/test_data_line.cpp
 
 DISTFILES += gtest_dendency.pri
 
 TARGET = RDB_Diplomaterv_Monitor_Unit_Tests
-

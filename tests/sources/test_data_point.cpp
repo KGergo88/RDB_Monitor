@@ -21,11 +21,6 @@
 
 
 
-#ifndef TEST_DATA_POINT_HPP
-#define TEST_DATA_POINT_HPP
-
-
-
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
@@ -33,7 +28,7 @@
 
 
 
-TEST(TestDataPoint, ConstructorsAndGetters)
+TEST(TestDataPoint, Constructors_Getters)
 {
     // Testing the default constructor
     int zero = 0;
@@ -113,7 +108,3 @@ TEST(TestDataPoint, Comparators)
     EXPECT_EQ(DataPoint<int>::CompareYValues(lower_left_point, upper_right_point), true);
     EXPECT_EQ(DataPoint<int>::CompareYValues(upper_right_point, lower_left_point), false);
 }
-
-
-
-#endif // TEST_DATA_POINT_HPP

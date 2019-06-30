@@ -45,7 +45,7 @@ public:
     DataLine(const DataLine& newDataLine) = default;
     DataLine(DataLine&& newDataLine) = default;
     
-    ~DataLine() {}
+    ~DataLine() = default;
     
     DataLine& operator=(const DataLine& newDataLine) = default;
     DataLine& operator=(DataLine&& newDataLine) = default;
@@ -68,6 +68,7 @@ public:
     inline DataLine<T_DATA_POINT, T_INDEX>& operator<<(const DataPoint<T_DATA_POINT>& newDataPoint)
     {
         AddNewDataPoint(newDataPoint);
+        return *this;
     }
 
     inline T_INDEX GetTheNumberOfDataPoints(void) const
@@ -75,7 +76,7 @@ public:
         return Data.size();
     }
     
-    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataPointIndex) const
+    inline const DataPoint<T_DATA_POINT> GetDataPoint(const T_INDEX& dataPointIndex) const
     {
         CheckDataPointIndex(dataPointIndex);
 
@@ -89,7 +90,7 @@ public:
         Data[dataPointIndex] = newDataPoint;
     }
 
-    inline const DataPoint<T_DATA_POINT>& GetDataPointWithMinValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
+    inline const DataPoint<T_DATA_POINT> GetDataPointWithMinValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
     {
         auto min_value = std::min_element(Data.begin(), Data.end(), compare);
 
@@ -102,7 +103,7 @@ public:
         return *min_value;
     }
 
-    inline const DataPoint<T_DATA_POINT>& GetDataPointWithMaxValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
+    inline const DataPoint<T_DATA_POINT> GetDataPointWithMaxValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
     {
         auto max_value = std::max_element(Data.begin(), Data.end(), compare);
 

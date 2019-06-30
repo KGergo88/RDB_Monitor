@@ -38,11 +38,12 @@ public:
     DataPoint(const DataPoint&  newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
     DataPoint(DataPoint&& newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
 
-    ~DataPoint() {}
+    ~DataPoint() = default;
 
     DataPoint& operator=(const DataPoint& newDataPoint) = default;
     DataPoint& operator=(DataPoint&& newDataPoint) = default;
     bool operator==(const DataPoint& other) const {return ((x == other.x) && (y == other.y));}
+    bool operator!=(const DataPoint& other) const {return !(*this == other);}
 
     inline const T_DATA_POINT GetX(void) const {return x;}
     inline const T_DATA_POINT GetY(void) const {return y;}
