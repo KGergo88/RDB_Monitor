@@ -44,7 +44,7 @@ public:
     Diagram(const Diagram& newDiagram) = default;
     Diagram(Diagram&& newDiagram) = default;
 
-    ~Diagram() {}
+    ~Diagram() = default;
 
     Diagram& operator=(const Diagram& newDiagram) = default;
     Diagram& operator=(Diagram&& newDiagram) = default;
@@ -68,7 +68,17 @@ public:
     {
         AxisXTitle = newAxisXTitle;
     }
-    
+
+    void AddNewDataLine(const std::string& newDataLineTitle = "")
+    {
+        Data.push_back(DataLine<T_DATA_POINT, T_INDEX>(newDataLineTitle));
+    }
+
+    inline const T_INDEX GetTheNumberOfDataLines(void) const
+    {
+        return Data.size();
+    }
+
     inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
@@ -82,17 +92,7 @@ public:
 
         Data[dataLineIndex].SetTitle(newDataLineTitle);
     }
-    
-    inline const T_INDEX GetTheNumberOfDataLines(void) const
-    {
-        return Data.size();
-    }
-    
-    void AddNewDataLine(const std::string& newDataLineTitle = "")
-    {
-        Data.push_back(DataLine<T_DATA_POINT, T_INDEX>(newDataLineTitle));
-    }
-    
+
     void AddNewDataPoint(T_INDEX dataLineIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
     {
         CheckDataLineIndex(dataLineIndex);
@@ -107,7 +107,7 @@ public:
         return Data[dataLineIndex].GetTheNumberOfDataPoints();
     }
 
-    inline const DataPoint<T_DATA_POINT>& GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex) const
+    inline const DataPoint<T_DATA_POINT> GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 

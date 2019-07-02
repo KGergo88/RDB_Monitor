@@ -53,7 +53,8 @@ win32 {
 SOURCES +=                          \
     sources/test_main.cpp           \
     sources/test_data_point.cpp     \
-    sources/test_data_line.cpp
+    sources/test_data_line.cpp      \
+    sources/test_diagram.cpp
 
 DISTFILES += gtest_dendency.pri
 
