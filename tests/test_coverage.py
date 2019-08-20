@@ -4,7 +4,7 @@ import subprocess
 
 
 configuration_name = "build-RDB_Diplomaterv_Monitor-Desktop_Qt_5_12_0_GCC_64bit-Debug"
-folder_build = os.path.join("..", "build", configuration_name, "tests")
+folder_build = os.path.join(os.path.dirname(__file__), "..", "build", configuration_name, "tests")
 folder_results = os.path.join(folder_build, "coverage_reports")
 path_test_executable = os.path.join(folder_build, "RDB_Diplomaterv_Monitor_Unit_Tests")
 path_coverage_file = os.path.join(folder_results, "coverage.info")

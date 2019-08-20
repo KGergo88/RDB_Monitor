@@ -28,9 +28,7 @@ include(GoogleTest.pri)
 TEMPLATE = app
 
 CONFIG += console c++17
-CONFIG -= app_bundle
 CONFIG += thread
-CONFIG -= qt
 
 # --coverage option is synonym for: -fprofile-arcs -ftest-coverage -lgcov
 QMAKE_CXXFLAGS += --coverage
@@ -50,11 +48,13 @@ win32 {
     DEFINES += WIN32_LEAN_AND_MEAN
 }
 
-SOURCES +=                          \
-    sources/test_main.cpp           \
-    sources/test_data_point.cpp     \
-    sources/test_data_line.cpp      \
-    sources/test_diagram.cpp
+SOURCES +=                                      \
+    ../application/sources/configuration.cpp    \
+    sources/test_main.cpp                       \
+    sources/test_data_point.cpp                 \
+    sources/test_data_line.cpp                  \
+    sources/test_diagram.cpp                    \
+    sources/test_configuration.cpp
 
 DISTFILES += gtest_dendency.pri
 
