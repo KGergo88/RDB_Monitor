@@ -6,3 +6,5 @@ qt/
 cppcheck/
 documentation/
 RDB_Diplomaterv_Monitor.pro.user*
+tests/test_config.json
+

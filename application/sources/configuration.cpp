@@ -43,17 +43,20 @@ bool Configuration::LoadExistingConfiguration()
                     // Taking the JSON data out of the document and storing it
                     data = json_document.object();
 
-                    // Checking all the elements of the configuration_data based on the valid_settings
+                    // Checking whether all the valid settings are contained by the configuration
                     auto iterator = valid_settings.begin();
                     while(iterator != valid_settings.end())
                     {
+                        // Does the configuration contain this valid setting?
                         if(!CheckSetting(iterator->name, iterator->default_value.type()))
                         {
-                            break;
+                            // If not, then we will add it with the default value so in case of adding a new setting, the old config file will be updated.
+                            // The unused settins will remain the config file, but will not be used anymore.
+                            data.insert(iterator->name, iterator->default_value);
                         }
                         iterator++;
                     }
-                    // If we have reached the end, all the elements passed the check
+                    // If we have reached the end, all the elements passed the check or they were added to the config file
                     if(valid_settings.end() == iterator)
                     {
                         bResult = true;

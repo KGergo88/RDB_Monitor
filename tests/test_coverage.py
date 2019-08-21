@@ -26,7 +26,7 @@ def main():
     subprocess.run(["lcov", "-d", folder_build, "-c", "-o", path_coverage_file])
 
     # Filtering the coverage file: Remove some paths/files we don't want to calculate the code coverage
-    subprocess.run(["lcov", "--remove", path_coverage_file, "/usr/include/*", "*/googlemock/*", "*/googletest/*", "-o", path_coverage_file])
+    subprocess.run(["lcov", "--remove", path_coverage_file, "/usr/include/*", "*/googlemock/*", "*/googletest/*", "*/QtCore/*", "-o", path_coverage_file])
 
     # Generate the HTML files from the coverage file
     subprocess.run(["genhtml", "-o", folder_results, path_coverage_file])
