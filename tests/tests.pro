@@ -27,11 +27,11 @@ include(GoogleTest.pri)
 
 TEMPLATE = app
 
-CONFIG += console c++17
+CONFIG += console
 CONFIG += thread
 
 # --coverage option is synonym for: -fprofile-arcs -ftest-coverage -lgcov
-QMAKE_CXXFLAGS += --coverage
+QMAKE_CXXFLAGS += -std=c++17 --coverage
 QMAKE_LFLAGS += --coverage
 
 #Linux
