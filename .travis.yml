@@ -1,9 +1,44 @@
-dist: bionic
 language: cpp
-compiler: gcc
 
-before_install:
-  - sudo apt-get update
-  - sudo apt-get -y install gcc-8 g++-8
-  - sudo apt-get -y install qt5-default qt5-qmake libqt5charts5-dev libqt5serialport5-dev
-  
+jobs:
+  include:
+    # A Bionic build with gcc-8
+    - os: linux
+      dist: bionic
+      env:
+        - CC=gcc-8
+        - CXX=g++-8
+        - GCOV=gcov-8
+        - GTEST_TAG=release-1.10.0
+
+before_script:
+  # Installing the requested GCC versions
+  - sudo apt install -y $CC
+  - sudo apt install -y $CXX
+  # Setting up the default GCC version
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/$CC 80 --slave /usr/bin/g++ g++ /usr/bin/$CXX --slave /usr/bin/gcov gcov /usr/bin/$GCOV
+  - sudo update-alternatives --set gcc /usr/bin/$CC
+  - gcc -v
+  - g++ -v
+  - gcov -v
+  # Installing Qt packages
+  - sudo apt update
+  - sudo apt install -y qt5-default
+  - sudo apt install -y qt5-qmake
+  - sudo apt install -y libqt5charts5-dev
+  - sudo apt install -y libqt5serialport5-dev
+  - qmake -v
+  # Cloning the Google Test repository and checking out the requested tag
+  - pushd ..
+  - git clone https://github.com/google/googletest.git
+  - cd googletest
+  - git checkout $GTEST_TAG
+  - popd
+
+script:
+  # Building the project
+  - mkdir build && cd build
+  - qmake ..
+  - make
+  # Running the unit tests
+  - ./tests/RDB_Diplomaterv_Monitor_Unit_Tests
