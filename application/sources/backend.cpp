@@ -170,9 +170,10 @@ void Backend::RequestForDiagram(const QModelIndex& model_index)
 void Backend::ImportFile(const std::string& path_to_file)
 {
 // #warning "This function needs to be changed when implementing the generic protocol handling"
-    if(std::filesystem::exists(std::filesystem::path(path_to_file)))
+    QFileInfo file_info(QString::fromStdString(path_to_file));
+    if(file_info.exists())
     {
-        std::string file_name = std::filesystem::path(path_to_file).filename().string();
+        std::string file_name = file_info.fileName().toStdString();
         if(!diagram_container.IsThisFileAlreadyStored(file_name, path_to_file))
         {
             if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
@@ -182,7 +183,7 @@ void Backend::ImportFile(const std::string& path_to_file)
                 StoreFileDiagrams(file_name, path_to_file, diagrams_from_file);
 
                 // Updating the configuration with the folder of the file that was imported
-                configuration.ImportFolder(std::filesystem::path(path_to_file).parent_path().string());
+                configuration.ImportFolder(file_info.absoluteDir().absolutePath().toStdString());
 
                 ReportStatus("The file \"" + path_to_file + "\" was successfully opened!");
             }
@@ -226,7 +227,7 @@ void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
             output_file_stream << exported_data.rdbuf();
 
             // Updating the configuration with the folder of the file that was exported
-            configuration.ExportFolder(std::filesystem::path(path_to_file).parent_path().string());
+            configuration.ExportFolder(QFileInfo(QString::fromStdString(path_to_file)).absoluteDir().absolutePath().toStdString());
 
             ReportStatus("The selected diagrams were successfully written to \"" + path_to_file + "\"!");
         }

@@ -182,7 +182,7 @@ bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_f
 {
     bool bResult = false;
 
-    std::string file_extension = std::filesystem::path(path_to_file).extension().string();
+    std::string file_extension = QFileInfo(QString::fromStdString(path_to_file)).completeSuffix().toStdString();
 
     if(native_file_extension == file_extension)
     {

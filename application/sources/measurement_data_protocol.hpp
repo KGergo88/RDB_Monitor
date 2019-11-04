@@ -31,7 +31,8 @@
 #include <cctype>
 #include <regex>
 #include <type_traits>
-#include <filesystem>
+
+#include <QFileInfo>
 
 #include "global.hpp"
 #include "data_processing_interface.hpp"

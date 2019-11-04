@@ -41,9 +41,6 @@ QMAKE_CXXFLAGS += -std=c++17
 #Linux
 unix {
     message("Linux build was selected!")
-
-    # Compiler requirement: We need g++8 or newer.
-    LIBS += -lstdc++fs
 }
 
 #Windows

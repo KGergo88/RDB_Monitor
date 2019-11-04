@@ -37,8 +37,6 @@ QMAKE_LFLAGS += --coverage
 #Linux
 unix {
     message("Linux build was selected!")
-
-    LIBS += -lstdc++fs
 }
 
 #Windows

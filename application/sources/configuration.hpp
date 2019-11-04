@@ -22,7 +22,6 @@
 
 
 #include <set>
-#include <filesystem>
 
 #include <QString>
 #include <QFile>
@@ -43,7 +42,7 @@
 class Configuration
 {
 public:
-    Configuration(std::filesystem::path new_configuration_file_path = (std::filesystem::current_path() / configuration_file_name))
+    Configuration(std::string new_configuration_file_path = QDir(QDir::currentPath()).filePath(configuration_file_name).toStdString())
         : configuration_file_path(new_configuration_file_path)
     {
         valid_settings.emplace(setting_import_folder, QDir::homePath());
@@ -92,7 +91,7 @@ private:
     static constexpr char setting_export_folder[] = "export_folder";
 
     std::set<Setting> valid_settings;
-    const std::filesystem::path configuration_file_path;
+    const std::string configuration_file_path;
     QJsonObject data;
 };
 

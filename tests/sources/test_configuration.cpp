@@ -34,13 +34,13 @@ class TestConfiguration : public ::testing::Test
   void SetUp() override
   {
       // Checking whether thet test config file exists and if so, delete it
-      if(std::filesystem::exists(test_configuration_path))
+      if(QFileInfo(QString::fromStdString(test_configuration_path)).exists())
       {
-          std::filesystem::remove(test_configuration_path);
+          QFile::remove(QString::fromStdString(test_configuration_path));
       }
   }
 
-  void ReadConfigFileContent(QJsonObject& config_file_content, std::filesystem::path path = "")
+  void ReadConfigFileContent(QJsonObject& config_file_content, std::string path = "")
   {
       // Let's drop the current content
       config_file_content = QJsonObject();
@@ -48,7 +48,7 @@ class TestConfiguration : public ::testing::Test
       QFile file;
       if("" == path)
       {
-          file.setFileName(QString::fromStdString(test_configuration_path.string()));
+          file.setFileName(QString::fromStdString(test_configuration_path));
       }
       else
       {
@@ -70,12 +70,12 @@ class TestConfiguration : public ::testing::Test
       ASSERT_FALSE(config_file_content.empty());
   }
 
-  void WriteConfigFileContent(QJsonObject& config_file_content, std::filesystem::path path = "")
+  void WriteConfigFileContent(QJsonObject& config_file_content, std::string path = "")
   {
       QFile file;
       if("" == path)
       {
-          file.setFileName(QString::fromStdString(test_configuration_path.string()));
+          file.setFileName(QString::fromStdString(test_configuration_path));
       }
       else
       {
@@ -90,7 +90,7 @@ class TestConfiguration : public ::testing::Test
   }
 
   // The path to the test config file
-  std::filesystem::path test_configuration_path = std::filesystem::current_path() / "test_config.json";
+  std::string test_configuration_path = QDir(QDir::currentPath()).filePath("test_config.json").toStdString();
 };
 
 TEST_F(TestConfiguration, Constructor)
@@ -98,11 +98,11 @@ TEST_F(TestConfiguration, Constructor)
     // Constructing a Configuration object
     std::unique_ptr<Configuration> test_configuration = std::make_unique<Configuration>(test_configuration_path);
     // We expect that the config file will not be written to the disk during construction
-    ASSERT_FALSE(std::filesystem::exists(test_configuration_path));
+    ASSERT_FALSE(QFileInfo::exists(QString::fromStdString(test_configuration_path)));
     // Destructing the Configuration object
     test_configuration.reset();
     // We expect that the config fill will be written to the disk during destruction
-    ASSERT_TRUE(std::filesystem::exists(test_configuration_path));
+    ASSERT_TRUE(QFileInfo::exists(QString::fromStdString(test_configuration_path)));
 
     // Let's examine the created configuration file and change the values on the disk
     QString new_import_folder_value = "This/is/the/new/value/for/import/folder";
@@ -168,7 +168,7 @@ TEST_F(TestConfiguration, OutdatedConfiguration)
     test_configuration.reset();
 
     // Open the stored config file
-    QFile file(QString::fromStdString(test_configuration_path.string()));
+    QFile file(QString::fromStdString(test_configuration_path));
     QJsonObject config_file_content;
     ReadConfigFileContent(config_file_content);
 

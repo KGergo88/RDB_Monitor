@@ -29,9 +29,9 @@ bool Configuration::LoadExistingConfiguration()
 {
     bool bResult = false;
 
-    if(std::filesystem::exists(configuration_file_path))
+    if(QFileInfo::exists(QString::fromStdString(configuration_file_path)))
     {
-        QFile file(QString::fromStdString(configuration_file_path.string()));
+        QFile file(QString::fromStdString(configuration_file_path));
         if(file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             auto json_document = QJsonDocument::fromJson(file.readAll());
@@ -99,7 +99,7 @@ QJsonObject Configuration::CreateEmptyConfiguration(void)
 
 void Configuration::SaveConfiguration(void)
 {
-    QFile file(QString::fromStdString(configuration_file_path.string()));
+    QFile file(QString::fromStdString(configuration_file_path));
     if(file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
     {        
         file.write(QJsonDocument(data).toJson());

@@ -26,9 +26,9 @@
 #include <cstdio>
 #include <ctime>
 #include <fstream>
-#include <filesystem>
 
 #include <QApplication>
+#include <QFileInfo>
 
 #include "global.hpp"
 #include "backend_signal_interface.hpp"
