@@ -2,7 +2,7 @@ language: cpp
 os: linux
 dist: bionic
 env:
-  - CC=gcc-7 CXX=g++-7 GCOV=gcov-7 GTEST_TAG=release-1.10.0
+#  - CC=gcc-7 CXX=g++-7 GCOV=gcov-7 GTEST_TAG=release-1.10.0
   - CC=gcc-8 CXX=g++-8 GCOV=gcov-8 GTEST_TAG=release-1.10.0
 
 before_script:
@@ -28,11 +28,21 @@ before_script:
   - cd googletest
   - git checkout $GTEST_TAG
   - popd
+  # Installing Coveralls
+  - pip install --user cpp-coveralls
+  # Installing other tools and utilities
+  - sudo apt install -y tree
 
 script:
   # Building the project
   - mkdir build && cd build
-  - qmake ..
+  - qmake BUILD_TESTS="On" ..
   - make
   # Running the unit tests
   - ./tests/RDB_Diplomaterv_Monitor_Unit_Tests
+  # Printing out the directory structure for debugging purposes
+  - tree ..
+
+after_success:
+  # Sending the coverage data to Coveralls
+  - coveralls --verbose --root .. --include "application/" --exclude "tests/" --gcov-options '\-lp'
