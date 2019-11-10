@@ -23,33 +23,17 @@
 
 TEMPLATE = app
 
-QT       += core        \
-            gui         \
-            charts      \
-            serialport
-
+# The used Qt components
+QT += core        \
+      gui         \
+      charts      \
+      serialport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-# The following define makes your compiler emit warnings if you use
-# any feature of Qt which as been marked as deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
-DEFINES += QT_DEPRECATED_WARNINGS
-
+# Compiler flags
 QMAKE_CXXFLAGS += -std=c++17
 
-#Linux
-unix {
-    message("Linux build was selected!")
-}
-
-#Windows
-win32 {
-    message("Windows build was selected!")
-
-    DEFINES += WIN32_LEAN_AND_MEAN
-}
-
+# Source files of the target
 SOURCES +=                                  \
     sources/backend.cpp                     \
     sources/configuration.cpp               \
@@ -63,6 +47,7 @@ SOURCES +=                                  \
     sources/network_handler.cpp             \
     sources/serial_port.cpp
 
+# Header files of the target
 HEADERS +=                                      \
     sources/backend.hpp                         \
     sources/backend_signal_interface.hpp        \

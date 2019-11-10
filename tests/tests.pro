@@ -25,34 +25,35 @@ include(GoogleTest.pri)
 
 
 
-TEMPLATE = app
+CONFIG +=   \
+    console \
+    thread
 
-CONFIG += console
-CONFIG += thread
+# The used Qt components
+QT += core        \
+      gui         \
+      charts      \
+      serialport
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+# Compiler flags
 # --coverage option is synonym for: -fprofile-arcs -ftest-coverage -lgcov
 QMAKE_CXXFLAGS += -std=c++17 --coverage
+# Linker flags
 QMAKE_LFLAGS += --coverage
 
-#Linux
-unix {
-    message("Linux build was selected!")
-}
-
-#Windows
-win32 {
-    message("Windows build was selected!")
-
-    DEFINES += WIN32_LEAN_AND_MEAN
-}
-
+# Source files of the target
 SOURCES +=                                      \
     ../application/sources/configuration.cpp    \
     sources/test_main.cpp                       \
     sources/test_data_point.cpp                 \
     sources/test_data_line.cpp                  \
     sources/test_diagram.cpp                    \
-    sources/test_configuration.cpp
+    sources/test_configuration.cpp              \
+    sources/test_diagram_container.cpp          \
+    sources/test_measurement_data_protocol.cpp  \
+    sources/test_serial_port.cpp                \
+    sources/test_backend.cpp
 
 DISTFILES += gtest_dendency.pri
 

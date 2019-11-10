@@ -30,8 +30,11 @@ before_script:
   - popd
   # Installing Coveralls
   - pip install --user cpp-coveralls
+  # Installing CppCheck
+  - sudo apt install -y cppcheck
   # Installing other tools and utilities
   - sudo apt install -y tree
+
 
 script:
   # Building the project
@@ -40,6 +43,10 @@ script:
   - make
   # Running the unit tests
   - ./tests/RDB_Diplomaterv_Monitor_Unit_Tests
+  # Running the cppcheck
+  - cppcheck ../application/sources --verbose 2> cppcheck_errors.txt
+  - echo "Errors found by CppCheck:"
+  - cat cppcheck_errors.txt
   # Printing out the directory structure for debugging purposes
   - tree ..
 
