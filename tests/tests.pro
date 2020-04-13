@@ -23,7 +23,9 @@
 
 include(GoogleTest.pri)
 
-
+message(===============================)
+message(============ Tests ============)
+message(===============================)
 
 CONFIG +=   \
     console \
@@ -43,18 +45,29 @@ QMAKE_CXXFLAGS += -std=c++17 --coverage
 QMAKE_LFLAGS += --coverage
 
 # Source files of the target
-SOURCES +=                                      \
-    ../application/sources/configuration.cpp    \
-    sources/test_main.cpp                       \
-    sources/test_data_point.cpp                 \
-    sources/test_data_line.cpp                  \
-    sources/test_diagram.cpp                    \
-    sources/test_configuration.cpp              \
-    sources/test_diagram_container.cpp          \
-    sources/test_measurement_data_protocol.cpp  \
-    sources/test_serial_port.cpp                \
+SOURCES +=                                                  \
+    ../application/sources/configuration.cpp                \
+    ../application/sources/measurement_data_protocol.cpp    \
+    sources/test_main.cpp                                   \
+    sources/test_data_point.cpp                             \
+    sources/test_data_line.cpp                              \
+    sources/test_diagram.cpp                                \
+    sources/test_configuration.cpp                          \
+    sources/test_diagram_container.cpp                      \
+    sources/test_measurement_data_protocol.cpp              \
+    sources/test_serial_port.cpp                            \
     sources/test_backend.cpp
 
-DISTFILES += gtest_dendency.pri
+DISTFILES +=                        \
+    gtest_dendency.pri              \
+    test_files/TEST_1C_0E_MDP.mdp   \
+    test_files/TEST_2C_0E_MDP.mdp
 
 TARGET = RDB_Diplomaterv_Monitor_Unit_Tests
+
+# Copying the test files next to the binary
+copydata.commands = $(COPY_DIR) $$PWD/test_files $$OUT_PWD
+first.depends = $(first) copydata
+export(first.depends)
+export(copydata.commands)
+QMAKE_EXTRA_TARGETS += first copydata

@@ -23,6 +23,10 @@
 
 TEMPLATE = app
 
+message(===============================)
+message(========= Application =========)
+message(===============================)
+
 # The used Qt components
 QT += core        \
       gui         \

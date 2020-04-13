@@ -1,17 +1,4 @@
 <<<START>>>
-u64TimeSinceTestBeginMs,eTestProcessState,i16SpeedSetValueRpm,i16SpeedActualValueRpm,i16CurrentSetValue,
-10,2,+2500,0,5000,
-20,2,+2500,0,5000,
-30,2,+2500,0,5000,
-40,2,+2500,276,4500,
-50,2,0,408,4345,
-60,2,-2500,480,4306,
-70,2,-2500,642,4079,
-80,2,-2500,810,3831,
-90,2,-2500,954,3625,
-<<<END>>>
-
-<<<START>>>
 <Temperature measurement>
 u64TimeSinceTestBeginMs,i16Temperature,
 10,+1000,
@@ -23,4 +10,17 @@ u64TimeSinceTestBeginMs,i16Temperature,
 70,-250,
 80,-500,
 90,-1000,
+<<<END>>>
+
+<<<START>>>
+u64TimeSinceTestBeginMs,eTestProcessState,i16SpeedSetValueRpm,i16SpeedActualValueRpm,i16CurrentSetValue,
+10,2,+2500,0,5000,
+20,2,+2500,0,5000,
+30,2,+2500,0,5000,
+40,2,+2500,276,4500,
+50,2,0,408,4345,
+60,2,-2500,480,4306,
+70,2,-2500,642,4079,
+80,2,-2500,810,3831,
+90,2,-2500,954,3625,
 <<<END>>>
