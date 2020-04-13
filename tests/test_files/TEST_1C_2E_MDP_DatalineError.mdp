@@ -1,0 +1,32 @@
+<<<START>>>
+<Measurement with extra element in dataline>
+u64TimeSinceTestBeginMs,i16Temperature,
+10,+1000,
+20,+500,+666,
+30,+250,
+50,0,
+<<<END>>>
+
+<<<START>>>
+<Measurement with too few element in dataline>
+u64TimeSinceTestBeginMs,i16Temperature,i16Voltage,
+10,+1000,+220,
+20,+220,
+30,+250,+220,
+50,0,+220,
+<<<END>>>
+
+
+<<<START>>>
+<Correct measurement>
+u64TimeSinceTestBeginMs,i16Temperature,
+10,+1000,
+20,+500,
+30,+250,
+40,+125,
+50,0,
+60,-125,
+70,-250,
+80,-500,
+90,-1000,
+<<<END>>>

@@ -1,0 +1,27 @@
+<<<START>>>
+<Measurement with headline error>
+u64TimeSinceTestBeginthere is an error here
+10,+1000,
+20,+500,
+30,+250,
+40,+125,
+50,0,
+60,-125,
+70,-250,
+80,-500,
+90,-1000,
+<<<END>>>
+
+<<<START>>>
+<Correct measurement>
+u64TimeSinceTestBeginMs,i16Temperature,
+10,+1000,
+20,+500,
+30,+250,
+40,+125,
+50,0,
+60,-125,
+70,-250,
+80,-500,
+90,-1000,
+<<<END>>>

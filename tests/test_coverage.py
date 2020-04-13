@@ -33,5 +33,6 @@ def main():
     # Reset our counts
     subprocess.run(["lcov", "-d", folder_results, "-z"])
 
+
 if "__main__" == __name__:
     main()

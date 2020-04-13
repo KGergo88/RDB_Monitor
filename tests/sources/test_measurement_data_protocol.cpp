@@ -35,11 +35,21 @@
 
 
 
-class TestMeasurementDataProtocol : public ::testing::Test
+struct TestMeasurementDataProtocolParameter
+{
+    TestMeasurementDataProtocolParameter(const QString& new_file_name,
+                                         const int& new_expected_correct_diagrams) : file_name(new_file_name),
+                                                                                     expected_correct_diagrams(new_expected_correct_diagrams) {}
+    QString file_name;
+    int expected_correct_diagrams;
+};
+
+class TestMeasurementDataProtocol : public ::testing::Test,
+                                    public testing::WithParamInterface<TestMeasurementDataProtocolParameter>
 {
  protected:
- std::ifstream ReadTestFileContent(const QString& file_name)
- {
+    std::ifstream ReadTestFileContent(const QString& file_name)
+    {
     std::string test_file_path = QDir(test_files_path).filePath(file_name).toStdString();
     std::ifstream test_file_stream(test_file_path);
 
@@ -49,15 +59,15 @@ class TestMeasurementDataProtocol : public ::testing::Test
     }
 
     return test_file_stream;
- }
+    }
 
-  MeasurementDataProtocol test_mdp_processor;
-  std::string expected_protocol_name = "Measurement Data Protocol MDP";
-  std::string expected_file_type = "mdp";
-  std::vector<DiagramSpecialized> processed_diagrams;
+    MeasurementDataProtocol test_mdp_processor;
+    std::string expected_protocol_name = "Measurement Data Protocol MDP";
+    std::string expected_file_type = "mdp";
+    std::vector<DiagramSpecialized> processed_diagrams;
 
-  // The path to the test files
-  QString test_files_path = QDir(QCoreApplication::applicationDirPath()).filePath("test_files");
+    // The path to the test files
+    QString test_files_path = QDir(QCoreApplication::applicationDirPath()).filePath("test_files");
 };
 
 TEST_F(TestMeasurementDataProtocol, ConstructorAndDataProcessingInterface)
@@ -71,28 +81,7 @@ TEST_F(TestMeasurementDataProtocol, ConstructorAndDataProcessingInterface)
     EXPECT_FALSE(test_mdp_processor.CanThisFileBeProcessed(filename_to_test));
 }
 
-TEST_F(TestMeasurementDataProtocol, ProcessData_EmptyStream)
-{
-    std::ifstream empty_stream;
-    processed_diagrams = test_mdp_processor.ProcessData(empty_stream);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(0));
-}
-
-TEST_F(TestMeasurementDataProtocol, ProcessData_1C_0E_MDP)
-{
-    std::ifstream file_stream = ReadTestFileContent("TEST_1C_0E_MDP.mdp");
-    processed_diagrams = test_mdp_processor.ProcessData(file_stream);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(1));
-}
-
-TEST_F(TestMeasurementDataProtocol, ProcessData_2C_0E_MDP)
-{
-    std::ifstream file_stream = ReadTestFileContent("TEST_2C_0E_MDP.mdp");
-    processed_diagrams = test_mdp_processor.ProcessData(file_stream);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(2));
-}
-
-TEST_F(TestMeasurementDataProtocol, ExportData_EmptyContainer)
+TEST_F(TestMeasurementDataProtocol, ProcessData_ExportData_EmptyStream)
 {
     std::ifstream empty_stream;
     processed_diagrams = test_mdp_processor.ProcessData(empty_stream);
@@ -103,24 +92,22 @@ TEST_F(TestMeasurementDataProtocol, ExportData_EmptyContainer)
     EXPECT_EQ(processed_diagrams.size(), std::size_t(0));
 }
 
-TEST_F(TestMeasurementDataProtocol, ExportData_1C_0E_MDP)
+TEST_P(TestMeasurementDataProtocol, ProcessData_ExportData)
 {
-    std::ifstream file_stream = ReadTestFileContent("TEST_1C_0E_MDP.mdp");
+    auto test_parameter = GetParam();
+    std::ifstream file_stream = ReadTestFileContent(test_parameter.file_name);
     processed_diagrams = test_mdp_processor.ProcessData(file_stream);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(1));
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams));
 
     std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
     processed_diagrams = test_mdp_processor.ProcessData(exported_data);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(1));
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams));
 }
 
-TEST_F(TestMeasurementDataProtocol, ExportData_2C_0E_MDP)
-{
-    std::ifstream file_stream = ReadTestFileContent("TEST_2C_0E_MDP.mdp");
-    processed_diagrams = test_mdp_processor.ProcessData(file_stream);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(2));
-
-    std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
-    processed_diagrams = test_mdp_processor.ProcessData(exported_data);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(2));
-}
+INSTANTIATE_TEST_SUITE_P(TestMeasurementDataProtocolInstantiation,
+                         TestMeasurementDataProtocol,
+                         testing::Values(TestMeasurementDataProtocolParameter("TEST_1C_0E_MDP.mdp", 1),
+                                         TestMeasurementDataProtocolParameter("TEST_2C_0E_MDP.mdp", 2),
+                                         TestMeasurementDataProtocolParameter("TEST_1C_1E_MDP_HeadlineError.mdp", 1),
+                                         TestMeasurementDataProtocolParameter("TEST_1C_2E_MDP_DatalineError.mdp", 1)
+                                         ));
