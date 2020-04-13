@@ -21,14 +21,73 @@
 
 
 
+#include <fstream>
+
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
+#include <QCoreApplication>
+#include <QString>
+#include <QDir>
+
+#include "../application/sources/global.hpp"
 #include "../application/sources/measurement_data_protocol.hpp"
 
 
 
-TEST(TestMeasurementDataProtocol, Constructor)
+class TestMeasurementDataProtocol : public ::testing::Test
 {
-    MeasurementDataProtocol myProtocol();
+ protected:
+ std::ifstream ReadTestFileContent(const QString& file_name)
+ {
+    std::string test_file_path = QDir(test_files_path).filePath(file_name).toStdString();
+    std::ifstream test_file_stream(test_file_path);
+
+    if(!test_file_stream.is_open())
+    {
+        ADD_FAILURE() << "The file could not be opened! Path: " << test_file_path;
+    }
+
+    return test_file_stream;
+ }
+
+  MeasurementDataProtocol test_mdp_processor;
+  std::string expected_protocol_name = "Measurement Data Protocol MDP";
+  std::string expected_file_type = "mdp";
+  std::vector<DiagramSpecialized> processed_diagrams;
+
+  // The path to the test files
+  QString test_files_path = QDir(QCoreApplication::applicationDirPath()).filePath("test_files");
+};
+
+TEST_F(TestMeasurementDataProtocol, ConstructorAndDataProcessingInterface)
+{
+    EXPECT_EQ(test_mdp_processor.GetProtocolName(), expected_protocol_name);
+    EXPECT_EQ(test_mdp_processor.GetSupportedFileType(), expected_file_type);
+
+    std::string filename_to_test = std::string("myfile.") + expected_file_type;
+    EXPECT_TRUE(test_mdp_processor.CanThisFileBeProcessed(filename_to_test));
+    filename_to_test = std::string("mymdpfile.") + std::string("txt");
+    EXPECT_FALSE(test_mdp_processor.CanThisFileBeProcessed(filename_to_test));
+}
+
+TEST_F(TestMeasurementDataProtocol, ProcessData_EmptyStream)
+{
+    std::ifstream empty_stream;
+    processed_diagrams = test_mdp_processor.ProcessData(empty_stream);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(0));
+}
+
+TEST_F(TestMeasurementDataProtocol, ProcessData_1C_0E_MDP)
+{
+    std::ifstream file_stream = ReadTestFileContent("TEST_1C_0E_MDP.mdp");
+    processed_diagrams = test_mdp_processor.ProcessData(file_stream);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(1));
+}
+
+TEST_F(TestMeasurementDataProtocol, ProcessData_2C_0E_MDP)
+{
+    std::ifstream file_stream = ReadTestFileContent("TEST_2C_0E_MDP.mdp");
+    processed_diagrams = test_mdp_processor.ProcessData(file_stream);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(2));
 }

@@ -21,12 +21,18 @@
 
 
 
+#include <QApplication>
+
 #include <gtest/gtest.h>
 
 
 
 int main(int argc, char *argv[])
 {
+    // This is needs to be instantiated to be able to use Qt methods in the tests
+    QApplication qApplication(argc, argv);
+
+    // Running all the unit tests
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

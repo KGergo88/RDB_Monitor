@@ -25,7 +25,7 @@
 
 
 
-MeasurementDataProtocol::MeasurementDataProtocol() : DataProcessingInterface("Measurement Data Protocol MDP", ".mdp")
+MeasurementDataProtocol::MeasurementDataProtocol() : DataProcessingInterface("Measurement Data Protocol MDP", "mdp")
 {
     state = Constants::States::WaitingForStartLine;
 }
