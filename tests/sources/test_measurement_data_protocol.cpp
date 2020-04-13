@@ -91,3 +91,36 @@ TEST_F(TestMeasurementDataProtocol, ProcessData_2C_0E_MDP)
     processed_diagrams = test_mdp_processor.ProcessData(file_stream);
     EXPECT_EQ(processed_diagrams.size(), std::size_t(2));
 }
+
+TEST_F(TestMeasurementDataProtocol, ExportData_EmptyContainer)
+{
+    std::ifstream empty_stream;
+    processed_diagrams = test_mdp_processor.ProcessData(empty_stream);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(0));
+
+    std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
+    processed_diagrams = test_mdp_processor.ProcessData(exported_data);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(0));
+}
+
+TEST_F(TestMeasurementDataProtocol, ExportData_1C_0E_MDP)
+{
+    std::ifstream file_stream = ReadTestFileContent("TEST_1C_0E_MDP.mdp");
+    processed_diagrams = test_mdp_processor.ProcessData(file_stream);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(1));
+
+    std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
+    processed_diagrams = test_mdp_processor.ProcessData(exported_data);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(1));
+}
+
+TEST_F(TestMeasurementDataProtocol, ExportData_2C_0E_MDP)
+{
+    std::ifstream file_stream = ReadTestFileContent("TEST_2C_0E_MDP.mdp");
+    processed_diagrams = test_mdp_processor.ProcessData(file_stream);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(2));
+
+    std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
+    processed_diagrams = test_mdp_processor.ProcessData(exported_data);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(2));
+}
