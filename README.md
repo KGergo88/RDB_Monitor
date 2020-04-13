@@ -23,9 +23,9 @@ A monitor program for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Dipl
 ## Introduction
 
 The RDB Diplomaterv Monitor was developed in order to visualise the measurement results of the RDB Diplomaterv project.
-Besides this, the program can be used with any other software or device that produces output as described in the supported protocols chapter.
+Besides this, the program can be used with any other software or device that produces output as described in the [Supported protocols](#supported-protocols) chapter.
 
-At the moment only the serial port can be used for data reception. In the tested environment the ST_LinkV2 debugger of the RDB Diplomaterv project
+At the moment only the serial port can be used for data reception. In the tested environment the ST_LinkV2 debugger of the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project
 was connected to the PC running the RDB Diplomaterv Monitor with a USB cable and the data was received through either a COM port (Windows) or a device in the /dev folder (Linux).
 
 
