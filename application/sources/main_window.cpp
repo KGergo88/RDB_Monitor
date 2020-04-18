@@ -70,10 +70,23 @@ MainWindow::MainWindow() : QMainWindow(),
     pDiagramsMenu->addAction(diagram_menu_import_diagrams_text, this, &MainWindow::MenuActionDiagramsImportDiagrams);
     pDiagramsMenu->addAction(diagram_menu_export_diagrams_text, this, &MainWindow::MenuActionDiagramsExportDiagrams);
 
-    // Setting the minimum size and the title of the main window and showing it maximized
+    // Setting the minimum size, and the title of the window
     setMinimumSize(main_window_minimum_width, main_window_minimum_height);
     setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
 
+    // Setting the window icon
+    QString window_icon_image_path = ":/images/Icon.png";
+    if(QFileInfo(window_icon_image_path).exists())
+    {
+        QIcon window_icon(window_icon_image_path);
+        setWindowIcon(window_icon);
+    }
+    else
+    {
+        throw("The window icon can not be found! Check path: " + window_icon_image_path.toStdString());
+    }
+
+    // The window will be opened as maximized
     showMaximized();
 }
 

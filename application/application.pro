@@ -70,4 +70,6 @@ HEADERS +=                                      \
     sources/network_handler.hpp                 \
     sources/serial_port.hpp
 
+RESOURCES = ../resources.qrc
+
 TARGET = RDB_Diplomaterv_Monitor
