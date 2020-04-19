@@ -143,6 +143,7 @@ u32TimeHour,u8RoomTemperature,
 <<<END>>>
 ```
 
+
 ## Dependencies
 
 The RDB Diplomaterv Monitor was developed in C++17 and it depends on the following external components:
@@ -153,7 +154,7 @@ The RDB Diplomaterv Monitor was developed in C++17 and it depends on the followi
 
 ## Portability
 
-The RDB Diplomaterv Monitor was developed on an Ubuntu 18.10 Linux but it tries to ensure compatibility with Windows 10 as much as possible.
+The RDB Diplomaterv Monitor was developed on an Ubuntu 18.04.4 LTS (Bionic Beaver) but it tries to ensure compatibility with Windows 10 as much as possible.
 The tagged versions are tested under both Ubuntu and Windows.
 
 
