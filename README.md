@@ -1,4 +1,5 @@
 # RDB Diplomaterv Monitor <!-- omit in toc -->
+[![Build Status](https://travis-ci.org/KGergo88/RDB_Diplomaterv_Monitor.svg?branch=master)](https://travis-ci.org/KGergo88/RDB_Diplomaterv_Monitor) [![Coverage Status](https://coveralls.io/repos/github/KGergo88/RDB_Diplomaterv_Monitor/badge.svg?branch=master)](https://coveralls.io/github/KGergo88/RDB_Diplomaterv_Monitor?branch=master) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 A monitor program for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project.
 
