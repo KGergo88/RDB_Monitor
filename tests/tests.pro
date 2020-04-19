@@ -58,9 +58,11 @@ SOURCES +=                                                  \
     sources/test_serial_port.cpp                            \
     sources/test_backend.cpp
 
-DISTFILES +=                        \
-    gtest_dendency.pri              \
-    test_files/TEST_1C_0E_MDP.mdp   \
+DISTFILES +=                                        \
+    gtest_dendency.pri                              \
+    test_files/TEST_1C_0E_MDP.mdp                   \
+    test_files/TEST_1C_1E_MDP_HeadlineError.mdp     \
+    test_files/TEST_1C_2E_MDP_DatalineError.mdp     \
     test_files/TEST_2C_0E_MDP.mdp
 
 TARGET = RDB_Diplomaterv_Monitor_Unit_Tests
