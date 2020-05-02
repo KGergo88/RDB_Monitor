@@ -72,6 +72,7 @@ private:
 
         enum class States : uint8_t
         {
+            INVALID = 0,
             WaitingForStartLine,
             ProcessingTitleLine,
             ProcessingHeadline,

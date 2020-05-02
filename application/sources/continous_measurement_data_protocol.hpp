@@ -70,7 +70,13 @@ private:
 
         enum class States : uint8_t
         {
-            WaitingForTransmission
+            INVALID = 0,
+            WaitingForTransmission,
+            HeaderStartReceived,
+            HeaderContentReceived,
+            HeaderEndReceived,
+            DataStartReceived,
+            DataEndReceived
         };
     };
 
