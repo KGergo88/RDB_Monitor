@@ -21,26 +21,27 @@
 
 
 
-#include "measurement_data_protocol.hpp"
+#include "continous_measurement_data_protocol.hpp"
 
 
 
-MeasurementDataProtocol::MeasurementDataProtocol()
+ContinousMeasurementDataProtocol::ContinousMeasurementDataProtocol()
 {
-    state = Constants::States::WaitingForStartLine;
+    state = Constants::States::WaitingForTransmission;
 }
 
-std::string MeasurementDataProtocol::GetProtocolName(void)
+std::string ContinousMeasurementDataProtocol::GetProtocolName(void)
 {
     return std::string(Constants::protocol_name);
 }
 
-std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istream& input_data)
+std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(std::istream& input_data)
 {
     std::vector<DiagramSpecialized> assembled_diagrams;
     std::string received_data;
     std::string actual_line;
 
+    /*
     while(std::getline(input_data, actual_line))
     {
         std::smatch match_results;
@@ -174,57 +175,15 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
             throw("A regex exception was caught: " + std::to_string(exception.code()) + ": " + exception.what());
         }
     }
+    */
 
     return assembled_diagrams;
 }
 
-bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_file)
+bool ContinousMeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_file)
 {
-    bool bResult = false;
+    (void) path_to_file;
 
-    std::string file_extension = QFileInfo(QString::fromStdString(path_to_file)).completeSuffix().toStdString();
-
-    if(std::string(Constants::native_file_extension) == file_extension)
-    {
-        bResult = true;
-    }
-    return bResult;
-}
-
-std::stringstream MeasurementDataProtocol::ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export)
-{
-    std::stringstream exported_data;
-
-    for(auto const& diagram : diagrams_to_export)
-    {
-        exported_data << Constants::Export::start_line << std::endl;
-
-        exported_data << Constants::Export::diagram_title_start << diagram.GetTitle() << Constants::Export::diagram_title_end << std::endl;
-
-        auto number_of_data_lines = diagram.GetTheNumberOfDataLines();
-        if(0 < number_of_data_lines)
-        {
-            exported_data << diagram.GetAxisXTitle() << Constants::Export::element_separator;
-            for(std::size_t data_line_index = 0; data_line_index < number_of_data_lines; data_line_index++)
-            {
-                exported_data << diagram.GetDataLineTitle(data_line_index) << Constants::Export::element_separator;
-            }
-            exported_data << std::endl;
-
-            auto number_of_data_points = diagram.GetTheNumberOfDataPoints(0);
-            for(std::size_t data_point_index = 0; data_point_index < number_of_data_points; data_point_index++)
-            {
-                exported_data << diagram.GetDataPoint(0, data_point_index).GetX() << Constants::Export::element_separator;
-                for(std::size_t data_line_index = 0; data_line_index < number_of_data_lines; data_line_index++)
-                {
-                    exported_data << diagram.GetDataPoint(data_line_index, data_point_index).GetY() << Constants::Export::element_separator;
-                }
-                exported_data << std::endl;
-            }
-        }
-
-        exported_data << Constants::Export::end_line << std::endl << std::endl;
-    }
-
-    return exported_data;
+    // The CMDP can not process files
+    return false;
 }

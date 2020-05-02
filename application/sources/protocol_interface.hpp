@@ -23,22 +23,17 @@
 
 #include <string>
 
-#include "global.hpp"
-#include "protocol_interface.hpp"
+
+
+#ifndef PROTOCOL_INTERFACE_HPP
+#define PROTOCOL_INTERFACE_HPP
 
 
 
-#ifndef DATA_PROCESSING_INTERFACE_HPP
-#define DATA_PROCESSING_INTERFACE_HPP
-
-
-
-class DataProcessingInterface : public ProtocolInterface
+class ProtocolInterface
 {
 public:
-    virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) = 0;
-    virtual bool CanThisFileBeProcessed(const std::string path_to_file) = 0;
-    virtual std::string GetSupportedFileType(void) = 0;
+    virtual std::string GetProtocolName(void) = 0;
 };
 
-#endif // DATA_PROCESSING_INTERFACE_HPP
+#endif // PROTOCOL_INTERFACE_HPP

@@ -36,67 +36,41 @@
 
 #include "global.hpp"
 #include "data_processing_interface.hpp"
-#include "data_exporting_interface.hpp"
 #include "diagram.hpp"
 
 
 
-#ifndef MEAUREMENT_DATA_PROTOCOL_HPP
-#define MEAUREMENT_DATA_PROTOCOL_HPP
+#ifndef CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP
+#define CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP
 
 
 
-class MeasurementDataProtocol : public DataProcessingInterface, public DataExportingInterface
+class ContinousMeasurementDataProtocol : public DataProcessingInterface
 {
 public:
-    MeasurementDataProtocol();
-    virtual ~MeasurementDataProtocol() = default;
+    ContinousMeasurementDataProtocol();
+    virtual ~ContinousMeasurementDataProtocol() = default;
 
-    MeasurementDataProtocol(const MeasurementDataProtocol&) = delete;
-    MeasurementDataProtocol(MeasurementDataProtocol&&) = delete;
+    ContinousMeasurementDataProtocol(const ContinousMeasurementDataProtocol&) = delete;
+    ContinousMeasurementDataProtocol(ContinousMeasurementDataProtocol&&) = delete;
 
-    MeasurementDataProtocol& operator=(const MeasurementDataProtocol&) = delete;
-    MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
+    ContinousMeasurementDataProtocol& operator=(const ContinousMeasurementDataProtocol&) = delete;
+    ContinousMeasurementDataProtocol& operator=(ContinousMeasurementDataProtocol&&) = delete;
 
     std::string GetProtocolName(void) override;
     std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
     bool CanThisFileBeProcessed(const std::string path_to_file) override;
     std::string GetSupportedFileType(void) override {return Constants::native_file_extension;}
-    std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
 
 private:
     struct Constants
     {
-        static constexpr char protocol_name[] = "Measurement Data Protocol MDP";
-        static constexpr char native_file_extension[] = "mdp";
+        static constexpr char protocol_name[] = "Continous Measurement Data Protocol CMDP";
+        static constexpr char native_file_extension[] = "cmdp";
 
         enum class States : uint8_t
         {
-            WaitingForStartLine,
-            ProcessingTitleLine,
-            ProcessingHeadline,
-            ProcessingDataLines
-        };
-
-        struct Regex
-        {
-            // REGEX strings to search the input data for valid measurement session
-            static constexpr char start_line[]         = R"(^\s*<<<START>>>$)";
-            static constexpr char title_line[]         = R"(^<(.*)>$)";
-            static constexpr char headline[]           = R"(^\s*(\w+,){2,}$)";
-            static constexpr char headline_analyzer[]  = R"(^\s*(\w+),)";
-            static constexpr char data_line[]          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
-            static constexpr char data_line_analyzer[] = R"(^\s*((?:\+|\-)?\d+),)";
-            static constexpr char end_line[]           = R"(^\s*<<<END>>>$)";
-        };
-
-        struct Export
-        {
-            static constexpr char start_line[]          = "<<<START>>>";
-            static constexpr char end_line[]            = "<<<END>>>";
-            static constexpr char diagram_title_start[] = "<";
-            static constexpr char diagram_title_end[]   = ">";
-            static constexpr char element_separator     = ',';
+            WaitingForTransmission
         };
     };
 
@@ -106,4 +80,4 @@ private:
 
 
 
-#endif // MEAUREMENT_DATA_PROTOCOL_HPP
+#endif // CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP

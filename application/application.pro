@@ -47,37 +47,41 @@ win32 {
 }
 
 # Source files of the target
-SOURCES +=                                  \
-    sources/backend.cpp                     \
-    sources/configuration.cpp               \
-    sources/data_line.cpp                   \
-    sources/data_point.cpp                  \
-    sources/diagram.cpp                     \
-    sources/diagram_container.cpp           \
-    sources/main.cpp                        \
-    sources/main_window.cpp                 \
-    sources/measurement_data_protocol.cpp   \
-    sources/network_handler.cpp             \
+SOURCES +=                                          \
+    sources/backend.cpp                             \
+    sources/configuration.cpp                       \
+    sources/continous_measurement_data_protocol.cpp \
+    sources/data_line.cpp                           \
+    sources/data_point.cpp                          \
+    sources/diagram.cpp                             \
+    sources/diagram_container.cpp                   \
+    sources/main.cpp                                \
+    sources/main_window.cpp                         \
+    sources/measurement_data_protocol.cpp           \
+    sources/network_handler.cpp                     \
     sources/serial_port.cpp
 
 # Header files of the target
-HEADERS +=                                      \
-    sources/backend.hpp                         \
-    sources/backend_signal_interface.hpp        \
-    sources/configuration.hpp                   \
-    sources/data_connection_interface.hpp       \
-    sources/data_line.hpp                       \
-    sources/data_point.hpp                      \
-    sources/data_processing_interface.hpp       \
-    sources/diagram.hpp                         \
-    sources/diagram_container.hpp               \
-    sources/global.hpp                          \
-    sources/gui_signal_interface.hpp            \
-    sources/main_window.hpp                     \
-    sources/measurement_data_protocol.hpp       \
-    sources/network_connection_interface.hpp    \
-    sources/network_handler.hpp                 \
-    sources/ordered_dict.h                      \
+HEADERS +=                                          \
+    sources/backend.hpp                             \
+    sources/backend_signal_interface.hpp            \
+    sources/configuration.hpp                       \
+    sources/continous_measurement_data_protocol.hpp \
+    sources/data_connection_interface.hpp           \
+    sources/data_exporting_interface.hpp            \
+    sources/data_line.hpp                           \
+    sources/data_point.hpp                          \
+    sources/data_processing_interface.hpp           \
+    sources/diagram.hpp                             \
+    sources/diagram_container.hpp                   \
+    sources/global.hpp                              \
+    sources/gui_signal_interface.hpp                \
+    sources/main_window.hpp                         \
+    sources/measurement_data_protocol.hpp           \
+    sources/network_connection_interface.hpp        \
+    sources/network_handler.hpp                     \
+    sources/protocol_interface.hpp                  \
+    sources/ordered_dict.h                          \
     sources/serial_port.hpp
 
 RESOURCES = ../resources.qrc
