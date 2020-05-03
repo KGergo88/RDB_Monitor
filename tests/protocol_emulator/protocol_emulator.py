@@ -2,6 +2,7 @@ import logging
 import sys
 import os
 import serial
+import collections
 
 
 # socat command to create the serial port pair:
@@ -19,46 +20,79 @@ class Constants:
 class CMDP_Emulator:
     class MessageConstants:
         class Header:
-            Start = R"<CMDP_H>\n"
-            End = R">CMDP_H<\n"
+            Start = R"<CMDP_H>"
+            End = R">CMDP_H<"
 
         class Data:
-            Start = R"<CMDP_D>\n"
-            End = R">CMDP_D<\n"
+            Start = R"<CMDP_D>"
+            End = R">CMDP_D<"
 
-        Tail = R"<CMDP_T>\n"
+        Tail = R"<CMDP_T>"
 
-    def __init__(self, transmit_function):
+    def __init__(self, transmit_function, string_encoding):
         self._transmit_function = transmit_function
+        self._string_encoding = string_encoding
+
+    def _transmit_line(self, string_to_transfer):
+        self._transmit_function(bytes(string_to_transfer, self._string_encoding) + b"\r\n")
 
     def TransmitSession(self, diagram_title, data_line_titles, content_of_the_data_messages):
+        """
+        diagram_title : str
+            The title of the diagram. Set it to None there is none.
+        data_line_titles : dict/OrderedDict
+            The titles of the data lines. The keys of the dict/OrderedDict must be X, Y0 ... Yn.
+            If the order of the data line titles is important for your use case use an OrderedDict,
+            otherwise you can use a regular dict.
+            Example:
+                {"X":"Time [s]", "Y0":"Temperature [C]"}
+        content_of_the_data_messages : list/tuple of list/tuples of dicts/OrderedDicts
+            Contains the data for all the data messages of the session.
+            The dicts/OrderedDicts represent one measurement point with one or more values.
+            The keys of the dict/OrderedDict must be X, Y0 ... Yn.
+            If the order of the elements in a measurement point is important for your use case use an OrderedDict,
+            otherwise you can use a regular dict.
+            One list/tuple element represent one data message. Example:
+            (
+                (
+                    {"X": "0", "Y0":"10"},
+                ),
+                (
+                    {"X":"10", "Y0":"12"},
+                    {"X":"15", "Y0":"13"}
+                ),
+                (
+                    {"X": "5", "Y0":"11"},
+                    {"X":"20", "Y0":"14"}
+                )
+            )
+        """
         self.TransmitHeader(diagram_title, data_line_titles)
         for data_message_content in content_of_the_data_messages:
             self.TransmitData(data_message_content)
         self.TransmitTail()
 
     def TransmitHeader(self, diagram_title, data_line_titles):
-        self._transmit_function(CMDP_Emulator.MessageConstants.Header.Start)
+        self._transmit_line(CMDP_Emulator.MessageConstants.Header.Start)
         if diagram_title:
-            self._transmit_function("<" + diagram_title + ">")
-        header_content = "X:{},".format(data_line_titles[0])
-        for index in range(1, len(data_line_titles)):
-            header_content += "Y{}:{},".format((index - 1), data_line_titles[index])
-        header_content += "\n"
-        self._transmit_function(header_content)
-        self._transmit_function(CMDP_Emulator.MessageConstants.Header.End)
+            self._transmit_line("<" + diagram_title + ">")
+        line_to_send = ""
+        for key, value in data_line_titles.items():
+            line_to_send += "{}:{},".format(key, value)
+        self._transmit_line(line_to_send)
+        self._transmit_line(CMDP_Emulator.MessageConstants.Header.End)
 
-    def TransmitData(self, data_points_of_the_message):
-        self._transmit_function(CMDP_Emulator.MessageConstants.Data.Start)
-        for data_points_of_the_measurement in data_points_of_the_message:
-            data_content = "X:{},".format(data_points_of_the_measurement[0])
-            for index in range(1, len(data_points_of_the_measurement)):
-                data_content += "Y{}:{},".format((index - 1), data_points_of_the_measurement[index])
-            data_content += "\n"
-        self._transmit_function(CMDP_Emulator.MessageConstants.Data.End)
+    def TransmitData(self, data_message_content):
+        self._transmit_line(CMDP_Emulator.MessageConstants.Data.Start)
+        for measurement_point_data in data_message_content:
+            line_to_send = ""
+            for key, value in measurement_point_data.items():
+                line_to_send += "{}:{},".format(key, value)
+            self._transmit_line(line_to_send)
+        self._transmit_line(CMDP_Emulator.MessageConstants.Data.End)
 
     def TransmitTail(self):
-        self._transmit_function(CMDP_Emulator.MessageConstants.Tail)
+        self._transmit_line(CMDP_Emulator.MessageConstants.Tail)
 
 
 def GetDevice(default_device):
@@ -108,26 +142,24 @@ def main():
         serial_port = serial.Serial(device)
 
         logging.info("Creating emulator")
-        emulator = EmulatorFactory(protocol, serial_port.write)
+        emulator = EmulatorFactory(protocol, serial_port.write, "ascii")
 
+        logging.info("Transmitting session")
         emulator.TransmitSession(None,
-                                ("Time [s]", "Temperature [C]"),
-                                (
-                                    (
-                                        {"X": "0", "Y0":"10"}
-                                    ),
-                                    (
-                                        {"X":"10", "Y0":"12"},
-                                        {"X":"15", "Y0":"13"}
-                                    ),
-                                    (
-                                        {"X": "5", "Y0":"11"},
-                                        {"X":"20", "Y0":"14"}
-                                    )
-                                ))
-
-    except:
-        logging.fatal("Could not open serial port")
+                                 collections.OrderedDict([("X", "Time [s]"), ("Y0", "Temperature [C]")]),
+                                 (
+                                     (
+                                         collections.OrderedDict([("X", "0"), ("Y0", "10")]),
+                                     ),
+                                     (
+                                         collections.OrderedDict([("X", "10"), ("Y0", "12")]),
+                                         collections.OrderedDict([("X", "15"), ("Y0", "13")])
+                                     ),
+                                     (
+                                         collections.OrderedDict([("X",  "5"), ("Y0", "11")]),
+                                         collections.OrderedDict([("X", "20"), ("Y0", "14")])
+                                     )
+                                 ))
     finally:
         if serial_port is not None:
             logging.info("Closing serial port")
