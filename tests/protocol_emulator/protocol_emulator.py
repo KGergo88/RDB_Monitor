@@ -137,30 +137,27 @@ def main():
     logging.info("Selected protocol: {}".format(protocol))
 
     serial_port = None
-    try:
-        logging.info("Opening serial port")
-        serial_port = serial.Serial(device)
+    logging.info("Opening serial port")
+        with serial_port = serial.Serial(device)
+            logging.info("Creating emulator")
+            emulator = EmulatorFactory(protocol, serial_port.write, "ascii")
 
-        logging.info("Creating emulator")
-        emulator = EmulatorFactory(protocol, serial_port.write, "ascii")
-
-        logging.info("Transmitting session")
-        emulator.TransmitSession(None,
-                                 collections.OrderedDict([("X", "Time [s]"), ("Y0", "Temperature [C]")]),
-                                 (
+            logging.info("Transmitting session")
+            emulator.TransmitSession(None,
+                                     collections.OrderedDict([("X", "Time [s]"), ("Y0", "Temperature [C]")]),
                                      (
-                                         collections.OrderedDict([("X", "0"), ("Y0", "10")]),
-                                     ),
-                                     (
-                                         collections.OrderedDict([("X", "10"), ("Y0", "12")]),
-                                         collections.OrderedDict([("X", "15"), ("Y0", "13")])
-                                     ),
-                                     (
-                                         collections.OrderedDict([("X",  "5"), ("Y0", "11")]),
-                                         collections.OrderedDict([("X", "20"), ("Y0", "14")])
-                                     )
-                                 ))
-    finally:
+                                         (
+                                             collections.OrderedDict([("X", "0"), ("Y0", "10")]),
+                                         ),
+                                         (
+                                             collections.OrderedDict([("X", "10"), ("Y0", "12")]),
+                                             collections.OrderedDict([("X", "15"), ("Y0", "13")])
+                                         ),
+                                         (
+                                             collections.OrderedDict([("X",  "5"), ("Y0", "11")]),
+                                             collections.OrderedDict([("X", "20"), ("Y0", "14")])
+                                         )
+                                     ))
         if serial_port is not None:
             logging.info("Closing serial port")
             serial_port.close()
