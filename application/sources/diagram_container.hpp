@@ -49,11 +49,11 @@ class DiagramContainer : public QAbstractItemModel
 public:
     DiagramContainer(QObject* parent = nullptr);
 
-    DiagramContainer(const DiagramContainer& new_backend) = delete;
-    DiagramContainer(DiagramContainer&& new_backend) = delete;
+    DiagramContainer(const DiagramContainer&) = delete;
+    DiagramContainer(DiagramContainer&&) = delete;
 
-    DiagramContainer& operator=(const DiagramContainer& new_backend) = delete;
-    DiagramContainer& operator=(DiagramContainer&& new_backend) = delete;
+    DiagramContainer& operator=(const DiagramContainer&) = delete;
+    DiagramContainer& operator=(DiagramContainer&&) = delete;
 
     virtual ~DiagramContainer() override = default;
 
@@ -112,11 +112,11 @@ private:
         explicit Element(const DataType& new_data, Element* new_parent = nullptr, const Qt::ItemFlags& new_flags = element_flags_default, const Qt::CheckState new_check_state = Qt::Unchecked)
             : data(new_data), parent(new_parent), flags(new_flags), check_state(new_check_state) {}
 
-        Element(const Element& new_backend) = delete;
-        Element(Element&& new_backend) = delete;
+        Element(const Element&) = delete;
+        Element(Element&&) = delete;
 
-        Element& operator=(const Element& new_backend) = delete;
-        Element& operator=(Element&& new_backend) = delete;
+        Element& operator=(const Element&) = delete;
+        Element& operator=(Element&&) = delete;
 
         ~Element() = default;
 

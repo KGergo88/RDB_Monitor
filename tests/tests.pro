@@ -47,6 +47,7 @@ QMAKE_LFLAGS += --coverage
 # Source files of the target
 SOURCES +=                                                  \
     ../application/sources/configuration.cpp                \
+    ../application/sources/diagram_container.cpp            \
     ../application/sources/measurement_data_protocol.cpp    \
     sources/test_main.cpp                                   \
     sources/test_data_point.cpp                             \
@@ -57,6 +58,9 @@ SOURCES +=                                                  \
     sources/test_measurement_data_protocol.cpp              \
     sources/test_serial_port.cpp                            \
     sources/test_backend.cpp
+
+HEADERS +=                                                  \
+    ../application/sources/diagram_container.hpp             
 
 DISTFILES +=                                        \
     gtest_dendency.pri                              \

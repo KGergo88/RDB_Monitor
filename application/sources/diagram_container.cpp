@@ -26,7 +26,7 @@ DiagramContainer::DiagramContainer(QObject* parent) : QAbstractItemModel(parent)
 
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
     std::cout << "Elements contained by the DiagramContainer:" << std::endl;
-    root_item->PrintAllElementsBelow();
+    root_element->PrintAllElementsRecursive();
     std::cout << std::endl;
 #endif
 }
@@ -622,7 +622,7 @@ void DiagramContainer::Element::CallFunctionOnElementsRecursive(std::function<vo
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
 void DiagramContainer::Element::PrintAllElementsRecursive(const std::string& identation) const
 {
-    std::cout << identation << "Name: \"" << name << "\", Address: " << this << std::endl;
+    std::cout << identation << "Name: \"" << std::get<DataType_Name>(data) << "\", Address: " << this << std::endl;
 
     for(const auto& i : children)
     {
