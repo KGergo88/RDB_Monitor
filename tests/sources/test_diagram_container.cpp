@@ -27,54 +27,94 @@
 #include "../application/sources/diagram_container.hpp"
 
 
+// Model structure should be
+// root ("Available digrams")
+//     |
+//     --- first_child ("Diagrams loaded from files")
+//     |       |
+//     |       --- first_child_of_first_child ("No diagrams yet...")
+//     |
+//     --- second_child ("Diagrams received on the network")
+//             |
+//             --- first_child_of_second_child ("No diagrams yet...")
 
-TEST(TestDiagramContainer, ConstructorAndIndexing)
+class TestDiagramContainerClass : public ::testing::Test
 {
-    // Model structure should be
-    // root_element ("Available digrams")
-    //     |
-    //     --- files_element_data ("Diagrams loaded from files")
-    //     |       |
-    //     |       --- empty_element_data ("No diagrams yet...")
-    //     |
-    //     --- network_element_data ("Diagrams received on the network")
-    //     |       |
-    //     |       --- empty_element_data ("No diagrams yet...")
-
+protected:
     DiagramContainer container{};
     QModelIndex root = QModelIndex{};
     QModelIndex first_child = container.index(0,0,root);
     QModelIndex first_child_of_first_child = container.index(0,0,first_child);
-    QModelIndex non_existent_second_child_of_first_child = container.index(1,0,first_child);
     QModelIndex second_child = container.index(1,0,root);
     QModelIndex first_child_of_second_child = container.index(0,0,second_child);
-    QModelIndex non_existent_second_child_of_second_child = container.index(1,0,second_child);
-    QModelIndex non_existent_third_child = container.index(2,0,root);
 
+    TestDiagramContainerClass() {  }
+    ~TestDiagramContainerClass() override {  }
+    void SetUp() override {  }
+    void TearDown() override {  }
+};
+
+
+TEST_F(TestDiagramContainerClass, ModelStructureAndIndexingCorrectAfterConstruction)
+{
     EXPECT_EQ(first_child.row(), 0);
     EXPECT_EQ(first_child.column(), 0);
+    EXPECT_TRUE(first_child.isValid());
     EXPECT_EQ(first_child_of_first_child.row(), 0);
     EXPECT_EQ(first_child_of_first_child.column(), 0);
-    EXPECT_EQ(non_existent_second_child_of_first_child.row(), -1);
-    EXPECT_EQ(non_existent_second_child_of_first_child.column(), -1);
-    EXPECT_TRUE(first_child.isValid());
     EXPECT_TRUE(first_child_of_first_child.isValid());
-    EXPECT_FALSE(non_existent_second_child_of_first_child.isValid());
 
     EXPECT_EQ(second_child.row(), 1);
     EXPECT_EQ(second_child.column(), 0);
+    EXPECT_TRUE(second_child.isValid());
     EXPECT_EQ(first_child_of_second_child.row(), 0);
     EXPECT_EQ(first_child_of_second_child.column(), 0);
-    EXPECT_EQ(non_existent_second_child_of_second_child.row(), -1);
-    EXPECT_EQ(non_existent_second_child_of_second_child.column(), -1);
-    EXPECT_TRUE(second_child.isValid());
     EXPECT_TRUE(first_child_of_second_child.isValid());
-    EXPECT_FALSE(non_existent_second_child_of_second_child.isValid());
 
+    QModelIndex non_existent_second_child_of_first_child = container.index(1,0,first_child);
+    QModelIndex non_existent_second_child_of_second_child = container.index(1,0,second_child);
+    QModelIndex non_existent_third_child = container.index(2,0,root);
+
+    EXPECT_EQ(non_existent_second_child_of_first_child.row(), -1);
+    EXPECT_EQ(non_existent_second_child_of_first_child.column(), -1);
+    EXPECT_FALSE(non_existent_second_child_of_first_child.isValid());
     EXPECT_EQ(non_existent_second_child_of_second_child.row(), -1);
     EXPECT_EQ(non_existent_second_child_of_second_child.column(), -1);
+    EXPECT_FALSE(non_existent_second_child_of_second_child.isValid());
+    EXPECT_EQ(non_existent_third_child.row(), -1);
+    EXPECT_EQ(non_existent_third_child.column(), -1);
     EXPECT_FALSE(non_existent_third_child.isValid());
+}
 
+TEST_F(TestDiagramContainerClass, ParentReferencingWorks)
+{
+    EXPECT_EQ(container.parent(root), QModelIndex{});
+    EXPECT_EQ(container.parent(first_child), root);
+    EXPECT_EQ(container.parent(second_child), root);
+    EXPECT_EQ(container.parent(first_child_of_first_child), first_child);
+    EXPECT_EQ(container.parent(first_child_of_second_child), second_child)
+    << container.parent(first_child_of_second_child).internalId() << " | " << second_child.internalId() << "\n"
+    << container.parent(first_child_of_second_child).row() << " | " << second_child.row() << "\n"
+    << container.parent(first_child_of_second_child).column() << " | " << second_child.column() << "\n";
+}
+
+TEST_F(TestDiagramContainerClass, RowAndColumnCountCorrectAfterConstruction)
+{
+    EXPECT_EQ(container.rowCount(root), 2);
+    EXPECT_EQ(container.columnCount(root), 1);
+    EXPECT_EQ(container.rowCount(first_child), 1);
+    EXPECT_EQ(container.columnCount(first_child), 1);
+    EXPECT_EQ(container.rowCount(second_child), 1);
+    EXPECT_EQ(container.columnCount(second_child), 1);
+    EXPECT_EQ(container.rowCount(first_child_of_first_child), 0);
+    EXPECT_EQ(container.columnCount(first_child_of_first_child), 1);
+    EXPECT_EQ(container.rowCount(first_child_of_second_child), 0);
+    EXPECT_EQ(container.columnCount(first_child_of_second_child), 1);
+}
+
+TEST_F(TestDiagramContainerClass, FlagsAreSetCorrectlyAtConstruction)
+{
+    EXPECT_EQ(root.flags(), Qt::NoItemFlags);
     EXPECT_EQ(first_child.flags(), Qt::ItemIsEnabled);
     EXPECT_EQ(second_child.flags(), Qt::ItemIsEnabled);
     EXPECT_EQ(first_child_of_first_child.flags(), Qt::ItemIsEnabled);
