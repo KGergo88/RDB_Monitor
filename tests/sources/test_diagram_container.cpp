@@ -92,10 +92,7 @@ TEST_F(TestDiagramContainerClass, ParentReferencingWorks)
     EXPECT_EQ(container.parent(first_child), root);
     EXPECT_EQ(container.parent(second_child), root);
     EXPECT_EQ(container.parent(first_child_of_first_child), first_child);
-    EXPECT_EQ(container.parent(first_child_of_second_child), second_child)
-    << container.parent(first_child_of_second_child).internalId() << " | " << second_child.internalId() << "\n"
-    << container.parent(first_child_of_second_child).row() << " | " << second_child.row() << "\n"
-    << container.parent(first_child_of_second_child).column() << " | " << second_child.column() << "\n";
+    EXPECT_EQ(container.parent(first_child_of_second_child), second_child);
 }
 
 TEST_F(TestDiagramContainerClass, RowAndColumnCountCorrectAfterConstruction)

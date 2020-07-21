@@ -334,9 +334,19 @@ QModelIndex DiagramContainer::parent(const QModelIndex &index) const
     {
         Element* indexed_element = static_cast<Element*>(index.internalPointer());
         Element* parent_element = indexed_element->parent;
+        Element* parent_of_parent_element = parent_element->parent;
         if(root_element.get() != parent_element)
         {
-            result = createIndex(0, (column_count - 1), parent_element);
+            int row = 0;
+            for(std::size_t i = parent_of_parent_element->GetNumberOfChildren(); i > 0; --i)
+            {
+                std::size_t index_of_parent = i - 1;
+                if(parent_of_parent_element->GetIndexWithChild(parent_element, index_of_parent) == true)
+                {
+                    row = static_cast<int>(index_of_parent);
+                }
+            }
+            result = createIndex(row, (column_count - 1), parent_element);
         }
     }
 
