@@ -35,7 +35,9 @@ CONFIG +=   \
 QT += core        \
       gui         \
       charts      \
-      serialport
+      serialport  \
+      testlib
+      
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 # Compiler flags

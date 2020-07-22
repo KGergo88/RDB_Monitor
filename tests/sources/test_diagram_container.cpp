@@ -24,10 +24,12 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
+#include <QSignalSpy>
 #include "../application/sources/diagram_container.hpp"
 
 
-// Model structure should be
+// Constructed model structure should be...
+//
 // root ("Available digrams")
 //     |
 //     --- first_child ("Diagrams loaded from files")
@@ -38,7 +40,7 @@
 //             |
 //             --- first_child_of_second_child ("No diagrams yet...")
 
-class TestDiagramContainerClass : public ::testing::Test
+class TestDiagramContainer : public ::testing::Test
 {
 protected:
     DiagramContainer container{};
@@ -48,14 +50,13 @@ protected:
     QModelIndex second_child = container.index(1,0,root);
     QModelIndex first_child_of_second_child = container.index(0,0,second_child);
 
-    TestDiagramContainerClass() {  }
-    ~TestDiagramContainerClass() override {  }
+    TestDiagramContainer() {  }
+    ~TestDiagramContainer() override {  }
     void SetUp() override {  }
     void TearDown() override {  }
 };
 
-
-TEST_F(TestDiagramContainerClass, ModelStructureAndIndexingCorrectAfterConstruction)
+TEST_F(TestDiagramContainer, ModelStructureAndIndexingAfterConstruction)
 {
     EXPECT_EQ(first_child.row(), 0);
     EXPECT_EQ(first_child.column(), 0);
@@ -86,7 +87,7 @@ TEST_F(TestDiagramContainerClass, ModelStructureAndIndexingCorrectAfterConstruct
     EXPECT_FALSE(non_existent_third_child.isValid());
 }
 
-TEST_F(TestDiagramContainerClass, ParentReferencingWorks)
+TEST_F(TestDiagramContainer, ParentReferencing)
 {
     EXPECT_EQ(container.parent(root), QModelIndex{});
     EXPECT_EQ(container.parent(first_child), root);
@@ -95,7 +96,7 @@ TEST_F(TestDiagramContainerClass, ParentReferencingWorks)
     EXPECT_EQ(container.parent(first_child_of_second_child), second_child);
 }
 
-TEST_F(TestDiagramContainerClass, RowAndColumnCountCorrectAfterConstruction)
+TEST_F(TestDiagramContainer, RowAndColumnCountAfterConstruction)
 {
     EXPECT_EQ(container.rowCount(root), 2);
     EXPECT_EQ(container.columnCount(root), 1);
@@ -109,11 +110,54 @@ TEST_F(TestDiagramContainerClass, RowAndColumnCountCorrectAfterConstruction)
     EXPECT_EQ(container.columnCount(first_child_of_second_child), 1);
 }
 
-TEST_F(TestDiagramContainerClass, FlagsAreSetCorrectlyAtConstruction)
+TEST_F(TestDiagramContainer, FlagsAfterConstruction)
 {
     EXPECT_EQ(root.flags(), Qt::NoItemFlags);
     EXPECT_EQ(first_child.flags(), Qt::ItemIsEnabled);
     EXPECT_EQ(second_child.flags(), Qt::ItemIsEnabled);
     EXPECT_EQ(first_child_of_first_child.flags(), Qt::ItemIsEnabled);
     EXPECT_EQ(first_child_of_second_child.flags(), Qt::ItemIsEnabled);
+}
+
+TEST_F(TestDiagramContainer, DataAfterConstruction)
+{
+    EXPECT_EQ(container.headerData(0, Qt::Horizontal, Qt::DisplayRole).value<QString>(), QString("Available diagrams"));
+    EXPECT_FALSE(container.headerData(0, Qt::Vertical, Qt::DisplayRole).isValid());
+    EXPECT_FALSE(container.headerData(0, Qt::Horizontal, Qt::CheckStateRole).isValid());
+
+    EXPECT_EQ(container.data(first_child, Qt::DisplayRole).value<QString>(), QString("Diagrams loaded from files"));
+    EXPECT_EQ(container.data(first_child, Qt::CheckStateRole).value<Qt::CheckState>(), Qt::Unchecked);
+
+    EXPECT_EQ(container.data(second_child, Qt::DisplayRole).value<QString>(), QString("Diagrams received on the network"));
+    EXPECT_EQ(container.data(second_child, Qt::CheckStateRole).value<Qt::CheckState>(), Qt::Unchecked);
+
+    EXPECT_EQ(container.data(first_child_of_first_child, Qt::DisplayRole).value<QString>(), QString("No diagrams yet..."));
+    EXPECT_EQ(container.data(first_child_of_first_child, Qt::CheckStateRole).value<Qt::CheckState>(), Qt::Unchecked);
+
+    EXPECT_EQ(container.data(first_child_of_second_child, Qt::DisplayRole).value<QString>(), QString("No diagrams yet..."));
+    EXPECT_EQ(container.data(first_child_of_second_child, Qt::CheckStateRole).value<Qt::CheckState>(), Qt::Unchecked);
+}
+
+TEST_F(TestDiagramContainer, ChangingCheckStateOfItem)
+{
+    container.ShowCheckBoxes();
+    QSignalSpy SpyDataChangedSignal(&container, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)));
+
+    EXPECT_EQ(root.flags(), Qt::NoItemFlags);
+    EXPECT_EQ(first_child.flags(), Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+    EXPECT_EQ(second_child.flags(), Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+    EXPECT_EQ(first_child_of_first_child.flags(), Qt::ItemIsEnabled);
+    EXPECT_EQ(first_child_of_second_child.flags(), Qt::ItemIsEnabled);
+
+    EXPECT_TRUE(container.setData(first_child, QVariant{Qt::Checked}, Qt::CheckStateRole));
+    EXPECT_EQ(container.data(first_child, Qt::CheckStateRole).value<Qt::CheckState>(), Qt::Checked);
+    EXPECT_EQ(SpyDataChangedSignal.count(), 1);
+
+    EXPECT_TRUE(container.setData(second_child, QVariant{Qt::Checked}, Qt::CheckStateRole));
+    EXPECT_EQ(container.data(second_child, Qt::CheckStateRole).value<Qt::CheckState>(), Qt::Checked);
+    EXPECT_EQ(SpyDataChangedSignal.count(), 2);
+
+    EXPECT_FALSE(container.setData(first_child_of_first_child, QVariant{Qt::Checked}, Qt::CheckStateRole));
+    EXPECT_FALSE(container.setData(first_child_of_second_child, QVariant{Qt::Checked}, Qt::CheckStateRole));
+    EXPECT_EQ(SpyDataChangedSignal.count(), 2);
 }
