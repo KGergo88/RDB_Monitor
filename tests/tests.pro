@@ -48,9 +48,16 @@ QMAKE_LFLAGS += --coverage
 
 # Source files of the target
 SOURCES +=                                                  \
+    ../application/sources/backend.cpp                      \
     ../application/sources/configuration.cpp                \
+    ../application/sources/data_line.cpp                    \
+    ../application/sources/data_point.cpp                   \
+    ../application/sources/diagram.cpp                      \
     ../application/sources/diagram_container.cpp            \
+    ../application/sources/main_window.cpp                  \
     ../application/sources/measurement_data_protocol.cpp    \
+    ../application/sources/network_handler.cpp              \
+    ../application/sources/serial_port.cpp                  \
     sources/test_main.cpp                                   \
     sources/test_data_point.cpp                             \
     sources/test_data_line.cpp                              \
@@ -62,7 +69,22 @@ SOURCES +=                                                  \
     sources/test_backend.cpp
 
 HEADERS +=                                                  \
-    ../application/sources/diagram_container.hpp             
+    ../application/sources/backend.hpp                      \
+    ../application/sources/backend_signal_interface.hpp     \
+    ../application/sources/configuration.hpp                \
+    ../application/sources/data_connection_interface.hpp    \
+    ../application/sources/data_line.hpp                    \
+    ../application/sources/data_point.hpp                   \
+    ../application/sources/data_processing_interface.hpp    \
+    ../application/sources/diagram.hpp                      \
+    ../application/sources/diagram_container.hpp            \
+    ../application/sources/global.hpp                       \
+    ../application/sources/gui_signal_interface.hpp         \
+    ../application/sources/main_window.hpp                  \
+    ../application/sources/measurement_data_protocol.hpp    \
+    ../application/sources/network_connection_interface.hpp \
+    ../application/sources/network_handler.hpp              \
+    ../application/sources/serial_port.hpp
 
 DISTFILES +=                                        \
     gtest_dendency.pri                              \
