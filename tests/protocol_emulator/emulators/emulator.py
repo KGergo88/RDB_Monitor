@@ -2,7 +2,6 @@ import abc
 
 
 class Emulator(abc.ABC):
-    @abc.abstractmethod
     def __init__(self, transmit_function, string_encoding):
         """
         Constructor.
@@ -15,7 +14,8 @@ class Emulator(abc.ABC):
             The encoding that shall be used for the strings that will be transmitted.
             For possible valies see the bytes() built-in function.
         """
-        pass
+        self._transmit_function = transmit_function
+        self._string_encoding = string_encoding
 
     @abc.abstractmethod
     def transmitSession(self, diagram_title, data_line_titles, content_of_the_data_messages):
@@ -51,3 +51,11 @@ class Emulator(abc.ABC):
             )
         """        
         pass
+
+    def _transmit_line(self, string_to_transfer, line_ending="\r\n"):
+        """
+        Function to transmit a single line.
+        string_to_transfer : str
+            The content of the line that needs to be transmitted.
+        """
+        self._transmit_function(bytes(string_to_transfer + line_ending, self._string_encoding))

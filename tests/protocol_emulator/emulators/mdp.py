@@ -1,23 +1,17 @@
 import emulators.emulator
 
 
-class CMDP_Emulator(emulators.emulator.Emulator):
+class MDP_Emulator(emulators.emulator.Emulator):
     class MessageConstants:
-        class Header:
-            Start = R"<CMDP_H>"
-            End = R">CMDP_H<"
-
-        class Data:
-            Start = R"<CMDP_D>"
-            End = R">CMDP_D<"
-
-        Tail = R"<CMDP_T>"
+        class Session:
+            Start = R"<<<START>>>"
+            End = R"<<<END>>>"
 
     def __init__(self, *args):
         """
         See class emulators.emulator.Emulator class for description.
         """
-        super(CMDP_Emulator, self).__init__(*args)
+        super(MDP_Emulator, self).__init__(*args)
 
     def transmitSession(self, diagram_title, data_line_titles, content_of_the_data_messages):
         """
@@ -29,23 +23,20 @@ class CMDP_Emulator(emulators.emulator.Emulator):
         self._transmitTail()
 
     def _transmitHeader(self, diagram_title, data_line_titles):
-        self._transmit_line(CMDP_Emulator.MessageConstants.Header.Start)
+        self._transmit_line(MDP_Emulator.MessageConstants.Session.Start)
         if diagram_title:
             self._transmit_line("<" + diagram_title + ">")
         line_to_send = ""
-        for key, value in data_line_titles.items():
-            line_to_send += "{}:{},".format(key, value)
+        for data_line_title in data_line_titles.values():
+            line_to_send += "{},".format(data_line_title)
         self._transmit_line(line_to_send)
-        self._transmit_line(CMDP_Emulator.MessageConstants.Header.End)
 
     def _transmitData(self, data_message_content):
-        self._transmit_line(CMDP_Emulator.MessageConstants.Data.Start)
         for measurement_point_data in data_message_content:
             line_to_send = ""
-            for key, value in measurement_point_data.items():
-                line_to_send += "{}:{},".format(key, value)
+            for value in measurement_point_data.values():
+                line_to_send += "{},".format(value)
             self._transmit_line(line_to_send)
-        self._transmit_line(CMDP_Emulator.MessageConstants.Data.End)
 
     def _transmitTail(self):
-        self._transmit_line(CMDP_Emulator.MessageConstants.Tail)
+        self._transmit_line(MDP_Emulator.MessageConstants.Session.End)

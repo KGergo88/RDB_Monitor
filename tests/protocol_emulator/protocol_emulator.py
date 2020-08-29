@@ -17,7 +17,7 @@ class Constants:
     DEFAULT_DEVICE = "/dev/pts/3"
     # Set this variable to a name of one of the available protocols or
     # to None if the user should enter the name during runtime
-    DEFAULT_PROTOCOL = "CMDP"
+    DEFAULT_PROTOCOL = "MDP"
 
 
 def getDevice(default_device):
