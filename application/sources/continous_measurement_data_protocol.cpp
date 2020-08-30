@@ -27,7 +27,7 @@
 
 ContinousMeasurementDataProtocol::ContinousMeasurementDataProtocol()
 {
-    state = Constants::States::WaitingForTransmission;
+    state = Constants::States::WaitingForHeaderMessageStart;
 }
 
 std::string ContinousMeasurementDataProtocol::GetProtocolName(void)
@@ -41,7 +41,6 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
     std::string received_data;
     std::string actual_line;
 
-    /*
     while(std::getline(input_data, actual_line))
     {
         std::smatch match_results;
@@ -53,18 +52,17 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
         {
             switch(state)
             {
-                case Constants::States::WaitingForStartLine:
-                    // If a start line was found...
-                    if(std::regex_match(actual_line, std::regex(Constants::Regex::start_line)))
+                case Constants::States::WaitingForHeaderMessageStart:
+                    // If a header message start line was found
+                    if(std::regex_match(actual_line, std::regex(Constants::Regex::header_start)))
                     {
-                        state = Constants::States::ProcessingTitleLine;
+                        state = Constants::States::ProcessingHeaderDiagramTitle;
                     }
                     break;
-                case Constants::States::ProcessingTitleLine:
-                    // In any case, we will switch to the next state
-                    state = Constants::States::ProcessingHeadline;
-                    // If this is a diagram title line
-                    if(std::regex_search(actual_line, match_results, std::regex(Constants::Regex::title_line)))
+                case Constants::States::ProcessingHeaderDiagramTitle:
+                    state = Constants::States::ProcessingHeaderDataLines;
+                    // If a header message diagram title line was found
+                    if(std::regex_search(actual_line, match_results, std::regex(Constants::Regex::header_diagram_title)))
                     {
                         // Then we create a diagram object with the title
                         actual_diagram = DiagramSpecialized(match_results[1]);
@@ -81,50 +79,63 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
                         actual_diagram = DiagramSpecialized(current_date_and_time_string);
                         // Switching to the next state without a break --> a new line will NOT be fetched, because this line is the headline
                     }
-
                     // The falltrough is not an error in this case, this behaviour needed because there was no diagram title found, the actual_line contains the headline
-                [[fallthrough]];
-                case Constants::States::ProcessingHeadline:
-                    // If this is a headline but not a dataline
-                    // (this is needed because with regex it is difficult to define the differences between the data and headlines)
-                    if((std::regex_match(actual_line, std::regex(Constants::Regex::headline))) &&
-                       (!std::regex_match(actual_line, std::regex(Constants::Regex::data_line))))
+                    [[fallthrough]];
+                case Constants::States::ProcessingHeaderDataLines:
+                    if(std::regex_match(actual_line, std::regex(Constants::Regex::header_datalines)))
                     {
-                        std::string headline = actual_line;
-                        DataIndexType column_index = 0;
+                        std::string header_data_lines = actual_line;
 
-                        // Collecting the labels from the headline
-                        while(std::regex_search(headline, match_results, std::regex(Constants::Regex::headline_analyzer)))
+                        // Extracting the title of the X axis
+                        std::regex_search(header_data_lines, match_results, std::regex(Constants::Regex::header_dataline_x));
+                        actual_diagram.SetAxisXTitle(match_results[1]);
+                        header_data_lines = match_results.suffix().str();
+
+                        // Extracting the title of the Y axis
+                        while(std::regex_search(header_data_lines, match_results, std::regex(Constants::Regex::header_dataline_y)))
                         {
-                            if(0 == column_index)
-                            {
-                                actual_diagram.SetAxisXTitle(match_results[1]);
-                            }
-                            else
-                            {
-                                actual_diagram.AddNewDataLine(match_results[1]);
-                            }
-
-                            ++column_index;
-                            headline = match_results.suffix().str();
+                            actual_diagram.AddNewDataLine(match_results[1], match_results[2]);
+                            header_data_lines = match_results.suffix().str();
                         }
-
-                        state = Constants::States::ProcessingDataLines;
+                        state = Constants::States::WaitingForHeaderMessageEnd;
                     }
                     else
                     {
-                        state = Constants::States::WaitingForStartLine;
+                        state = Constants::States::WaitingForHeaderMessageStart;
                     }
                     break;
-                case Constants::States::ProcessingDataLines:
-                    if(std::regex_match(actual_line, std::regex(Constants::Regex::data_line)))
+                case Constants::States::WaitingForHeaderMessageEnd:
+                    // If a header message end line was found
+                    if(std::regex_match(actual_line, std::regex(Constants::Regex::header_end)))
+                    {
+                        state = Constants::States::WaitingForDataMessageStart;
+                    }
+                    else
+                    {
+                        state = Constants::States::WaitingForHeaderMessageStart;
+                    }
+                    break;
+                case Constants::States::WaitingForDataMessageStart:
+                    // If a header message end line was found
+                    if(std::regex_match(actual_line, std::regex(Constants::Regex::data_start)))
+                    {
+                        state = Constants::States::ProcessingDataMessageContent;
+                    }
+                    else if(std::regex_match(actual_line, std::regex(Constants::Regex::tail)))
+                    {
+                        assembled_diagrams.push_back(actual_diagram);
+                        state = Constants::States::WaitingForHeaderMessageStart;
+                    }
+                    break;
+                case Constants::States::ProcessingDataMessageContent:
+                    if(std::regex_match(actual_line, std::regex(Constants::Regex::data_datalines)))
                     {
                         std::string data_line = actual_line;
                         DataIndexType column_index = 0;
                         DataPointType data_point_x_value = 0;
 
                         // Collecting the data from the dataline
-                        while(std::regex_search(data_line, match_results, std::regex(Constants::Regex::data_line_analyzer)))
+                        while(std::regex_search(data_line, match_results, std::regex(Constants::Regex::data_datalines)))
                         {
                             if(0 == column_index)
                             {
@@ -142,7 +153,7 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
                                 }
                                 else
                                 {
-                                    state = Constants::States::WaitingForStartLine;
+                                    state = Constants::States::WaitingForHeaderMessageStart;
                                     break;
                                 }
                             }
@@ -152,20 +163,23 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
                         }
                         if((column_index - 1) != actual_diagram.GetTheNumberOfDataLines())
                         {
-                            state = Constants::States::WaitingForStartLine;
+                            state = Constants::States::WaitingForHeaderMessageStart;
                         }
                     }
                     else
                     {
-                        if(std::regex_match(actual_line, std::regex(Constants::Regex::end_line)))
+                        if(std::regex_match(actual_line, std::regex(Constants::Regex::data_end)))
                         {
-                            assembled_diagrams.push_back(actual_diagram);
+                            state = Constants::States::WaitingForDataMessageStart;
                         }
-                        state = Constants::States::WaitingForStartLine;
+                        else
+                        {
+                            state = Constants::States::WaitingForHeaderMessageStart;
+                        }
                     }
                     break;
                 default:
-                    state = Constants::States::WaitingForStartLine;
+                    state = Constants::States::WaitingForHeaderMessageStart;
                     throw("The DataProcessor::ProcessData's statemachine switched to an unexpected state: " + std::to_string(static_cast<std::underlying_type<Constants::States>::type>(state)));
                     break;
             }
@@ -175,15 +189,20 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
             throw("A regex exception was caught: " + std::to_string(exception.code()) + ": " + exception.what());
         }
     }
-    */
 
     return assembled_diagrams;
 }
 
 bool ContinousMeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_file)
 {
-    (void) path_to_file;
+    bool bResult = false;
 
-    // The CMDP can not process files
-    return false;
+    std::string file_extension = QFileInfo(QString::fromStdString(path_to_file)).completeSuffix().toStdString();
+
+    if(std::string(Constants::native_file_extension) == file_extension)
+    {
+        bResult = true;
+    }
+
+    return bResult;
 }
