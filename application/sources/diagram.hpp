@@ -69,9 +69,10 @@ public:
         AxisXTitle = newAxisXTitle;
     }
 
-    void AddNewDataLine(const std::string& newDataLineTitle = "")
+    void AddNewDataLine(const std::string& newDataLineId = DataLine<T_DATA_POINT, T_INDEX>::invalid_id,
+                        const std::string& newDataLineTitle = "")
     {
-        Data.push_back(DataLine<T_DATA_POINT, T_INDEX>(newDataLineTitle));
+        Data.push_back(DataLine<T_DATA_POINT, T_INDEX>(newDataLineId, newDataLineTitle));
     }
 
     inline const T_INDEX GetTheNumberOfDataLines(void) const
@@ -79,7 +80,7 @@ public:
         return Data.size();
     }
 
-    inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex) const
+    inline const std::string GetDataLineTitle(const T_INDEX& dataLineIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
@@ -93,11 +94,53 @@ public:
         Data[dataLineIndex].SetTitle(newDataLineTitle);
     }
 
+    inline std::string GetDataLineId(const T_INDEX& dataLineIndex) const
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        return Data[dataLineIndex].GetId();
+    }
+
+    inline void SetDataLineId(const T_INDEX& dataLineIndex, const std::string& newDataLineId)
+    {
+        CheckDataLineIndex(dataLineIndex);
+
+        Data[dataLineIndex].SetId(newDataLineId);
+    }
+
+    inline bool GetDataLineIndex(const std::string& dataLineId, T_INDEX& dataLineIndex) const
+    {
+        bool result = false;
+        dataLineIndex = 0;
+
+        for(auto const& dataLine : Data)
+        {
+            if(dataLine.GetId() == dataLineId)
+            {
+                result = true;
+                break;
+            }
+            dataLineIndex++;
+        }
+
+        return result;
+    }
+
     void AddNewDataPoint(T_INDEX dataLineIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
     {
         CheckDataLineIndex(dataLineIndex);
 
         Data[dataLineIndex].AddNewDataPoint(newDataPoint);
+    }
+
+    void AddNewDataPoint(std::string dataLineId, const DataPoint<T_DATA_POINT>& newDataPoint)
+    {
+        T_INDEX data_line_index = 0;
+
+        if(GetDataLineIndex(dataLineId, data_line_index))
+        {
+            Data[data_line_index].AddNewDataPoint(newDataPoint);
+        }
     }
 
     inline const T_INDEX GetTheNumberOfDataPoints(const T_INDEX& dataLineIndex) const
@@ -189,7 +232,7 @@ private:
             throw errorMessage;
         }
     }
-    
+
     std::string DiagramTitle;
     std::string AxisXTitle;
     std::vector<DataLine<T_DATA_POINT, T_INDEX> > Data;

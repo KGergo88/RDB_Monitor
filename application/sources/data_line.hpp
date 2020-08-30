@@ -40,7 +40,8 @@ template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
 {
 public:
-    explicit DataLine(const std::string& newDataLineTitle = "") : DataLineTitle(newDataLineTitle) {}
+    explicit DataLine(const std::string& newDataLineId = invalid_id,
+                      const std::string& newDataLineTitle = "") : DataLineId(newDataLineId), DataLineTitle(newDataLineTitle) {}
 
     DataLine(const DataLine& newDataLine) = default;
     DataLine(DataLine&& newDataLine) = default;
@@ -50,7 +51,7 @@ public:
     DataLine& operator=(const DataLine& newDataLine) = default;
     DataLine& operator=(DataLine&& newDataLine) = default;
     
-    inline const std::string& GetTitle(void) const
+    inline std::string GetTitle(void) const
     {
         return DataLineTitle;
     }
@@ -60,9 +61,19 @@ public:
         DataLineTitle = newDataLineTitle;
     }
     
+    inline std::string GetId(void) const
+    {
+        return DataLineId;
+    }
+
+    inline void SetId(const std::string& newDataLineId)
+    {
+        DataLineId = newDataLineId;
+    }
+
     inline void AddNewDataPoint(const DataPoint<T_DATA_POINT>& newDataPoint)
     {
-        Data.push_back(newDataPoint);       
+        Data.push_back(newDataPoint);
     }
 
     inline DataLine<T_DATA_POINT, T_INDEX>& operator<<(const DataPoint<T_DATA_POINT>& newDataPoint)
@@ -90,7 +101,8 @@ public:
         Data[dataPointIndex] = newDataPoint;
     }
 
-    inline const DataPoint<T_DATA_POINT> GetDataPointWithMinValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
+    inline const DataPoint<T_DATA_POINT> GetDataPointWithMinValue(const std::function<bool(DataPoint<T_DATA_POINT>,
+                                                                                           DataPoint<T_DATA_POINT>)>& compare) const
     {
         auto min_value = std::min_element(Data.begin(), Data.end(), compare);
 
@@ -103,7 +115,8 @@ public:
         return *min_value;
     }
 
-    inline const DataPoint<T_DATA_POINT> GetDataPointWithMaxValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
+    inline const DataPoint<T_DATA_POINT> GetDataPointWithMaxValue(const std::function<bool(DataPoint<T_DATA_POINT>,
+                                                                                           DataPoint<T_DATA_POINT>)>& compare) const
     {
         auto max_value = std::max_element(Data.begin(), Data.end(), compare);
 
@@ -116,6 +129,8 @@ public:
         return *max_value;
     }
     
+    static constexpr char invalid_id[] = "invalid_id";
+
 private:
     void CheckDataPointIndex(const T_INDEX& dataPointIndex) const
     {
@@ -129,6 +144,7 @@ private:
         }
     }
     
+    std::string DataLineId;
     std::string DataLineTitle;
     std::vector<DataPoint<T_DATA_POINT> > Data;
 };
