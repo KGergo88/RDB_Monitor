@@ -46,6 +46,10 @@ win32 {
     QMAKE_CXXFLAGS += /std:c++17
 }
 
+CONFIG(debug, debug|release) {
+    CONFIG += -O0
+}
+
 # Source files of the target
 SOURCES +=                                          \
     sources/backend.cpp                             \
