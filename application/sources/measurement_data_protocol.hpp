@@ -35,6 +35,7 @@
 #include <QFileInfo>
 
 #include "global.hpp"
+#include "protocol_interface.hpp"
 #include "data_processing_interface.hpp"
 #include "data_exporting_interface.hpp"
 #include "diagram.hpp"
@@ -58,11 +59,12 @@ public:
     MeasurementDataProtocol& operator=(const MeasurementDataProtocol&) = delete;
     MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
 
-    std::string GetProtocolName(void) override;
-    std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
-    bool CanThisFileBeProcessed(const std::string path_to_file) override;
-    std::string GetSupportedFileType(void) override {return Constants::native_file_extension;}
-    std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
+    virtual std::string GetProtocolName(void) override;
+    virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
+    virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
+    virtual std::string GetSupportedFileType(void) override {return Constants::native_file_extension;}
+    virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
+    virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
 
 private:
     struct Constants

@@ -188,6 +188,7 @@ bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_f
     {
         bResult = true;
     }
+
     return bResult;
 }
 
@@ -227,4 +228,18 @@ std::stringstream MeasurementDataProtocol::ExportData(const std::vector<DiagramS
     }
 
     return exported_data;
+}
+
+bool MeasurementDataProtocol::CanThisFileBeExportedInto(const std::string path_to_file)
+{
+    bool bResult = false;
+
+    std::string file_extension = QFileInfo(QString::fromStdString(path_to_file)).completeSuffix().toStdString();
+
+    if(std::string(Constants::native_file_extension) == file_extension)
+    {
+        bResult = true;
+    }
+
+    return bResult;
 }

@@ -22,6 +22,7 @@
 
 
 #include <string>
+#include <vector>
 
 #include "global.hpp"
 #include "protocol_interface.hpp"
@@ -33,7 +34,7 @@
 
 
 
-class DataProcessingInterface : public ProtocolInterface
+class DataProcessingInterface : virtual ProtocolInterface
 {
 public:
     virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) = 0;

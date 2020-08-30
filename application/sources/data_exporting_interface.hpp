@@ -34,10 +34,13 @@
 
 
 
-class DataExportingInterface: public ProtocolInterface
+class DataExportingInterface : virtual ProtocolInterface
 {
 public:
     virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) = 0;
+    virtual bool CanThisFileBeExportedInto(const std::string path_to_file) = 0;
+    virtual std::string GetSupportedFileType(void) = 0;
+
 };
 
 #endif // DATA_EXPORTING_INTERFACE_HPP
