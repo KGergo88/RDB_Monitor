@@ -206,13 +206,13 @@ void MainWindow::ProcessNetworkOperationResult(const std::string& port_name, con
             if(!network_connection_is_open)
             {
                 pWidgetConnectionManager->line_edit_port_name->setReadOnly(true);
-                pWidgetConnectionManager->line_edit_port_name->setText(ConnectionManagerWidget::button_close_connection_text);
+                pWidgetConnectionManager->button_open_close_connection->setText(ConnectionManagerWidget::button_close_connection_text);
                 network_connection_is_open = true;
             }
             else
             {
                 pWidgetConnectionManager->line_edit_port_name->setReadOnly(false);
-                pWidgetConnectionManager->line_edit_port_name->setText(ConnectionManagerWidget::button_open_connection_text);
+                pWidgetConnectionManager->button_open_close_connection->setText(ConnectionManagerWidget::button_open_connection_text);
                 network_connection_is_open = false;
             }
         }
