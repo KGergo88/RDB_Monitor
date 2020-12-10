@@ -68,6 +68,7 @@ HEADERS +=                                      \
     sources/measurement_data_protocol.hpp       \
     sources/network_connection_interface.hpp    \
     sources/network_handler.hpp                 \
+    sources/ordered_dict.h                      \
     sources/serial_port.hpp
 
 RESOURCES = ../resources.qrc
