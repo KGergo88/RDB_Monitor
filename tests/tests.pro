@@ -55,6 +55,7 @@ SOURCES +=                                                  \
     sources/test_configuration.cpp                          \
     sources/test_diagram_container.cpp                      \
     sources/test_measurement_data_protocol.cpp              \
+    sources/test_ordered_dict.cpp                           \
     sources/test_serial_port.cpp                            \
     sources/test_backend.cpp
 
