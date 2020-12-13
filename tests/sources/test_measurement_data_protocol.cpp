@@ -47,18 +47,18 @@ struct TestMeasurementDataProtocolParameter
 class TestMeasurementDataProtocol : public ::testing::Test,
                                     public testing::WithParamInterface<TestMeasurementDataProtocolParameter>
 {
- protected:
+protected:
     std::ifstream ReadTestFileContent(const QString& file_name)
     {
-    std::string test_file_path = QDir(test_files_path).filePath(file_name).toStdString();
-    std::ifstream test_file_stream(test_file_path);
+        std::string test_file_path = QDir(test_files_path).filePath(file_name).toStdString();
+        std::ifstream test_file_stream(test_file_path);
 
-    if(!test_file_stream.is_open())
-    {
-        ADD_FAILURE() << "The file could not be opened! Path: " << test_file_path;
-    }
+        if(!test_file_stream.is_open())
+        {
+            ADD_FAILURE() << "The file could not be opened! Path: " << test_file_path;
+        }
 
-    return test_file_stream;
+        return test_file_stream;
     }
 
     MeasurementDataProtocol test_mdp_processor;
@@ -97,11 +97,11 @@ TEST_P(TestMeasurementDataProtocol, ProcessData_ExportData)
     auto test_parameter = GetParam();
     std::ifstream file_stream = ReadTestFileContent(test_parameter.file_name);
     processed_diagrams = test_mdp_processor.ProcessData(file_stream);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams));
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams)) << "test_file: " << test_parameter.file_name.toStdString();
 
     std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
     processed_diagrams = test_mdp_processor.ProcessData(exported_data);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams));
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams)) << "test_file: " << test_parameter.file_name.toStdString();
 }
 
 INSTANTIATE_TEST_SUITE_P(TestMeasurementDataProtocolInstantiation,
