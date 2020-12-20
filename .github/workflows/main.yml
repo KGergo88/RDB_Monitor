@@ -2,7 +2,7 @@
 
 name: CI
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
@@ -27,13 +27,47 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt update
           sudo apt install -y cppcheck
-          sudo apt install -y tree          
+          sudo apt install -y tree
 
       - name: Run CppCheck
         run: cppcheck application/sources --verbose 2> cppcheck_errors.txt
 
       - name: Process CppCheck results
         run: |
-          tree
+          echo "Errors found by CppCheck:"
           cat cppcheck_errors.txt
+
+  BuildAndTestOnUbuntu:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y tree
+          sudo apt install gcc-8
+          sudo apt install g++-8
+          sudo apt install lcov
+          sudo apt install -y qt5-default
+          sudo apt install -y qt5-qmake
+          sudo apt install -y libqt5charts5-dev
+          sudo apt install -y libqt5serialport5-dev
+          cd ..
+          git clone --branch release-1.10.0 https://github.com/google/googletest.git
+
+      - name: Building the project
+        run: |
+          mkdir build && cd build
+          qmake BUILD_TESTS="On" ..
+          make
+
+      - name: Running the unit tests
+        run: |
+          ./build/tests/RDB_Diplomaterv_Monitor_Unit_Tests
