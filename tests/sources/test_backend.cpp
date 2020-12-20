@@ -30,5 +30,5 @@
 
 TEST(TestBackend, Constructor)
 {
-    Backend myBackend();
+    Backend myBackend;
 }

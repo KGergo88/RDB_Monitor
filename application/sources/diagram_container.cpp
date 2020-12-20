@@ -26,7 +26,7 @@ DiagramContainer::DiagramContainer(QObject* parent) : QAbstractItemModel(parent)
 
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
     std::cout << "Elements contained by the DiagramContainer:" << std::endl;
-    root_item->PrintAllElementsBelow();
+    root_element->PrintAllElementsRecursive();
     std::cout << std::endl;
 #endif
 }
@@ -334,9 +334,19 @@ QModelIndex DiagramContainer::parent(const QModelIndex &index) const
     {
         Element* indexed_element = static_cast<Element*>(index.internalPointer());
         Element* parent_element = indexed_element->parent;
+        Element* parent_of_parent_element = parent_element->parent;
         if(root_element.get() != parent_element)
         {
-            result = createIndex(0, (column_count - 1), parent_element);
+            int row = 0;
+            for(std::size_t i = parent_of_parent_element->GetNumberOfChildren(); i > 0; --i)
+            {
+                std::size_t index_of_parent = i - 1;
+                if(parent_of_parent_element->GetIndexWithChild(parent_element, index_of_parent) == true)
+                {
+                    row = static_cast<int>(index_of_parent);
+                }
+            }
+            result = createIndex(row, (column_count - 1), parent_element);
         }
     }
 
@@ -622,7 +632,7 @@ void DiagramContainer::Element::CallFunctionOnElementsRecursive(std::function<vo
 #ifdef DIAGRAM_CONTAINER_DEBUG_MODE
 void DiagramContainer::Element::PrintAllElementsRecursive(const std::string& identation) const
 {
-    std::cout << identation << "Name: \"" << name << "\", Address: " << this << std::endl;
+    std::cout << identation << "Name: \"" << std::get<DataType_Name>(data) << "\", Address: " << this << std::endl;
 
     for(const auto& i : children)
     {
