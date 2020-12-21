@@ -39,7 +39,7 @@ jobs:
           echo "Errors found by CppCheck:"
           cat cppcheck_errors.txt
 
-  BuildAndTestOnUbuntu:
+  BuildAndTestOnLatestUbuntu:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -68,6 +68,30 @@ jobs:
           qmake BUILD_TESTS="On" ..
           make
 
-      - name: Running the unit tests
+      - name: Running the unit tests and generating the coverage files
         run: |
-          ./build/tests/RDB_Diplomaterv_Monitor_Unit_Tests
+          python3 tests/test_coverage.py --test_executable build/tests/RDB_Diplomaterv_Monitor_Unit_Tests --output_directory build/coverage_results
+
+      - name: Run lcov-reporter-action
+        uses: romeovs/lcov-reporter-action@v0.2.17
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: build/coverage_results/coverage.info
+
+  BuildAndTestOnLatestWindows:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.11.1
+        with:
+          version: '5.15.2'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2019_64'
+          modules: 'qtcharts qtserialport'
