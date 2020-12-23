@@ -43,6 +43,10 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        build_tool: [QMake, CMake]
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -62,10 +66,18 @@ jobs:
           cd ..
           git clone --branch release-1.10.0 https://github.com/google/googletest.git
 
-      - name: Building the project
+      - name: Building the project with QMake
+        if: matrix.build_tool == 'QMake'
         run: |
           mkdir build && cd build
           qmake BUILD_TESTS="On" ..
+          make
+
+      - name: Building the project with CMake
+        if: matrix.build_tool == 'CMake'
+        run: |
+          mkdir build && cd build
+          cmake -DBUILD_TESTS=On ..
           make
 
       - name: Running the unit tests and generating the coverage files
@@ -73,6 +85,8 @@ jobs:
           python3 tests/test_coverage.py --test_executable build/tests/RDB_Diplomaterv_Monitor_Unit_Tests --output_directory build/coverage_results
 
       - name: Run lcov-reporter-action
+        # This step will only be run with QMake, the coverage results are not influenced by the selected build tool
+        if: matrix.build_tool == 'QMake'
         uses: romeovs/lcov-reporter-action@v0.2.17
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
