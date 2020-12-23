@@ -109,3 +109,19 @@ jobs:
           target: 'desktop'
           arch: 'win64_msvc2019_64'
           modules: 'qtcharts qtserialport'
+
+      - name: Install other dependencies
+        run: |
+          cd ..
+          git clone --branch release-1.10.0 https://github.com/google/googletest.git
+
+      - name: Building the project with CMake
+        run: |
+          mkdir build && cd build
+          cmake .. -DBUILD_TESTS=On -G "Visual Studio 16 2019" -A x64
+          cmake --build . --config Release
+
+      - name: Running the unit tests
+        run: |
+          windeployqt.exe build\tests\Release
+          build\tests\Release\RDB_Diplomaterv_Monitor_Unit_Tests.exe
