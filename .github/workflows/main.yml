@@ -1,0 +1,150 @@
+#===============================================================================#
+#                                                                               #
+#    RDB Diplomaterv Monitor                                                    #
+#       A monitor program for the RDB Diplomaterv project                       #
+#    Copyright (C) 2018  András Gergő Kocsis                                    #
+#                                                                               #
+#    This program is free software: you can redistribute it and/or modify       #
+#    it under the terms of the GNU General Public License as published by       #
+#    the Free Software Foundation, either version 3 of the License, or          #
+#    (at your option) any later version.                                        #
+#                                                                               #
+#    This program is distributed in the hope that it will be useful,            #
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of             #
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
+#    GNU General Public License for more details.                               #
+#                                                                               #
+#    You should have received a copy of the GNU General Public License          #
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.     #
+#                                                                               #
+#===============================================================================#
+
+
+
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  CppCheck:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cppcheck
+          sudo apt install -y tree
+
+      - name: Run CppCheck
+        run: cppcheck application/sources --verbose 2> cppcheck_errors.txt
+
+      - name: Process CppCheck results
+        run: |
+          echo "Errors found by CppCheck:"
+          cat cppcheck_errors.txt
+
+  BuildAndTestOnLatestUbuntu:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        build_tool: [QMake, CMake]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y tree
+          sudo apt install gcc-8
+          sudo apt install g++-8
+          sudo apt install lcov
+          sudo apt install -y qt5-default
+          sudo apt install -y qt5-qmake
+          sudo apt install -y libqt5charts5-dev
+          sudo apt install -y libqt5serialport5-dev
+          cd ..
+          git clone --branch release-1.10.0 https://github.com/google/googletest.git
+
+      - name: Building the project with QMake
+        if: matrix.build_tool == 'QMake'
+        run: |
+          mkdir build && cd build
+          qmake BUILD_TESTS="On" ..
+          make
+
+      - name: Building the project with CMake
+        if: matrix.build_tool == 'CMake'
+        run: |
+          mkdir build && cd build
+          cmake -DBUILD_TESTS=On ..
+          make
+
+      - name: Running the unit tests and generating the coverage files
+        run: |
+          python3 tests/test_coverage.py --test_executable build/tests/RDB_Diplomaterv_Monitor_Unit_Tests --output_directory build/coverage_results
+
+      - name: Run lcov-reporter-action
+        # This step will only be run with QMake, the coverage results are not influenced by the selected build tool
+        if: matrix.build_tool == 'QMake'
+        uses: romeovs/lcov-reporter-action@v0.2.17
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: build/coverage_results/coverage.info
+
+  BuildAndTestOnLatestWindows:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.11.1
+        with:
+          version: '5.15.2'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2019_64'
+          modules: 'qtcharts qtserialport'
+
+      - name: Install other dependencies
+        run: |
+          cd ..
+          git clone --branch release-1.10.0 https://github.com/google/googletest.git
+
+      - name: Building the project with CMake
+        run: |
+          mkdir build && cd build
+          cmake .. -DBUILD_TESTS=On -G "Visual Studio 16 2019" -A x64
+          cmake --build . --config Release
+
+      - name: Running the unit tests
+        run: |
+          windeployqt.exe build\tests\Release
+          build\tests\Release\RDB_Diplomaterv_Monitor_Unit_Tests.exe
