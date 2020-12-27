@@ -34,8 +34,17 @@ QT += core        \
       serialport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-# Compiler flags
-QMAKE_CXXFLAGS += -std=c++17
+# Selecting the C++ standard
+# This is solved this way and not with the CONFIG variable since that is
+# only available since Qt5.12 or later.
+unix {
+    # Compiler flags
+    QMAKE_CXXFLAGS += -std=c++17
+}
+win32 {
+    # Compiler flags
+    QMAKE_CXXFLAGS += /std:c++17
+}
 
 # Source files of the target
 SOURCES +=                                  \
