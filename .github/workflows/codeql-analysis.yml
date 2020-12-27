@@ -47,6 +47,17 @@ jobs:
         # Prefix the list here with "+" to use these queries and those in the config file.
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
+    # Installing the dependencies of the RDB_Diplomaterv_Monitor application
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install gcc-8
+        sudo apt install g++-8
+        sudo apt install -y qt5-default
+        sudo apt install -y qt5-qmake
+        sudo apt install -y libqt5charts5-dev
+        sudo apt install -y libqt5serialport5-dev
+
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
     - name: Autobuild
