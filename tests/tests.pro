@@ -38,11 +38,25 @@ QT += core        \
       serialport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-# Compiler flags
-# --coverage option is synonym for: -fprofile-arcs -ftest-coverage -lgcov
-QMAKE_CXXFLAGS += -std=c++17 --coverage
-# Linker flags
-QMAKE_LFLAGS += --coverage
+CONFIG(debug, debug|release) {
+    BUILD_TYPE = debug
+} else {
+    BUILD_TYPE = release
+}
+
+# The C++ standard selection is solved this way and not with the CONFIG variable since that is
+# only available since Qt5.12 or later.
+unix {
+    # Compiler flags
+    # --coverage option is synonym for: -fprofile-arcs -ftest-coverage -lgcov
+    QMAKE_CXXFLAGS += -std=c++17 --coverage
+    # Linker flags
+    QMAKE_LFLAGS += --coverage
+}
+win32 {
+    # Compiler flags
+    QMAKE_CXXFLAGS += /std:c++17
+}
 
 # Source files of the target
 SOURCES +=                                                  \
@@ -69,7 +83,16 @@ DISTFILES +=                                        \
 TARGET = RDB_Diplomaterv_Monitor_Unit_Tests
 
 # Copying the test files next to the binary
-copydata.commands = $(COPY_DIR) $$PWD/test_files $$OUT_PWD
+TEST_FILES_SOURCE_PATH = $$PWD/test_files
+unix {
+    TEST_FILES_TARGET_PATH = $$OUT_PWD/test_files
+}
+win32 {
+    TEST_FILES_TARGET_PATH = $$OUT_PWD/$$BUILD_TYPE/test_files
+}
+message(Copying the test_files from: $$TEST_FILES_SOURCE_PATH)
+message(Copying the test_files to: $$TEST_FILES_TARGET_PATH)
+copydata.commands = $(COPY_DIR) $$system_path($$TEST_FILES_SOURCE_PATH) $$system_path($$TEST_FILES_TARGET_PATH)
 first.depends = $(first) copydata
 export(first.depends)
 export(copydata.commands)
