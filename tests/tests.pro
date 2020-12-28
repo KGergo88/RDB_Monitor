@@ -60,19 +60,24 @@ win32 {
 }
 
 # Source files of the target
-SOURCES +=                                                  \
-    ../application/sources/configuration.cpp                \
-    ../application/sources/measurement_data_protocol.cpp    \
-    sources/test_main.cpp                                   \
-    sources/test_data_point.cpp                             \
-    sources/test_data_line.cpp                              \
-    sources/test_diagram.cpp                                \
-    sources/test_configuration.cpp                          \
-    sources/test_diagram_container.cpp                      \
-    sources/test_measurement_data_protocol.cpp              \
-    sources/test_ordered_dict.cpp                           \
-    sources/test_serial_port.cpp                            \
+SOURCES +=                                                          \
+    ../application/sources/configuration.cpp                        \
+    ../application/sources/measurement_data_protocol.cpp            \
+    ../application/sources/continous_measurement_data_protocol.cpp  \
+    sources/test_main.cpp                                           \
+    sources/test_data_point.cpp                                     \
+    sources/test_data_line.cpp                                      \
+    sources/test_diagram.cpp                                        \
+    sources/test_configuration.cpp                                  \
+    sources/test_diagram_container.cpp                              \
+    sources/test_measurement_data_protocol.cpp                      \
+    sources/test_continous_measurement_data_protocol.cpp            \
+    sources/test_ordered_dict.cpp                                   \
+    sources/test_serial_port.cpp                                    \
     sources/test_backend.cpp
+
+HEADERS +=                          \
+    sources/test_protocol_common.h
 
 DISTFILES +=                                        \
     gtest_dendency.pri                              \

@@ -21,31 +21,18 @@
 
 
 
-#include <fstream>
-
-#include <gtest/gtest.h>
-#include <gmock/gmock-matchers.h>
-
 #include <QCoreApplication>
 #include <QString>
 #include <QDir>
 
 #include "../application/sources/global.hpp"
 #include "../application/sources/measurement_data_protocol.hpp"
+#include "test_protocol_common.h"
 
 
-
-struct TestMeasurementDataProtocolParameter
-{
-    TestMeasurementDataProtocolParameter(const QString& new_file_name,
-                                         const int& new_expected_correct_diagrams) : file_name(new_file_name),
-                                                                                     expected_correct_diagrams(new_expected_correct_diagrams) {}
-    QString file_name;
-    int expected_correct_diagrams;
-};
 
 class TestMeasurementDataProtocol : public ::testing::Test,
-                                    public testing::WithParamInterface<TestMeasurementDataProtocolParameter>
+                                    public testing::WithParamInterface<TestProtocolParameter>
 {
 protected:
     std::ifstream ReadTestFileContent(const QString& file_name)
@@ -70,15 +57,22 @@ protected:
     QString test_files_path = QDir(QCoreApplication::applicationDirPath()).filePath("test_files");
 };
 
-TEST_F(TestMeasurementDataProtocol, ConstructorAndDataProcessingInterface)
+TEST_F(TestMeasurementDataProtocol, GetProtocolName)
 {
     EXPECT_EQ(test_mdp_processor.GetProtocolName(), expected_protocol_name);
-    EXPECT_EQ(test_mdp_processor.GetSupportedFileType(), expected_file_type);
+}
 
+TEST_F(TestMeasurementDataProtocol, CanThisFileBeProcessed)
+{
     std::string filename_to_test = std::string("myfile.") + expected_file_type;
     EXPECT_TRUE(test_mdp_processor.CanThisFileBeProcessed(filename_to_test));
     filename_to_test = std::string("mymdpfile.") + std::string("txt");
     EXPECT_FALSE(test_mdp_processor.CanThisFileBeProcessed(filename_to_test));
+}
+
+TEST_F(TestMeasurementDataProtocol, GetSupportedFileType)
+{
+    EXPECT_EQ(test_mdp_processor.GetSupportedFileType(), expected_file_type);
 }
 
 TEST_F(TestMeasurementDataProtocol, ProcessData_ExportData_EmptyStream)
@@ -106,8 +100,8 @@ TEST_P(TestMeasurementDataProtocol, ProcessData_ExportData)
 
 INSTANTIATE_TEST_SUITE_P(TestMeasurementDataProtocolInstantiation,
                          TestMeasurementDataProtocol,
-                         testing::Values(TestMeasurementDataProtocolParameter("TEST_1C_0E_MDP.mdp", 1),
-                                         TestMeasurementDataProtocolParameter("TEST_2C_0E_MDP.mdp", 2),
-                                         TestMeasurementDataProtocolParameter("TEST_1C_1E_MDP_HeadlineError.mdp", 1),
-                                         TestMeasurementDataProtocolParameter("TEST_1C_2E_MDP_DatalineError.mdp", 1)
+                         testing::Values(TestProtocolParameter("TEST_1C_0E_MDP.mdp", 1),
+                                         TestProtocolParameter("TEST_2C_0E_MDP.mdp", 2),
+                                         TestProtocolParameter("TEST_1C_1E_MDP_HeadlineError.mdp", 1),
+                                         TestProtocolParameter("TEST_1C_2E_MDP_DatalineError.mdp", 1)
                                          ));
