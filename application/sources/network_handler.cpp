@@ -29,7 +29,7 @@ bool NetworkHandler::Run(const std::string& new_port_name)
 {
     bool result = false;
 
-    if(network_connection_interface && data_processing_interface && diagram_collector && error_collector)
+    if(network_connection_interface && protocol_interface && diagram_collector && error_collector)
     {
         if(network_connection_interface->Open(new_port_name))
         {
@@ -60,7 +60,7 @@ void NetworkHandler::DataAvailable(std::istream& received_data)
 {
     if(diagram_collector)
     {
-        auto assembled_diagrams = data_processing_interface->ProcessData(received_data);
+        auto assembled_diagrams = protocol_interface->ProcessData(received_data);
 
         if(!assembled_diagrams.empty())
         {

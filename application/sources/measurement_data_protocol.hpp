@@ -35,9 +35,7 @@
 #include <QFileInfo>
 
 #include "global.hpp"
-#include "protocol_interface.hpp"
-#include "data_processing_interface.hpp"
-#include "data_exporting_interface.hpp"
+#include "i_protocol.hpp"
 #include "diagram.hpp"
 
 
@@ -47,7 +45,7 @@
 
 
 
-class MeasurementDataProtocol : public DataProcessingInterface, public DataExportingInterface
+class MeasurementDataProtocol : public I_Protocol
 {
 public:
     MeasurementDataProtocol();

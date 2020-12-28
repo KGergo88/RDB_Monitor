@@ -30,7 +30,7 @@
 
 #include "global.hpp"
 #include "network_connection_interface.hpp"
-#include "data_processing_interface.hpp"
+#include "i_protocol.hpp"
 #include "diagram.hpp"
 
 
@@ -50,11 +50,11 @@ public:
     using error_collector_type = std::function<void(const std::string&)>;
 
     NetworkHandler(NetworkConnectionInterface *new_network_connection_interface,
-                   DataProcessingInterface *new_data_processing_interface,
+                   I_Protocol *new_protocol_interface,
                    diagram_collector_type new_diagram_collector,
                    error_collector_type new_error_collector)
                               : network_connection_interface(new_network_connection_interface),
-                                data_processing_interface(new_data_processing_interface),
+                                protocol_interface(new_protocol_interface),
                                 diagram_collector(new_diagram_collector),
                                 error_collector(new_error_collector)
     {
@@ -63,9 +63,9 @@ public:
             std::string errorMessage = "There was no network_connection_interface set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
-        if(!data_processing_interface)
+        if(!protocol_interface)
         {
-            std::string errorMessage = "There was no data_processor_interface set in NetworkHandler::NetworkHandler!";
+            std::string errorMessage = "There was no protocol_interface set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
         if(!diagram_collector)
@@ -98,7 +98,7 @@ private slots:
 
 private:
     NetworkConnectionInterface* network_connection_interface;
-    DataProcessingInterface* data_processing_interface;
+    I_Protocol* protocol_interface;
     diagram_collector_type diagram_collector;
     error_collector_type error_collector;
     std::string port_name;

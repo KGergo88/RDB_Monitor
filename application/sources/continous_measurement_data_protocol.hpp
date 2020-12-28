@@ -36,8 +36,7 @@
 #include <QFileInfo>
 
 #include "global.hpp"
-#include "protocol_interface.hpp"
-#include "data_processing_interface.hpp"
+#include "i_protocol.hpp"
 #include "diagram.hpp"
 
 
@@ -47,7 +46,7 @@
 
 
 
-class ContinousMeasurementDataProtocol : public DataProcessingInterface
+class ContinousMeasurementDataProtocol : public I_Protocol
 {
 public:
     ContinousMeasurementDataProtocol();
@@ -61,14 +60,15 @@ public:
 
     virtual std::string GetProtocolName(void) override;
     virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
-    virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
-    virtual std::string GetSupportedFileType(void) override {return Constants::native_file_extension;}
+    virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export);
+    virtual bool CanThisFileBeProcessed(const std::string path_to_file);
+    virtual bool CanThisFileBeExportedInto(const std::string path_to_file);
+    virtual std::string GetSupportedFileType(void);
 
 private:
     struct Constants
     {
         static constexpr char protocol_name[] = "Continous Measurement Data Protocol CMDP";
-        static constexpr char native_file_extension[] = "cmdp";
 
         enum class States : uint8_t
         {

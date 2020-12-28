@@ -193,16 +193,28 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
     return assembled_diagrams;
 }
 
+std::stringstream ContinousMeasurementDataProtocol::ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export)
+{
+    (void) diagrams_to_export;
+    throw("The Continous Measurement Protocol does not support exporting into files!");
+}
+
 bool ContinousMeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_file)
 {
-    bool bResult = false;
+    (void) path_to_file;
+    // The CMDP protocol does not support file processing
+    return false;
+}
 
-    std::string file_extension = QFileInfo(QString::fromStdString(path_to_file)).completeSuffix().toStdString();
+bool ContinousMeasurementDataProtocol::CanThisFileBeExportedInto(const std::string path_to_file)
+{
+    (void) path_to_file;
+    // The CMDP protocol does not support storing into files
+    return false;
+}
 
-    if(std::string(Constants::native_file_extension) == file_extension)
-    {
-        bResult = true;
-    }
-
-    return bResult;
+std::string ContinousMeasurementDataProtocol::GetSupportedFileType(void)
+{
+    // The CMDP protocol does not support any file types
+    return "";
 }
