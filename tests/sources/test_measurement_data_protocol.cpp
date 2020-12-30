@@ -21,7 +21,6 @@
 
 
 
-#include <QCoreApplication>
 #include <QString>
 #include <QDir>
 
@@ -35,26 +34,10 @@ class TestMeasurementDataProtocol : public ::testing::Test,
                                     public testing::WithParamInterface<TestProtocolParameter>
 {
 protected:
-    std::ifstream ReadTestFileContent(const QString& file_name)
-    {
-        std::string test_file_path = QDir(test_files_path).filePath(file_name).toStdString();
-        std::ifstream test_file_stream(test_file_path);
-
-        if(!test_file_stream.is_open())
-        {
-            ADD_FAILURE() << "The file could not be opened! Path: " << test_file_path;
-        }
-
-        return test_file_stream;
-    }
-
     MeasurementDataProtocol test_mdp_processor;
     std::string expected_protocol_name = "Measurement Data Protocol MDP";
     std::string expected_file_type = "mdp";
     std::vector<DiagramSpecialized> processed_diagrams;
-
-    // The path to the test files
-    QString test_files_path = QDir(QCoreApplication::applicationDirPath()).filePath("test_files");
 };
 
 TEST_F(TestMeasurementDataProtocol, GetProtocolName)
@@ -89,7 +72,7 @@ TEST_F(TestMeasurementDataProtocol, ProcessData_ExportData_EmptyStream)
 TEST_P(TestMeasurementDataProtocol, ProcessData_ExportData)
 {
     auto test_parameter = GetParam();
-    std::ifstream file_stream = ReadTestFileContent(test_parameter.file_name);
+    std::ifstream file_stream = TestFileReader::read(test_parameter.file_name);
     processed_diagrams = test_mdp_processor.ProcessData(file_stream);
     EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams)) << "test_file: " << test_parameter.file_name.toStdString();
 

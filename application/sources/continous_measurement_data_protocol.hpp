@@ -30,10 +30,10 @@
 #include <functional>
 #include <ctime>
 #include <cctype>
-#include <regex>
 #include <type_traits>
 
 #include <QFileInfo>
+#include <QRegularExpression>
 
 #include "global.hpp"
 #include "i_protocol.hpp"
@@ -60,10 +60,10 @@ public:
 
     virtual std::string GetProtocolName(void) override;
     virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
-    virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export);
-    virtual bool CanThisFileBeProcessed(const std::string path_to_file);
-    virtual bool CanThisFileBeExportedInto(const std::string path_to_file);
-    virtual std::string GetSupportedFileType(void);
+    virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
+    virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
+    virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
+    virtual std::string GetSupportedFileType(void) override;
 
 private:
     struct Constants
@@ -80,26 +80,27 @@ private:
             WaitingForDataMessageStart,
             ProcessingDataMessageContent,
         };
+    };
 
-        struct Regex
-        {
-            // REGEX strings to search the input data for valid measurement session
-            static constexpr char header_start[]         = R"(^<CMDP_H>$)";
-            static constexpr char header_diagram_title[] = R"(^<.*>$)";
-            static constexpr char header_datalines[]     = R"(^X:[^,]*,(Y\d+:[^,]*,)+$)";
-            static constexpr char header_dataline_x[]    = R"(^X:([^,]*),)";
-            static constexpr char header_dataline_y[]    = R"(^Y(\d+):([^,]*),)";
-            static constexpr char header_end[]           = R"(^>CMDP_H<$)";
-            static constexpr char data_start[]           = R"(^<CMDP_D>$)";
-            static constexpr char data_datalines[]       = R"(^X:\"(\d+)\",(Y(\d):\"(\d+)\")+$)";
-            static constexpr char data_end[]             = R"(^>CMDP_D<$)";
-            static constexpr char tail[]                 = R"(^<CMDP_T>$)";
-            static constexpr char reset[]                = R"(^<CMDP_R>$)";
-        };
+    struct RegexPatterns
+    {
+        // REGEX patterns to search the input data for valid measurement session
+        QRegularExpression header_start             = QRegularExpression(R"(^<CMDP_H>$)");
+        QRegularExpression header_diagram_title     = QRegularExpression(R"(^<(?<diagram_title>.*)>$)");
+        QRegularExpression header_datalines         = QRegularExpression(R"(^X:(?<x_title>[^,]*),(?<y_titles>(Y\d+:[^,]*,)+)$)");
+        QRegularExpression header_dataline_y_titles = QRegularExpression(R"((?<id>Y\d+):(?<title>[^,]*),)");
+        QRegularExpression header_end               = QRegularExpression(R"(^>CMDP_H<$)");
+        QRegularExpression data_start               = QRegularExpression(R"(^<CMDP_D>$)");
+        QRegularExpression data_content             = QRegularExpression(R"(^X:(?<x_value>\d+),(?<y_content>(Y\d+:\d+,)+)$)");
+        QRegularExpression data_y_content           = QRegularExpression(R"((?<id>Y\d+):(?<value>\d+),)");
+        QRegularExpression data_end                 = QRegularExpression(R"(^>CMDP_D<$)");
+        QRegularExpression tail                     = QRegularExpression(R"(^<CMDP_T>$)");
+        QRegularExpression reset                    = QRegularExpression(R"(^<CMDP_R>$)");
     };
 
     Constants::States state;
     DiagramSpecialized actual_diagram;
+    RegexPatterns regex_patterns;
 };
 
 

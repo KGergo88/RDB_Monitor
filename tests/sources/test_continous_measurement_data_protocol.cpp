@@ -21,12 +21,6 @@
 
 
 
-#include <fstream>
-
-#include <gtest/gtest.h>
-#include <gmock/gmock-matchers.h>
-
-#include <QCoreApplication>
 #include <QString>
 #include <QDir>
 
@@ -78,3 +72,15 @@ TEST_F(TestContinousMeasurementDataProtocol, ExportData)
     EXPECT_ANY_THROW(exported_data = test_cmdp_processor.ExportData(std::vector<DiagramSpecialized>()));
     EXPECT_EQ(exported_data.str(), std::string());
 }
+
+TEST_P(TestContinousMeasurementDataProtocol, ProcessData)
+{
+    auto test_parameter = GetParam();
+    std::ifstream file_stream = TestFileReader::read(test_parameter.file_name);
+    processed_diagrams = test_cmdp_processor.ProcessData(file_stream);
+    EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams)) << "test_file: " << test_parameter.file_name.toStdString();
+}
+
+INSTANTIATE_TEST_SUITE_P(TestContinousMeasurementDataProtocolInstantiation,
+                         TestContinousMeasurementDataProtocol,
+                         testing::Values(TestProtocolParameter("TEST_1C_0E_CMDP.cmdp", 1)));

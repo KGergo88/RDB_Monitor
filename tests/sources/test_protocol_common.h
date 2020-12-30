@@ -27,6 +27,8 @@
 #include <gmock/gmock-matchers.h>
 
 #include <QString>
+#include <QDir>
+#include <QCoreApplication>
 
 
 
@@ -42,6 +44,22 @@ struct TestProtocolParameter
                                                                       expected_correct_diagrams(new_expected_correct_diagrams) {}
     QString file_name;
     int expected_correct_diagrams;
+};
+
+struct TestFileReader
+{
+    static std::ifstream read(const QString& file_name, const QString& test_files_path = QDir(QCoreApplication::applicationDirPath()).filePath("test_files"))
+    {
+        std::string test_file_path = QDir(test_files_path).filePath(file_name).toStdString();
+        std::ifstream test_file_stream(test_file_path);
+
+        if(!test_file_stream.is_open())
+        {
+            ADD_FAILURE() << "The file could not be opened! Path: " << test_file_path;
+        }
+
+        return test_file_stream;
+    }
 };
 
 #endif // TEST_PROTOCOL_COMMON_H
