@@ -38,17 +38,12 @@ std::string ContinousMeasurementDataProtocol::GetProtocolName(void)
 std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(std::istream& input_data)
 {
     std::vector<DiagramSpecialized> assembled_diagrams;
-    std::string received_data;
     std::string actual_line_std_string;
-    QString actual_line;
 
     while(std::getline(input_data, actual_line_std_string))
     {
         QRegularExpressionMatch match;
-
-        // Removing the whitespaces from the actual line
-        actual_line_std_string.erase(std::remove_if(actual_line_std_string.begin(), actual_line_std_string.end(), isspace), actual_line_std_string.end());
-        actual_line = QString::fromStdString(actual_line_std_string);
+        QString actual_line = QString::fromStdString(actual_line_std_string);
 
         switch(state)
         {
@@ -98,9 +93,14 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
                     while(regex_iterator.hasNext())
                     {
                         auto match = regex_iterator.next();
-                        auto y_index = match.captured("id");
+                        auto y_id = match.captured("id");
                         auto y_title = match.captured("title");
-                        actual_diagram.AddNewDataLine(y_index.toStdString(), y_title.toStdString());
+
+                        // Adding the new dataline to the diagram, if we fail (because of duplicate IDs) then we drop this diagram
+                        if(!actual_diagram.AddNewDataLine(y_id.toStdString(), y_title.toStdString()))
+                        {
+                            state = Constants::States::WaitingForHeaderMessageStart;
+                        }
                     }
 
                     state = Constants::States::WaitingForHeaderMessageEnd;
@@ -147,9 +147,18 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
                     while(regex_iterator.hasNext())
                     {
                         auto match = regex_iterator.next();
-                        auto y_index = match.captured("id");
+                        auto y_id = match.captured("id");
                         auto y_value = match.captured("value");
-                        actual_diagram.AddNewDataPoint(y_index.toStdString(), DataPointSpecialized(x_value.toDouble(), y_value.toDouble()));
+
+                        // Checking whether the dataline existsm if not we are dropping this diagram
+                        if(actual_diagram.HasDataLine(y_id.toStdString()))
+                        {
+                            actual_diagram.AddNewDataPoint(y_id.toStdString(), DataPointSpecialized(x_value.toDouble(), y_value.toDouble()));
+                        }
+                        else
+                        {
+                            state = Constants::States::WaitingForHeaderMessageStart;
+                        }
                     }
                 }
                 else

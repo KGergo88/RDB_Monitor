@@ -59,9 +59,9 @@ TEST(TestOrderedDict, GetIndexForKeyGetKeyForIndex)
     EXPECT_EQ(key, "myKey");
     EXPECT_EQ(index, OrderedDict<uint8_t>::index_t(1234));
 
-    myDict.push_back("first", 1);
-    myDict.push_back("second", 2);
-    myDict.push_back("third", 3);
+    myDict.emplace_back("first", 1);
+    myDict.emplace_back("second", 2);
+    myDict.emplace_back("third", 3);
 
     key = "second";
     index = 1;
@@ -134,9 +134,9 @@ TEST(TestOrderedDict, UtilityFunctions)
     EXPECT_EQ(myDict.empty(), true);
     EXPECT_EQ(myDict.size(), std::size_t(0));
 
-    myDict.push_back("first", 1);
-    myDict.push_back("second", 2);
-    myDict.push_back("third", 3);
+    myDict.emplace_back("first", 1);
+    myDict.emplace_back("second", 2);
+    myDict.emplace_back("third", 3);
 
     EXPECT_EQ(myDict.empty(), false);
     EXPECT_EQ(myDict.size(), std::size_t(3));

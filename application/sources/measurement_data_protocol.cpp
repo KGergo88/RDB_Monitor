@@ -44,9 +44,6 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
     {
         std::smatch match_results;
 
-        // Removing the whitespaces from the actual line
-        actual_line.erase(std::remove_if(actual_line.begin(), actual_line.end(), isspace), actual_line.end());
-
         try
         {
             switch(state)
@@ -100,7 +97,8 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                             }
                             else
                             {
-                                actual_diagram.AddNewDataLine(DiagramSpecialized::DataLine_t::invalid_id, match_results[1]);
+                                std::string dataline_id = "Y" + std::to_string(column_index - 1);
+                                actual_diagram.AddNewDataLine(dataline_id, match_results[1]);
                             }
 
                             ++column_index;

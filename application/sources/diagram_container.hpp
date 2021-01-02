@@ -99,7 +99,6 @@ private:
             DataType_Connection(const std::string& new_name) : name(new_name) {}
             bool operator==(const DataType_Connection& other) const {return (name == other.name);}
             std::string name;
-// #warning "In the future more members will come as the generic connection handling will be implemented..."
         };
         // Data type used of elements that contain a diagram
         using DataType_Diagram = DiagramSpecialized;

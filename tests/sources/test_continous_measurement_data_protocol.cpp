@@ -83,4 +83,6 @@ TEST_P(TestContinousMeasurementDataProtocol, ProcessData)
 
 INSTANTIATE_TEST_SUITE_P(TestContinousMeasurementDataProtocolInstantiation,
                          TestContinousMeasurementDataProtocol,
-                         testing::Values(TestProtocolParameter("TEST_1C_0E_CMDP.cmdp", 1)));
+                         testing::Values(TestProtocolParameter("TEST_1C_0E_CMDP.cmdp", 1),
+                                         TestProtocolParameter("TEST_1C_0E_CMDP_NoTitles.cmdp", 1),
+                                         TestProtocolParameter("TEST_1C_0E_CMDP_Simple.cmdp", 1)));

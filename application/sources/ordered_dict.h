@@ -41,18 +41,35 @@ public:
     using value_t = T_VALUE;
     using index_t = T_INDEX;
     using data_element_t = std::pair<key_t, value_t>;
+    using data_container_t = std::vector<data_element_t>;
 
     OrderedDict() = default;
 
     OrderedDict(std::initializer_list<data_element_t> initial_data) : data(initial_data) {}
 
-    OrderedDict(const OrderedDict&) = delete;
-    OrderedDict(OrderedDict&&) = delete;
+    OrderedDict(const OrderedDict&) = default;
+    OrderedDict(OrderedDict&&) = default;
 
     virtual ~OrderedDict() = default;
 
-    OrderedDict operator=(const OrderedDict&) = delete;
-    OrderedDict operator=(OrderedDict&&) = delete;
+    OrderedDict& operator=(const OrderedDict&) = default;
+    OrderedDict& operator=(OrderedDict&&) = default;
+
+    bool hasKey(const key_t& key) const
+    {
+        bool result = false;
+
+        for(index_t i = 0; i < data.size(); i++)
+        {
+            if(key == data[i].first)
+            {
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
 
     bool getIndexForKey(const key_t& key, index_t& index) const
     {
@@ -137,14 +154,28 @@ public:
         }
     }
 
-    void push_back(const key_t& key, const value_t& value)
+    bool push_back(const data_element_t new_element)
     {
-        data.push_back(data_element_t(key, value));
+        bool result = false;
+
+        if(!hasKey(new_element.first))
+        {
+            data.push_back(new_element);
+        }
+
+        return result;
     }
 
-    void emplace_back(const key_t& key, const value_t& value)
+    bool emplace_back(const key_t& key, const value_t& value)
     {
-        data.emplace_back(key, value);
+        bool result = false;
+
+        if(!hasKey(key))
+        {
+            data.emplace_back(key, value);
+        }
+
+        return result;
     }
 
     bool empty(void) const { return data.empty(); }
@@ -153,8 +184,12 @@ public:
 
     void clear(void) { data.clear(); }
 
+    auto begin(void) const { return data.begin(); }
+    auto end(void) const { return data.end(); }
+
+
 private:
-    std::vector<data_element_t> data;
+    data_container_t data;
 };
 
 

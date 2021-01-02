@@ -45,7 +45,7 @@ TEST_F(TestDataLine, Constructors_GetTitle)
 
     // Testing the construction from values
     std::string data_line_title = "DataLineTitle";
-    DataLine_t data_line_with_title(DataLine_t::invalid_id, data_line_title);
+    DataLine_t data_line_with_title(data_line_title);
     EXPECT_EQ(data_line_with_title.GetTitle(), data_line_title);
 
     // Testing the copy construction
@@ -62,7 +62,7 @@ TEST_F(TestDataLine, Operators)
 {
     std::string data_line_title = "DataLineTitle";
     std::string overwritten_title = "Title that will be lost...";
-    DataLine_t data_line_with_title(DataLine_t::invalid_id, data_line_title);
+    DataLine_t data_line_with_title(data_line_title);
 
     // Testing the copy operator
     DataLine_t copied_data_line;
@@ -72,7 +72,7 @@ TEST_F(TestDataLine, Operators)
     EXPECT_EQ(copied_data_line.GetTitle(), data_line_title);
 
     // Testing the move operator
-    DataLine_t data_line_to_move(DataLine_t::invalid_id, data_line_title);
+    DataLine_t data_line_to_move(data_line_title);
     DataLine_t moved_data_line;
     moved_data_line.SetTitle(overwritten_title);
     EXPECT_EQ(moved_data_line.GetTitle(), overwritten_title);
