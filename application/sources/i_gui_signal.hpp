@@ -25,37 +25,33 @@
 #include <string>
 
 #include <QtPlugin>
-#include <QAbstractItemModel>
 
 #include "global.hpp"
 
 
 
-#ifndef BACKEND_SIGNAL_INTERFACE_HPP
-#define BACKEND_SIGNAL_INTERFACE_HPP
+#ifndef I_GUI_SIGNAL_HPP
+#define I_GUI_SIGNAL_HPP
 
 
 
-class BackendSignalInterface
+class I_GuiSignal
 {
+signals:
+    virtual void StartsToRun(void) = 0;
+    virtual void ShuttingDown(void) = 0;
+    virtual void OpenNetworkConnection(const std::string& port_name) = 0;
+    virtual void CloseNetworkConnection(const std::string& port_name) = 0;
+    virtual void RequestForDiagram(const QModelIndex& model_index) = 0;
+    virtual void ImportFile(const std::string& path_to_file) = 0;
+    virtual void ExportFileShowCheckBoxes(void) = 0;
+    virtual void ExportFileHideCheckBoxes(void) = 0;
+    virtual void ExportFileStoreCheckedDiagrams(const std::string& path_to_file) = 0;
 
 protected:
-    ~BackendSignalInterface() {}
-
-public:
-    virtual QAbstractItemModel* GetDiagramContainerModel(void) = 0;
-    virtual std::string GetFileImportDefaultFolder(void) = 0;
-    virtual std::string GetFileExportDefaultFolder(void) = 0;
-    virtual std::vector<std::string> GetSupportedFileExtensions(void) = 0;
-
-signals:
-    virtual void NewStatusMessage(const std::string& message_text) = 0;
-    virtual void NetworkOperationFinished(const std::string& port_name, bool result) = 0;
-    virtual void ShowThisDiagram(const DiagramSpecialized& diagram) = 0;
+    ~I_GuiSignal() {}
 };
 
-Q_DECLARE_INTERFACE(BackendSignalInterface, "BackendSignalInterface")
+Q_DECLARE_INTERFACE(I_GuiSignal, "I_GuiSignal")
 
-
-
-#endif // BACKEND_SIGNAL_INTERFACE_HPP
+#endif // I_GUI_SIGNAL_HPP
