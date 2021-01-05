@@ -54,6 +54,7 @@ CONFIG(debug, debug|release) {
 SOURCES +=                                          \
     sources/backend.cpp                             \
     sources/configuration.cpp                       \
+    sources/connection_manager_dialog.cpp \
     sources/continous_measurement_data_protocol.cpp \
     sources/data_line.cpp                           \
     sources/data_point.cpp                          \
@@ -68,8 +69,8 @@ SOURCES +=                                          \
 # Header files of the target
 HEADERS +=                                          \
     sources/backend.hpp                             \
-    sources/backend_signal_interface.hpp            \
     sources/configuration.hpp                       \
+    sources/connection_manager_dialog.hpp \
     sources/continous_measurement_data_protocol.hpp \
     sources/data_connection_interface.hpp           \
     sources/data_line.hpp                           \
@@ -77,7 +78,8 @@ HEADERS +=                                          \
     sources/diagram.hpp                             \
     sources/diagram_container.hpp                   \
     sources/global.hpp                              \
-    sources/gui_signal_interface.hpp                \
+    sources/i_backend_signal.hpp                    \
+    sources/i_gui_signal.hpp                        \
     sources/i_protocol.hpp                          \
     sources/main_window.hpp                         \
     sources/measurement_data_protocol.hpp           \
