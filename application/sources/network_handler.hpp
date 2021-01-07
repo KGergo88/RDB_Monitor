@@ -29,7 +29,7 @@
 #include <QObject>
 
 #include "global.hpp"
-#include "network_connection_interface.hpp"
+#include "i_network_connection.hpp"
 #include "i_protocol.hpp"
 #include "diagram.hpp"
 
@@ -49,7 +49,7 @@ public:
     using diagram_collector_type = std::function<void(const std::string, std::vector<DiagramSpecialized>&)>;
     using error_collector_type = std::function<void(const std::string&)>;
 
-    NetworkHandler(NetworkConnectionInterface *new_network_connection_interface,
+    NetworkHandler(I_NetworkConnection *new_network_connection_interface,
                    I_Protocol *new_protocol_interface,
                    diagram_collector_type new_diagram_collector,
                    error_collector_type new_error_collector)
@@ -97,7 +97,7 @@ private slots:
     void ErrorReport(const std::string& error_message);
 
 private:
-    NetworkConnectionInterface* network_connection_interface;
+    I_NetworkConnection* network_connection_interface;
     I_Protocol* protocol_interface;
     diagram_collector_type diagram_collector;
     error_collector_type error_collector;
