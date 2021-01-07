@@ -44,8 +44,8 @@
 
 
 
-#ifndef CONNECTION_MANAGER_DIALOG_HPP
-#define CONNECTION_MANAGER_DIALOG_HPP
+#ifndef ADD_CONNECTION_DIALOG_HPP
+#define ADD_CONNECTION_DIALOG_HPP
 
 
 
@@ -90,7 +90,7 @@ public:
 
     virtual QString getName(void) override
     {
-        return QString("Serial");
+        return QString("SerialPort");
     }
 
     virtual settings_t getSettings(void) override
@@ -162,7 +162,7 @@ public:
 };
 
 
-class ConnectionManagerDialog : private QDialog
+class AddConnectionDialog : public QDialog
 {
     Q_OBJECT
 
@@ -170,13 +170,13 @@ public:
     // This is needed because we inherit from QDialog non-public
     using QDialog::QObject;
 
-    ConnectionManagerDialog(QWidget* parent);
+    AddConnectionDialog(QWidget* parent);
 
-    ConnectionManagerDialog(const ConnectionManagerDialog&) = delete;
-    ConnectionManagerDialog(ConnectionManagerDialog&&) = delete;
+    AddConnectionDialog(const AddConnectionDialog&) = delete;
+    AddConnectionDialog(AddConnectionDialog&&) = delete;
 
-    ConnectionManagerDialog& operator=(const ConnectionManagerDialog&) = delete;
-    ConnectionManagerDialog& operator=(ConnectionManagerDialog&&) = delete;
+    AddConnectionDialog& operator=(const AddConnectionDialog&) = delete;
+    AddConnectionDialog& operator=(AddConnectionDialog&&) = delete;
 
     void popUp(const QStringList& available_connections, const QStringList& available_protocols);
 
@@ -191,9 +191,11 @@ private:
     QListWidget* pProtocolsAvailableList;
     QStackedLayout* pConnectionSettingsStackedLayout;
     QDialogButtonBox* pButtonBox;
+    QDialogButtonBox::StandardButton buttonBoxOkType;
+    QDialogButtonBox::StandardButton buttonBoxNokType;
     QList<I_ConnectionSettingsEditor*> connectionSettingsEditors;
 };
 
 
 
-#endif // CONNECTION_MANAGER_DIALOG_HPP
+#endif // ADD_CONNECTION_DIALOG_HPP

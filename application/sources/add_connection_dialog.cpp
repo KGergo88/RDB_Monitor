@@ -21,11 +21,11 @@
 
 
 
-#include "connection_manager_dialog.hpp"
+#include "add_connection_dialog.hpp"
 
 
 
-ConnectionManagerDialog::ConnectionManagerDialog(QWidget* parent) : QDialog(parent)
+AddConnectionDialog::AddConnectionDialog(QWidget* parent) : QDialog(parent)
 {
     // Available connections
     auto pConnectionsLayout = new QVBoxLayout;
@@ -60,7 +60,9 @@ ConnectionManagerDialog::ConnectionManagerDialog(QWidget* parent) : QDialog(pare
     pConnectionSettingsStackedLayout->setCurrentWidget(connectionSettingsEditors[0]);
 
     // Buttonbox to accept or decline the changes
-    pButtonBox = new QDialogButtonBox(QDialogButtonBox::Apply | QDialogButtonBox::Cancel);
+    buttonBoxOkType = QDialogButtonBox::Ok;
+    buttonBoxNokType = QDialogButtonBox::Cancel;
+    pButtonBox = new QDialogButtonBox(buttonBoxOkType | buttonBoxNokType);
 
     // Main layout for the dialog
     pMainLayout = new QVBoxLayout;
@@ -72,16 +74,16 @@ ConnectionManagerDialog::ConnectionManagerDialog(QWidget* parent) : QDialog(pare
 
     // Registering the connections between the signals and the slots
     connect(pConnectionsAvailableList, &QListWidget::itemSelectionChanged,
-            this, &ConnectionManagerDialog::listSelectionChanged);
-    connect(pProtocolsAvailableList, &QListWidget::itemSelectionChanged,
-            this, &ConnectionManagerDialog::listSelectionChanged);
-    connect(pButtonBox, &QDialogButtonBox::accepted,
-            this, &QDialog::accept);
-    connect(pButtonBox, &QDialogButtonBox::rejected,
-            this, &QDialog::reject);
+            this,                      &AddConnectionDialog::listSelectionChanged);
+    connect(pProtocolsAvailableList,   &QListWidget::itemSelectionChanged,
+            this,                      &AddConnectionDialog::listSelectionChanged);
+    connect(pButtonBox,                &QDialogButtonBox::accepted,
+            this,                      &QDialog::accept);
+    connect(pButtonBox,                &QDialogButtonBox::rejected,
+            this,                      &QDialog::reject);
 }
 
-void ConnectionManagerDialog::popUp(const QStringList& available_connections, const QStringList& available_protocols)
+void AddConnectionDialog::popUp(const QStringList& available_connections, const QStringList& available_protocols)
 {
     pConnectionsAvailableList->clear();
     pConnectionsAvailableList->clearSelection();
@@ -93,12 +95,12 @@ void ConnectionManagerDialog::popUp(const QStringList& available_connections, co
 
     updateConnectionSettingsEditor(nullptr);
 
-    pButtonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
+    pButtonBox->button(buttonBoxOkType)->setEnabled(false);
 
     open();
 }
 
-void ConnectionManagerDialog::listSelectionChanged(void)
+void AddConnectionDialog::listSelectionChanged(void)
 {
     auto selected_connections = pConnectionsAvailableList->selectedItems();
     auto selected_protocols = pProtocolsAvailableList->selectedItems();
@@ -110,17 +112,17 @@ void ConnectionManagerDialog::listSelectionChanged(void)
 
         if(1 == selected_protocols.size())
         {
-            pButtonBox->button(QDialogButtonBox::Apply)->setEnabled(true);
+            pButtonBox->button(buttonBoxOkType)->setEnabled(true);
         }
     }
     else
     {
         updateConnectionSettingsEditor();
-        pButtonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
+        pButtonBox->button(buttonBoxOkType)->setEnabled(false);
     }
 }
 
-void ConnectionManagerDialog::updateConnectionSettingsEditor(const QString& selected_connection)
+void AddConnectionDialog::updateConnectionSettingsEditor(const QString& selected_connection)
 {
     I_ConnectionSettingsEditor* selected_editor = connectionSettingsEditors[0];
 
