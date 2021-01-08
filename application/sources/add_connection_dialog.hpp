@@ -37,9 +37,10 @@
 #include <QSysInfo>
 #include <QGridLayout>
 #include <QLabel>
+#include <QLineEdit>
 
-
-#include "i_gui_signal.hpp"
+#include "i_connection_settings_editor.hpp"
+#include "serial_port_settings_editor.hpp"
 #include "ordered_dict.h"
 
 
@@ -49,88 +50,14 @@
 
 
 
-class I_ConnectionSettingsEditor : public QWidget
-{
-public:
-    using settings_t = OrderedDict<QString, std::size_t, QString>;
-
-    I_ConnectionSettingsEditor(QWidget* parent) : QWidget(parent) { }
-    virtual ~I_ConnectionSettingsEditor() = default;
-
-    virtual QString getName(void) = 0;
-    virtual settings_t getSettings(void) = 0;
-    virtual settings_t getDefaultSettings(void) = 0;
-};
-
-
-
-class SerialConnectionSettingsEditor : public I_ConnectionSettingsEditor
-{
-public:
-    SerialConnectionSettingsEditor(QWidget* parent) : I_ConnectionSettingsEditor(parent)
-    {
-        auto default_settings = getDefaultSettings();
-        pGridLayout = new QGridLayout(this);
-        int actual_row = 0;
-        for(auto i = default_settings.begin(); i != default_settings.end(); i++)
-        {
-            pGridLayout->addWidget(new QLabel(i->first), actual_row, 0);
-            pGridLayout->addWidget(new QLabel(i->second), actual_row, 1);
-            actual_row++;
-        }
-    }
-
-    SerialConnectionSettingsEditor(const SerialConnectionSettingsEditor&) = delete;
-    SerialConnectionSettingsEditor(SerialConnectionSettingsEditor&&) = delete;
-
-    virtual ~SerialConnectionSettingsEditor() = default;
-
-    SerialConnectionSettingsEditor& operator=(const SerialConnectionSettingsEditor&) = delete;
-    SerialConnectionSettingsEditor& operator=(SerialConnectionSettingsEditor&&) = delete;
-
-    virtual QString getName(void) override
-    {
-        return QString("SerialPort");
-    }
-
-    virtual settings_t getSettings(void) override
-    {
-        settings_t settings;
-
-        return settings;
-    }
-
-    virtual settings_t getDefaultSettings(void) override
-    {
-        settings_t default_settings;
-        auto os_name = QSysInfo::productType();
-
-        default_settings["Name"] = getName();
-        QString device_key = "Device";
-        if(("winrt" == os_name) && ("windows" == os_name))
-        {
-            default_settings[device_key] = "COM3";
-        }
-        else
-        {
-            default_settings[device_key] = "/dev/ttyACM0";
-        }
-        default_settings["Baudrate"] = "115200";
-        default_settings["Data bits"] =	"8";
-        default_settings["Stop bits"] =	"1";
-        default_settings["Parity"] = "none";
-        default_settings["Flow control"] = "none";
-
-        return default_settings;
-    }
-
-private:
-    QGridLayout* pGridLayout;
-};
-
-
 class EmptyConnectionSettingsEditor : public I_ConnectionSettingsEditor
 {
+    Q_OBJECT
+    Q_INTERFACES(I_ConnectionSettingsEditor)
+
+signals:
+    void settingsChanged(bool settings_valid, const QString& error_message) override;
+
 public:
     EmptyConnectionSettingsEditor(QWidget* parent) : I_ConnectionSettingsEditor(parent) { }
 
@@ -142,25 +69,18 @@ public:
     EmptyConnectionSettingsEditor& operator=(const EmptyConnectionSettingsEditor&) = delete;
     EmptyConnectionSettingsEditor& operator=(EmptyConnectionSettingsEditor&&) = delete;
 
-    virtual QString getName(void) override
+    virtual QString getConnectionName(void) override { return ""; }
+
+    virtual std::shared_ptr<I_ConnectionSettings> getSettings(void) override
     {
-        return QString("");
+        return nullptr;
     }
 
-    virtual settings_t getSettings(void) override
+    virtual std::shared_ptr<I_ConnectionSettings> getDefaultSettings(void) override
     {
-        settings_t settings;
-
-        return settings;
-    }
-
-    virtual settings_t getDefaultSettings(void) override
-    {
-        settings_t default_settings;
-        return default_settings;
+        return nullptr;
     }
 };
-
 
 class AddConnectionDialog : public QDialog
 {
@@ -181,7 +101,7 @@ public:
     void popUp(const QStringList& available_connections, const QStringList& available_protocols);
 
 private slots:
-    void listSelectionChanged(void);
+    void dialogContentChanged(bool connection_settings_valid = true, const QString& connection_settings_error_message = "");
 
 private:
     void updateConnectionSettingsEditor(const QString& selected_connection = "");
@@ -189,7 +109,10 @@ private:
     QVBoxLayout* pMainLayout;
     QListWidget* pConnectionsAvailableList;
     QListWidget* pProtocolsAvailableList;
+    QLineEdit* pUserDefinedNameLineEdit;
     QStackedLayout* pConnectionSettingsStackedLayout;
+    QLabel* pInstructionsLabel;
+    QString instructionLabelDefaultText;
     QDialogButtonBox* pButtonBox;
     QDialogButtonBox::StandardButton buttonBoxOkType;
     QDialogButtonBox::StandardButton buttonBoxNokType;

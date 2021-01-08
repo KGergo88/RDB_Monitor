@@ -48,8 +48,15 @@ AddConnectionDialog::AddConnectionDialog(QWidget* parent) : QDialog(parent)
     pConnectionsAndProtocolsLayout->addWidget(pConnectionsGroupBox);
     pConnectionsAndProtocolsLayout->addWidget(pProtocolsGroupBox);
 
+    // User defined name
+    auto pUserDefinedNameGridLayout = new QGridLayout;
+    auto pUserDefinedNameLabel = new QLabel("Connection name:");
+    pUserDefinedNameLineEdit = new QLineEdit();
+    pUserDefinedNameGridLayout->addWidget(pUserDefinedNameLabel);
+    pUserDefinedNameGridLayout->addWidget(pUserDefinedNameLineEdit);
+
     // Connection settings
-    connectionSettingsEditors = {new EmptyConnectionSettingsEditor(this), new SerialConnectionSettingsEditor(this)};
+    connectionSettingsEditors = {new EmptyConnectionSettingsEditor(this), new SerialPortSettingsEditor(this)};
     auto pConnectionSettingsGroupBox = new QGroupBox("Connection settings");
     pConnectionSettingsStackedLayout = new QStackedLayout;
     pConnectionSettingsGroupBox->setLayout(pConnectionSettingsStackedLayout);
@@ -59,6 +66,11 @@ AddConnectionDialog::AddConnectionDialog(QWidget* parent) : QDialog(parent)
     }
     pConnectionSettingsStackedLayout->setCurrentWidget(connectionSettingsEditors[0]);
 
+    // Instructions label
+    pInstructionsLabel = new QLabel;
+    instructionLabelDefaultText = "Select a connection and a protocol, choose a name and edit the connection settings!";
+    pInstructionsLabel->setText(instructionLabelDefaultText);
+
     // Buttonbox to accept or decline the changes
     buttonBoxOkType = QDialogButtonBox::Ok;
     buttonBoxNokType = QDialogButtonBox::Cancel;
@@ -67,20 +79,26 @@ AddConnectionDialog::AddConnectionDialog(QWidget* parent) : QDialog(parent)
     // Main layout for the dialog
     pMainLayout = new QVBoxLayout;
     pMainLayout->addLayout(pConnectionsAndProtocolsLayout);
+    pMainLayout->addLayout(pUserDefinedNameGridLayout);
     pMainLayout->addWidget(pConnectionSettingsGroupBox);
+    pMainLayout->addWidget(pInstructionsLabel);
     pMainLayout->addWidget(pButtonBox);
     setLayout(pMainLayout);
     setWindowTitle("Add connections");
 
     // Registering the connections between the signals and the slots
-    connect(pConnectionsAvailableList, &QListWidget::itemSelectionChanged,
-            this,                      &AddConnectionDialog::listSelectionChanged);
-    connect(pProtocolsAvailableList,   &QListWidget::itemSelectionChanged,
-            this,                      &AddConnectionDialog::listSelectionChanged);
-    connect(pButtonBox,                &QDialogButtonBox::accepted,
-            this,                      &QDialog::accept);
-    connect(pButtonBox,                &QDialogButtonBox::rejected,
-            this,                      &QDialog::reject);
+    QObject::connect(pConnectionsAvailableList,                         &QListWidget::itemSelectionChanged,
+                     [this](void){ dialogContentChanged(); });
+    QObject::connect(pProtocolsAvailableList,                           &QListWidget::itemSelectionChanged,
+                     [this](void){ dialogContentChanged(); });
+    QObject::connect(pUserDefinedNameLineEdit,                          &QLineEdit::textChanged,
+                     [this](void){ dialogContentChanged(); });
+    QObject::connect(pConnectionSettingsStackedLayout->currentWidget(), SIGNAL(settingsChanged(bool, const QString&)),
+                     this,                                              SLOT(dialogContentChanged(bool, const QString&)));
+    QObject::connect(pButtonBox,                                        &QDialogButtonBox::accepted,
+                     this,                                              &QDialog::accept);
+    QObject::connect(pButtonBox,                                        &QDialogButtonBox::rejected,
+                     this,                                              &QDialog::reject);
 }
 
 void AddConnectionDialog::popUp(const QStringList& available_connections, const QStringList& available_protocols)
@@ -93,6 +111,8 @@ void AddConnectionDialog::popUp(const QStringList& available_connections, const 
     pConnectionsAvailableList->clearSelection();
     pProtocolsAvailableList->addItems(available_protocols);
 
+    pUserDefinedNameLineEdit->setText("");
+
     updateConnectionSettingsEditor(nullptr);
 
     pButtonBox->button(buttonBoxOkType)->setEnabled(false);
@@ -100,24 +120,53 @@ void AddConnectionDialog::popUp(const QStringList& available_connections, const 
     open();
 }
 
-void AddConnectionDialog::listSelectionChanged(void)
+void AddConnectionDialog::dialogContentChanged(bool connection_settings_valid, const QString& connection_settings_error_message)
 {
-    auto selected_connections = pConnectionsAvailableList->selectedItems();
-    auto selected_protocols = pProtocolsAvailableList->selectedItems();
+    bool enable_ok_type_button = false;
+    QString instruction_label_text = instructionLabelDefaultText;
 
-    if(1 == selected_connections.size())
+    if(connection_settings_valid)
     {
-        auto selected_connection = pConnectionsAvailableList->selectedItems()[0]->text();
-        updateConnectionSettingsEditor(selected_connection);
+        auto selected_connections = pConnectionsAvailableList->selectedItems();
+        auto selected_protocols = pProtocolsAvailableList->selectedItems();
+        auto user_defined_name = pUserDefinedNameLineEdit->text();
 
-        if(1 == selected_protocols.size())
+        if(1 == selected_connections.size())
         {
-            pButtonBox->button(buttonBoxOkType)->setEnabled(true);
+            auto selected_connection = pConnectionsAvailableList->selectedItems()[0]->text();
+            updateConnectionSettingsEditor(selected_connection);
+
+            if(1 == selected_protocols.size())
+            {
+                if(!user_defined_name.isEmpty())
+                {
+                    instruction_label_text = "";
+                    enable_ok_type_button = true;
+                }
+            }
+            else
+            {
+                enable_ok_type_button = false;
+            }
+        }
+        else
+        {
+            updateConnectionSettingsEditor();
         }
     }
     else
     {
-        updateConnectionSettingsEditor();
+        instruction_label_text = "Invalid connection settings: " + connection_settings_error_message;
+    }
+
+    pInstructionsLabel->setText(instruction_label_text);
+
+    if(enable_ok_type_button)
+    {
+        pButtonBox->button(buttonBoxOkType)->setEnabled(true);
+    }
+    else
+    {
         pButtonBox->button(buttonBoxOkType)->setEnabled(false);
     }
 }
@@ -128,7 +177,7 @@ void AddConnectionDialog::updateConnectionSettingsEditor(const QString& selected
 
     for(auto& i : connectionSettingsEditors)
     {
-        auto setting_editor_name = i->getName();
+        auto setting_editor_name = i->getConnectionName();
         if(selected_connection == setting_editor_name)
         {
             selected_editor = i;
@@ -136,5 +185,11 @@ void AddConnectionDialog::updateConnectionSettingsEditor(const QString& selected
         }
     }
 
+    QObject::disconnect(pConnectionSettingsStackedLayout->currentWidget(), SIGNAL(settingsChanged(bool, const QString&)),
+                        this,                                              SLOT(dialogContentChanged(bool, const QString&)));
+
     pConnectionSettingsStackedLayout->setCurrentWidget(selected_editor);
+
+    QObject::connect(pConnectionSettingsStackedLayout->currentWidget(), SIGNAL(settingsChanged(bool, const QString&)),
+                     this,                                              SLOT(dialogContentChanged(bool, const QString&)));
 }
