@@ -64,7 +64,8 @@ SOURCES +=                                          \
     sources/main_window.cpp                         \
     sources/measurement_data_protocol.cpp           \
     sources/network_handler.cpp                     \
-    sources/serial_port.cpp
+    sources/serial_port.cpp                         \
+    sources/serial_port_settings_editor.cpp
 
 # Header files of the target
 HEADERS +=                                          \
@@ -79,14 +80,18 @@ HEADERS +=                                          \
     sources/diagram_container.hpp                   \
     sources/global.hpp                              \
     sources/i_backend_signal.hpp                    \
+    sources/i_connection.hpp                        \
+    sources/i_connection_settings.hpp               \
+    sources/i_connection_settings_editor.hpp        \
     sources/i_gui_signal.hpp                        \
     sources/i_protocol.hpp                          \
-    sources/i_network_connection.hpp                \
     sources/main_window.hpp                         \
     sources/measurement_data_protocol.hpp           \
     sources/network_handler.hpp                     \
     sources/ordered_dict.h                          \
-    sources/serial_port.hpp
+    sources/serial_port.hpp                         \
+    sources/serial_port_settings.hpp                \
+    sources/serial_port_settings_editor.hpp
 
 RESOURCES = ../resources.qrc
 
