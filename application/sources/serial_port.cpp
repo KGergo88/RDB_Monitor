@@ -39,11 +39,6 @@ SerialPort::~SerialPort()
     }
 }
 
-std::string SerialPort::getNetworkConnectionName(void)
-{
-    return std::string(network_connection_name);
-}
-
 bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NAME)
 {
     bool result = false;

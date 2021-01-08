@@ -29,7 +29,7 @@
 #include <QObject>
 
 #include "global.hpp"
-#include "i_network_connection.hpp"
+#include "i_connection.hpp"
 #include "i_protocol.hpp"
 #include "diagram.hpp"
 
@@ -49,18 +49,18 @@ public:
     using diagram_collector_type = std::function<void(const std::string, std::vector<DiagramSpecialized>&)>;
     using error_collector_type = std::function<void(const std::string&)>;
 
-    NetworkHandler(I_NetworkConnection *new_network_connection_interface,
+    NetworkHandler(I_Connection *new_connection_interface,
                    I_Protocol *new_protocol_interface,
                    diagram_collector_type new_diagram_collector,
                    error_collector_type new_error_collector)
-                              : network_connection_interface(new_network_connection_interface),
+                              : connection_interface(new_connection_interface),
                                 protocol_interface(new_protocol_interface),
                                 diagram_collector(new_diagram_collector),
                                 error_collector(new_error_collector)
     {
-        if(!network_connection_interface)
+        if(!connection_interface)
         {
-            std::string errorMessage = "There was no network_connection_interface set in NetworkHandler::NetworkHandler!";
+            std::string errorMessage = "There was no connection_interface set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
         if(!protocol_interface)
@@ -97,7 +97,7 @@ private slots:
     void ErrorReport(const std::string& error_message);
 
 private:
-    I_NetworkConnection* network_connection_interface;
+    I_Connection* connection_interface;
     I_Protocol* protocol_interface;
     diagram_collector_type diagram_collector;
     error_collector_type error_collector;

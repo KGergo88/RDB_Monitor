@@ -29,14 +29,14 @@ bool NetworkHandler::Run(const std::string& new_port_name)
 {
     bool result = false;
 
-    if(network_connection_interface && protocol_interface && diagram_collector && error_collector)
+    if(connection_interface && protocol_interface && diagram_collector && error_collector)
     {
-        if(network_connection_interface->Open(new_port_name))
+        if(connection_interface->Open(new_port_name))
         {
-            if(network_connection_interface->StartListening())
+            if(connection_interface->StartListening())
             {
-                QObject::connect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
-                QObject::connect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
+                QObject::connect(dynamic_cast<QObject*>(connection_interface), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
+                QObject::connect(dynamic_cast<QObject*>(connection_interface), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
                 port_name = new_port_name;
                 result = true;
             }
@@ -48,11 +48,11 @@ bool NetworkHandler::Run(const std::string& new_port_name)
 
 void NetworkHandler::Stop(void)
 {
-    if(network_connection_interface)
+    if(connection_interface)
     {
-        network_connection_interface->Close();
-        QObject::disconnect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
-        QObject::disconnect(dynamic_cast<QObject*>(network_connection_interface), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
+        connection_interface->Close();
+        QObject::disconnect(dynamic_cast<QObject*>(connection_interface), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
+        QObject::disconnect(dynamic_cast<QObject*>(connection_interface), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
     }
 }
 

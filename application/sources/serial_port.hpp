@@ -25,12 +25,14 @@
 #include <sstream>
 #include <memory>
 
+#include <QString>
 #include <QObject>
 #include <QSerialPort>
 #include <QSerialPortInfo>
 
 #include "global.hpp"
-#include "i_network_connection.hpp"
+#include "i_connection.hpp"
+#include "serial_port_settings.hpp"
 
 
 
@@ -39,10 +41,10 @@
 
 
 
-class SerialPort : public QObject, public I_NetworkConnection
+class SerialPort : public QObject, public I_Connection
 {
     Q_OBJECT
-    Q_INTERFACES(I_NetworkConnection)
+    Q_INTERFACES(I_Connection)
 
 public:
     SerialPort();
@@ -54,7 +56,7 @@ public:
     SerialPort& operator=(const SerialPort&) = delete;
     SerialPort& operator=(SerialPort&&) = delete;
 
-    std::string getNetworkConnectionName(void) override;
+    std::string getName(void) override { return std::string(serial_port_connection_name); }
     bool Open(const std::string& port_name) override;
     void Close(void) override;
     bool IsOpen(void) override;
@@ -69,7 +71,6 @@ private slots:
     void HandleErrors(QSerialPort::SerialPortError error);
 
 private:
-    static constexpr char network_connection_name[] = "SerialPort";
     std::unique_ptr<QSerialPort> port;
 };
 
