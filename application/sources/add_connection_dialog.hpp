@@ -41,7 +41,7 @@
 
 #include "i_connection_settings_editor.hpp"
 #include "serial_port_settings_editor.hpp"
-#include "ordered_dict.h"
+#include "connection_request_data.hpp"
 
 
 
@@ -99,6 +99,7 @@ public:
     AddConnectionDialog& operator=(AddConnectionDialog&&) = delete;
 
     void popUp(const QStringList& available_connections, const QStringList& available_protocols);
+    ConnectionRequestData getConnectionRequestData(void);
 
 private slots:
     void dialogContentChanged(bool connection_settings_valid = true, const QString& connection_settings_error_message = "");

@@ -120,6 +120,19 @@ void AddConnectionDialog::popUp(const QStringList& available_connections, const 
     open();
 }
 
+ConnectionRequestData AddConnectionDialog::getConnectionRequestData(void)
+{
+    ConnectionRequestData request_data;
+
+    request_data.user_defined_name = pUserDefinedNameLineEdit->text();
+    request_data.connection = pConnectionsAvailableList->selectedItems()[0]->text();
+    request_data.protocol = pProtocolsAvailableList->selectedItems()[0]->text();
+    auto editor_index = pConnectionSettingsStackedLayout->currentIndex();
+    request_data.connection_settings = connectionSettingsEditors[editor_index]->getSettings();
+
+    return request_data;
+}
+
 void AddConnectionDialog::dialogContentChanged(bool connection_settings_valid, const QString& connection_settings_error_message)
 {
     bool enable_ok_type_button = false;
