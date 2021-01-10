@@ -46,6 +46,8 @@
 
 
 
+static constexpr char continous_measurement_data_protocol_name[] = "Continous Measurement Data Protocol - CMDP";
+
 class ContinousMeasurementDataProtocol : public I_Protocol
 {
 public:
@@ -68,8 +70,6 @@ public:
 private:
     struct Constants
     {
-        static constexpr char protocol_name[] = "Continous Measurement Data Protocol CMDP";
-
         enum class States : uint8_t
         {
             INVALID = 0,

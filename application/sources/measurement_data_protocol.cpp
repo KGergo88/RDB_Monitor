@@ -32,7 +32,7 @@ MeasurementDataProtocol::MeasurementDataProtocol()
 
 std::string MeasurementDataProtocol::GetProtocolName(void)
 {
-    return std::string(Constants::protocol_name);
+    return std::string(measurement_data_protocol_name);
 }
 
 std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istream& input_data)

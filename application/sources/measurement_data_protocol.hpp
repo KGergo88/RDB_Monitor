@@ -45,6 +45,8 @@
 
 
 
+static constexpr char measurement_data_protocol_name[] = "Measurement Data Protocol - MDP";
+
 class MeasurementDataProtocol : public I_Protocol
 {
 public:
@@ -60,14 +62,13 @@ public:
     virtual std::string GetProtocolName(void) override;
     virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
     virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
-    virtual std::string GetSupportedFileType(void) override {return Constants::native_file_extension;}
+    virtual std::string GetSupportedFileType(void) override { return Constants::native_file_extension; }
     virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
     virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
 
 private:
     struct Constants
     {
-        static constexpr char protocol_name[] = "Measurement Data Protocol MDP";
         static constexpr char native_file_extension[] = "mdp";
 
         enum class States : uint8_t
