@@ -72,6 +72,8 @@ HEADERS +=                                          \
     sources/backend.hpp                             \
     sources/configuration.hpp                       \
     sources/add_connection_dialog.hpp               \
+    sources/connection_factory.hpp                  \
+    sources/connection_request_data.hpp             \
     sources/continous_measurement_data_protocol.hpp \
     sources/data_connection_interface.hpp           \
     sources/data_line.hpp                           \
@@ -89,6 +91,7 @@ HEADERS +=                                          \
     sources/measurement_data_protocol.hpp           \
     sources/network_handler.hpp                     \
     sources/ordered_dict.h                          \
+    sources/protocol_factory.hpp                    \
     sources/serial_port.hpp                         \
     sources/serial_port_settings.hpp                \
     sources/serial_port_settings_editor.hpp
