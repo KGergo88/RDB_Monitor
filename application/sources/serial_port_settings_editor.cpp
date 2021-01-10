@@ -102,10 +102,10 @@ std::shared_ptr<I_ConnectionSettings> SerialPortSettingsEditor::getSettings(void
     auto settings = std::make_shared<SerialPortSettings>();
     settings->portName = pPortNameLineEdit->text();
     settings->baudRate = pBaudRateComboBox->currentData().value<QSerialPort::BaudRate>();
-    settings->dataBits = pBaudRateComboBox->currentData().value<QSerialPort::DataBits>();
-    settings->stopBits = pBaudRateComboBox->currentData().value<QSerialPort::StopBits>();
-    settings->parity = pBaudRateComboBox->currentData().value<QSerialPort::Parity>();
-    settings->flowControl = pBaudRateComboBox->currentData().value<QSerialPort::FlowControl>();
+    settings->dataBits = pDataBitsComboBox->currentData().value<QSerialPort::DataBits>();
+    settings->stopBits = pStopBitsComboBox->currentData().value<QSerialPort::StopBits>();
+    settings->parity = pParityComboBox->currentData().value<QSerialPort::Parity>();
+    settings->flowControl = pFlowControlComboBox->currentData().value<QSerialPort::FlowControl>();
     return settings;
 }
 
