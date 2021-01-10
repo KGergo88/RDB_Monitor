@@ -27,6 +27,7 @@
 #include <QtPlugin>
 
 #include "global.hpp"
+#include "connection_request_data.hpp"
 
 
 
@@ -40,8 +41,8 @@ class I_GuiSignal
 signals:
     virtual void StartsToRun(void) = 0;
     virtual void ShuttingDown(void) = 0;
-    virtual void OpenNetworkConnection(const std::string& port_name) = 0;
-    virtual void CloseNetworkConnection(const std::string& port_name) = 0;
+    virtual void OpenNetworkConnection(const ConnectionRequestData& request_data) = 0;
+    virtual void CloseNetworkConnection(const QString& user_defined_name) = 0;
     virtual void RequestForDiagram(const QModelIndex& model_index) = 0;
     virtual void ImportFile(const std::string& path_to_file) = 0;
     virtual void ExportFileShowCheckBoxes(void) = 0;

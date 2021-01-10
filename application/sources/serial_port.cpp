@@ -39,21 +39,23 @@ SerialPort::~SerialPort()
     }
 }
 
-bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NAME)
+bool SerialPort::Open(const std::shared_ptr<I_ConnectionSettings> settings)
 {
     bool result = false;
+    std::shared_ptr<SerialPortSettings> serial_port_settings = std::dynamic_pointer_cast<SerialPortSettings>(settings);
 
     if(!port)
     {
         try
         {
+            std::shared_ptr<SerialPortSettings> serial_port_settings = std::dynamic_pointer_cast<SerialPortSettings>(settings);
             port = std::make_unique<QSerialPort>();
-            port->setPortName(QString::fromStdString(port_name));
-            port->setBaudRate(SERIAL_PORT_DEFAULT_BAUDRATE);
-            port->setDataBits(QSerialPort::Data8);
-            port->setStopBits(QSerialPort::OneStop);
-            port->setParity(QSerialPort::NoParity);
-            port->setFlowControl(QSerialPort::NoFlowControl);
+            port->setPortName(serial_port_settings->portName);
+            port->setBaudRate(serial_port_settings->baudRate);
+            port->setDataBits(serial_port_settings->dataBits);
+            port->setStopBits(serial_port_settings->stopBits);
+            port->setParity(serial_port_settings->parity);
+            port->setFlowControl(serial_port_settings->flowControl);
 
             if(port->open(QIODevice::ReadOnly))
             {
@@ -67,18 +69,18 @@ bool SerialPort::Open(const std::string& port_name = SERIAL_PORT_DEFAULT_PORT_NA
         catch(...)
         {
             port.reset();
-            throw("Could not open port (" + port_name + "), probably a bad allocation in std::make_unique().");
+            throw("SerialPort::Open: Could not open port! (" + serial_port_settings->portName + "), probably a bad allocation in std::make_unique().");
         }
     }
     else
     {
-        if(port_name == port->portName().toStdString())
+        if(serial_port_settings->portName == port->portName())
         {
             result = true;
         }
         else
         {
-            throw("Another serial port was already openend with this object: " + port_name);
+            throw("SerialPort::Open: Another serial port was already openend with this object: " + serial_port_settings->portName);
         }
     }
 
@@ -135,6 +137,6 @@ void SerialPort::HandleErrors(QSerialPort::SerialPortError error)
 {
     if(QSerialPort::ReadError == error)
     {
-        emit ErrorReport((QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(port->portName()).arg(port->errorString())).toStdString());
+        emit ErrorReport((QObject::tr("SerialPort::HandleErrors: An I/O error occurred while reading the data from port %1, error: %2").arg(port->portName()).arg(port->errorString())).toStdString());
     }
 }

@@ -48,15 +48,6 @@ using DataPointSpecialized = DataPoint<DataPointType>;
 
 #define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
 
-#ifdef _WIN32
-    #define SERIAL_PORT_DEFAULT_PORT_NAME ("COM3")
-#else
-    #define SERIAL_PORT_DEFAULT_PORT_NAME ("/dev/ttyACM0")
-#endif
-
-constexpr uint32_t SERIAL_PORT_DEFAULT_BAUDRATE = 115200;
-constexpr std::size_t SERIAL_PORT_MAX_READ_LENGTH_IN_BYTES = 100 * 1024;
-
 
 
 #endif /* GLOBAL_HPP */

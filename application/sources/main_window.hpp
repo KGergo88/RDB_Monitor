@@ -31,12 +31,13 @@
 #include <QString>
 #include <QFileDialog>
 #include <QTreeView>
+#include <QDialog>
 
 #include "global.hpp"
-#include "gui_signal_interface.hpp"
-#include "backend_signal_interface.hpp"
+#include "i_gui_signal.hpp"
+#include "i_backend_signal.hpp"
 #include "diagram.hpp"
-#include "network_handler.hpp"
+#include "add_connection_dialog.hpp"
 
 
 
@@ -45,29 +46,29 @@
 
 
 
-class MainWindow : public QMainWindow, public GuiSignalInterface
+class MainWindow : public QMainWindow, public I_GuiSignal
 {
     Q_OBJECT
-    Q_INTERFACES(GuiSignalInterface)
+    Q_INTERFACES(I_GuiSignal)
 
 public:
     MainWindow();
 
-    MainWindow(const MainWindow& newGuiWindow) = delete;
-    MainWindow(MainWindow&& newGuiWindow) = delete;
+    MainWindow(const MainWindow&) = delete;
+    MainWindow(MainWindow&&) = delete;
 
     ~MainWindow() override = default;
 
-    MainWindow& operator=(const MainWindow&  newGuiWindow) = delete;
-    MainWindow& operator=(MainWindow&& newGuiWindow) = delete;
+    MainWindow& operator=(const MainWindow&) = delete;
+    MainWindow& operator=(MainWindow&&) = delete;
 
-    void RegisterBackendSignalInterface(BackendSignalInterface* new_backend_signal_interface);
+    void RegisterBackendSignalInterface(I_BackendSignal* new_backend_signal_interface);
 
 signals:
     void StartsToRun(void) override;
     void ShuttingDown(void) override;
-    void OpenNetworkConnection(const std::string& port_name) override;
-    void CloseNetworkConnection(const std::string& port_name) override;
+    void OpenNetworkConnection(const ConnectionRequestData& request_data) override;
+    void CloseNetworkConnection(const QString& user_defined_name) override;
     void RequestForDiagram(const QModelIndex& model_index) override;
     void ImportFile(const std::string& path_to_file) override;
     void ExportFileShowCheckBoxes(void) override;
@@ -76,14 +77,16 @@ signals:
 
 private slots:
     void DisplayStatusMessage(const std::string& message_text);
-    void ConnectionManagerButtonOpenCloseWasClicked(void);
+    void AddConnectionDialogAccepted(void);
+    void ConnectionManagerAddConnectionButtonWasClicked(void);
+    void ConnectionManagerRemoveConnectionButtonWasClicked(void);
+    void ListOfActiveConnectionsChanged(const QStringList& active_connections);
     void DiagramExportButtonExportWasClicked(void);
     void DiagramExportButtonCancelWasClicked(void);
-    void ProcessNetworkOperationResult(const std::string& port_name, const bool& result);
     void DisplayDiagram(const DiagramSpecialized& diagram);
     void MenuActionDiagramsImportDiagrams(void);
     void MenuActionDiagramsExportDiagrams(void);
-    void TreeviewCurrentSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
+    void TreeviewCurrentSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 
 private:
     static constexpr int main_window_minimum_width = 800;
@@ -91,14 +94,17 @@ private:
 
     static constexpr int chart_view_size_percentage = 90;
     static constexpr int list_widget_status_size_percentage = 10;
-    static constexpr int tree_view_size_percentage = 90;
-    static constexpr int stacked_layout_size_percentage = 10;
+    static constexpr int tree_view_size_percentage = 80;
+    static constexpr int stacked_layout_size_percentage = 30;
     static constexpr int left_vertical_layout_size_percentage = 80;
     static constexpr int right_vertical_layout_size_percentage = 20;
 
-    static constexpr char diagram_menu_text[] = "Diagrams";
+    static constexpr char diagram_menu_text[] = "Import / Export Diagrams";
     static constexpr char diagram_menu_import_diagrams_text[] = "Import Diagrams";
     static constexpr char diagram_menu_export_diagrams_text[] = "Export Diagrams";
+
+    static constexpr char connections_menu_text[] = "Connections";
+    static constexpr char connections_menu_manage_connections_text[] = "Manage Connections";
 
     static constexpr char file_dialog_filter_string_constant_part[] = "Diagram Files: ";
 
@@ -113,11 +119,20 @@ private:
     public:
         ConnectionManagerWidget(QWidget* parent = nullptr) : QWidget(parent)
         {
-            layout = new QVBoxLayout(this);
-            line_edit_port_name = new QLineEdit(SERIAL_PORT_DEFAULT_PORT_NAME, this);
-            button_open_close_connection = new QPushButton(button_open_connection_text, this);
-            layout->addWidget(line_edit_port_name);
-            layout->addWidget(button_open_close_connection);
+            auto vertical_layout = new QVBoxLayout;
+            active_connections_list = new QListWidget();
+            active_connections_list->setSelectionMode(QAbstractItemView::SingleSelection);
+            vertical_layout->addWidget(active_connections_list);
+
+            auto horizontal_layout = new QHBoxLayout;
+            add_connection_button = new QPushButton("Add connection");
+            remove_connection_button = new QPushButton("Remove connection");
+            horizontal_layout->addWidget(add_connection_button);
+            horizontal_layout->addWidget(remove_connection_button);
+            vertical_layout->addLayout(horizontal_layout);
+
+            auto groupbox = new QGroupBox("Connections", this);
+            groupbox->setLayout(vertical_layout);
         }
 
         ConnectionManagerWidget(const ConnectionManagerWidget&) = delete;
@@ -128,12 +143,9 @@ private:
         ConnectionManagerWidget& operator=(const ConnectionManagerWidget&) = delete;
         ConnectionManagerWidget& operator=(ConnectionManagerWidget&&) = delete;
 
-        static constexpr char button_open_connection_text[]  = "Open Serial Port";
-        static constexpr char button_close_connection_text[] = "Close Serial Port";
-
-        QVBoxLayout* layout;
-        QLineEdit*   line_edit_port_name;
-        QPushButton* button_open_close_connection;
+        QListWidget* active_connections_list;
+        QPushButton* add_connection_button;
+        QPushButton* remove_connection_button;
     };
 
     class DiagramExportWidget : public QWidget
@@ -166,15 +178,17 @@ private:
 
     bool network_connection_is_open;
 
-    BackendSignalInterface* backend_signal_interface;
+    I_BackendSignal* backend_signal_interface;
 
     QMenu*                   pDiagramsMenu;
+    QMenu*                   pConnectionsMenu;
     QChartView*              pChartView;
     QTreeView*               pTreeView;
     QListWidget*             pListWidgetStatus;
     ConnectionManagerWidget* pWidgetConnectionManager;
     DiagramExportWidget*     pWidgetDiagramExport;
     QStackedLayout*          pStackedLayout;
+    AddConnectionDialog*     pAddConnectionDialog;
 };
 
 

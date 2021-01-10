@@ -46,10 +46,12 @@ public:
     virtual std::string GetFileImportDefaultFolder(void) = 0;
     virtual std::string GetFileExportDefaultFolder(void) = 0;
     virtual std::vector<std::string> GetSupportedFileExtensions(void) = 0;
+    virtual QStringList GetAvailableConnections(void) = 0;
+    virtual QStringList GetAvailableProtocols(void) = 0;
 
 signals:
     virtual void NewStatusMessage(const std::string& message_text) = 0;
-    virtual void NetworkOperationFinished(const std::string& port_name, bool result) = 0;
+    virtual void ListOfActiveConnectionsChanged(const QStringList& active_connections) = 0;
     virtual void ShowThisDiagram(const DiagramSpecialized& diagram) = 0;
 };
 

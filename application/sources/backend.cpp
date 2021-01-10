@@ -26,31 +26,30 @@
 #include "network_handler.hpp"
 #include "serial_port.hpp"
 #include "measurement_data_protocol.hpp"
+#include "continous_measurement_data_protocol.hpp"
 
 
 
-Backend::Backend() : QObject(),
-                     serial_port(),
-                     measurement_data_protocol(),
-                     serial_network_handler(&serial_port,
-                                            &measurement_data_protocol,
-                                            std::bind(&Backend::StoreNetworkDiagrams, this, std::placeholders::_1, std::placeholders::_2),
-                                            std::bind(&Backend::ReportStatus, this, std::placeholders::_1)),
-                     gui_signal_interface(nullptr)
+Backend::Backend() : QObject(), gui_signal_interface(nullptr)
 {
-// #warning "This function needs to be changed when implementing the generic protocol handling"
+    available_connection_handlers.append(QString(serial_port_connection_name));
+
+    available_protocol_handlers.append(QString(measurement_data_protocol_name));
+    available_protocol_handlers.append(QString(continous_measurement_data_protocol_name));
+
+    file_handlers.push_back(std::make_shared<MeasurementDataProtocol>());
 }
 
-void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface)
+void Backend::RegisterGuiSignalInterface(I_GuiSignal* new_gui_signal_interface)
 {
     if(new_gui_signal_interface)
     {
         gui_signal_interface = new_gui_signal_interface;
 
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(OpenNetworkConnection(const std::string&)),
-                         this,                                          SLOT(OpenNetwokConnection(const std::string&)));
-        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(CloseNetworkConnection(const std::string&)),
-                         this,                                          SLOT(CloseNetworkConnection(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(OpenNetworkConnection(const ConnectionRequestData&)),
+                         this,                                          SLOT(OpenNetworkConnection(const ConnectionRequestData&)));
+        QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(CloseNetworkConnection(const QString&)),
+                         this,                                          SLOT(CloseNetworkConnection(const QString&)));
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(RequestForDiagram(const QModelIndex&)),
                          this,                                          SLOT(RequestForDiagram(const QModelIndex&)));
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(ImportFile(const std::string&)),
@@ -61,7 +60,6 @@ void Backend::RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_inte
                          this,                                          SLOT(ExportFileHideCheckBoxes(void)));
         QObject::connect(dynamic_cast<QObject*>(gui_signal_interface),  SIGNAL(ExportFileStoreCheckedDiagrams(const std::string&)),
                          this,                                          SLOT(ExportFileStoreCheckedDiagrams(const std::string&)));
-
     }
     else
     {
@@ -106,12 +104,12 @@ void Backend::ReportStatus(const std::string& message)
     }
 }
 
-void Backend::StoreNetworkDiagrams(const std::string& connection_name, std::vector<DiagramSpecialized>& new_diagrams)
+void Backend::StoreNetworkDiagrams(const QString& connection_name, std::vector<DiagramSpecialized>& new_diagrams)
 {
     StoreDiagrams(new_diagrams,
         [&](const DiagramSpecialized& diagram_to_add) -> QModelIndex
         {
-            return diagram_container.AddDiagramFromNetwork(connection_name, diagram_to_add);
+            return diagram_container.AddDiagramFromNetwork(connection_name.toStdString(), diagram_to_add);
         });
 }
 
@@ -126,36 +124,66 @@ void Backend::StoreFileDiagrams(const std::string& file_name, const std::string&
 
 std::vector<std::string> Backend::GetSupportedFileExtensions(void)
 {
-// #warning "This function needs to be changed when implementing the generic protocol handling"
     std::vector<std::string> result;
 
-    result.push_back(measurement_data_protocol.GetSupportedFileType());
+    for(auto const& protocol_handler : file_handlers)
+    {
+        std::string supported_file_type = protocol_handler->GetSupportedFileType();
+        if(!supported_file_type.empty())
+        {
+            result.push_back(supported_file_type);
+        }
+    }
 
     return result;
 }
 
-void Backend::OpenNetwokConnection(const std::string& port_name)
+QStringList Backend::GetAvailableConnections(void)
 {
-    bool result = false;
-
-    if(serial_network_handler.Run(port_name))
-    {
-        result = true;
-        ReportStatus("The connection \"" + port_name + "\" was successfully opened!");
-    }
-    else
-    {
-        ReportStatus("The connection \"" + port_name + "\" could not be opened...maybe wrong name?");
-    }
-    emit NetworkOperationFinished(port_name, result);
+    return available_connection_handlers;
 }
 
-void Backend::CloseNetworkConnection(const std::string& port_name)
+QStringList Backend::GetAvailableProtocols(void)
 {
-    serial_network_handler.Stop();
+    return available_protocol_handlers;
+}
 
-    ReportStatus("The connection \"" + port_name + "\" was successfully closed!");
-    NetworkOperationFinished(port_name, true);
+void Backend::OpenNetworkConnection(const ConnectionRequestData& request_data)
+{
+    auto unique_user_defined_name = makeUserDefinedConnectionNameUnique(request_data.user_defined_name);
+    if(request_data.user_defined_name != unique_user_defined_name)
+    {
+        std::string status_message = "The connection name was updated: \"" + request_data.user_defined_name.toStdString() + "\" --> \"" + unique_user_defined_name.toStdString() + "\"";
+        emit ReportStatus(status_message);
+    }
+
+    auto connection = ConnectionFactory::make(request_data.connection);
+    auto connection_settings = request_data.connection_settings;
+    auto protocol = ProtocolFactory::make(request_data.protocol);
+    network_handlers[unique_user_defined_name] = std::make_shared<NetworkHandler>(unique_user_defined_name,
+                                                                                  connection,
+                                                                                  connection_settings,
+                                                                                  protocol,
+                                                                                  std::bind(&Backend::StoreNetworkDiagrams, this, std::placeholders::_1, std::placeholders::_2),
+                                                                                  std::bind(&Backend::ReportStatus, this, std::placeholders::_1));
+
+    std::string status_message = "The connection \"" + unique_user_defined_name.toStdString() + "\" was successfully opened!";
+    ReportStatus(status_message);
+
+    auto active_connections = getActiveConnections();
+    emit ListOfActiveConnectionsChanged(active_connections);
+}
+
+void Backend::CloseNetworkConnection(const QString& user_defined_name)
+{
+    network_handlers[user_defined_name]->Stop();
+    network_handlers.erase(user_defined_name);
+
+    std::string status_message = "The connection \"" + user_defined_name.toStdString() + "\" was successfully closed!";
+    ReportStatus(status_message);
+
+    auto active_connections = getActiveConnections();
+    emit ListOfActiveConnectionsChanged(active_connections);
 }
 
 void Backend::RequestForDiagram(const QModelIndex& model_index)
@@ -169,25 +197,32 @@ void Backend::RequestForDiagram(const QModelIndex& model_index)
 
 void Backend::ImportFile(const std::string& path_to_file)
 {
-// #warning "This function needs to be changed when implementing the generic protocol handling"
     QFileInfo file_info(QString::fromStdString(path_to_file));
     if(file_info.exists())
     {
         std::string file_name = file_info.fileName().toStdString();
         if(!diagram_container.IsThisFileAlreadyStored(file_name, path_to_file))
         {
-            if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
+            bool the_file_was_processed = false;
+            for(auto const& file_handler : file_handlers)
             {
-                std::ifstream file_stream(path_to_file);
-                auto diagrams_from_file = measurement_data_protocol.ProcessData(file_stream);
-                StoreFileDiagrams(file_name, path_to_file, diagrams_from_file);
+                if(file_handler->CanThisFileBeProcessed(path_to_file))
+                {
+                    std::ifstream file_stream(path_to_file);
+                    auto diagrams_from_file = file_handler->ProcessData(file_stream);
+                    StoreFileDiagrams(file_name, path_to_file, diagrams_from_file);
 
-                // Updating the configuration with the folder of the file that was imported
-                configuration.ImportFolder(file_info.absoluteDir().absolutePath().toStdString());
+                    // Updating the configuration with the folder of the file that was imported
+                    configuration.ImportFolder(file_info.absoluteDir().absolutePath().toStdString());
 
-                ReportStatus("The file \"" + path_to_file + "\" was successfully opened!");
+                    ReportStatus("The file \"" + path_to_file + "\" was successfully opened!");
+                    the_file_was_processed = true;
+                    // We have imported the diagrams with this protocol, we can break out of the loop
+                    break;
+                }
             }
-            else
+
+            if(!the_file_was_processed)
             {
                 ReportStatus("ERROR! The MeasurementDataProtocol cannot process the file: \"" + path_to_file + "\" because it has a wrong extension!");
             }
@@ -215,30 +250,34 @@ void Backend::ExportFileHideCheckBoxes(void)
 
 void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
 {
-// #warning "This function needs to be changed when implementing the generic protocol handling"
-    if(measurement_data_protocol.CanThisFileBeProcessed(path_to_file))
+    for(auto const& protocol_handler : file_handlers)
     {
-        auto checked_diagrams = diagram_container.GetCheckedDiagrams();
-        if(checked_diagrams.size())
+        if(protocol_handler->CanThisFileBeExportedInto(path_to_file))
         {
-            auto exported_data = measurement_data_protocol.ExportData(checked_diagrams);
+            auto checked_diagrams = diagram_container.GetCheckedDiagrams();
+            if(checked_diagrams.size())
+            {
+                auto exported_data = protocol_handler->ExportData(checked_diagrams);
 
-            std::ofstream output_file_stream(path_to_file, (std::ofstream::out | std::ofstream::trunc));
-            output_file_stream << exported_data.rdbuf();
+                std::ofstream output_file_stream(path_to_file, (std::ofstream::out | std::ofstream::trunc));
+                output_file_stream << exported_data.rdbuf();
 
-            // Updating the configuration with the folder of the file that was exported
-            configuration.ExportFolder(QFileInfo(QString::fromStdString(path_to_file)).absoluteDir().absolutePath().toStdString());
+                // Updating the configuration with the folder of the file that was exported
+                configuration.ExportFolder(QFileInfo(QString::fromStdString(path_to_file)).absoluteDir().absolutePath().toStdString());
 
-            ReportStatus("The selected diagrams were successfully written to \"" + path_to_file + "\"!");
+                ReportStatus("The selected diagrams were successfully written to \"" + path_to_file + "\"!");
+                // We have stored the diagrams with this data_exporter, we can break out of the loop
+                break;
+            }
+            else
+            {
+                ReportStatus("No diagram was selected! Nothing was exported!");
+            }
         }
         else
         {
-            ReportStatus("No diagram was selected! Nothing was exported!");
+            ReportStatus("ERROR! The MeasurementDataProtocol cannot save diagrams into the file: \"" + path_to_file + "\" because it has a wrong extension!");
         }
-    }
-    else
-    {
-        ReportStatus("ERROR! The MeasurementDataProtocol cannot save diagrams into the file: \"" + path_to_file + "\" because it has a wrong extension!");
     }
 }
 
@@ -266,4 +305,30 @@ void Backend::StoreDiagrams(std::vector<DiagramSpecialized>& new_diagrams, const
     }
 
     ReportStatus(std::to_string(new_diagrams.size()) + " new diagram was added to the list.");
+}
+
+QStringList Backend::getActiveConnections(void)
+{
+    QStringList active_connections;
+
+    for(const auto& i : network_handlers)
+    {
+        active_connections.append(i.first);
+    }
+
+    return active_connections;
+}
+
+QString Backend::makeUserDefinedConnectionNameUnique(const QString& user_defined_name)
+{
+    QString result = user_defined_name;
+
+    if(network_handlers.count(user_defined_name))
+    {
+        // The name already exists, it needs to be updated!
+        // We need to go into recursion here because the updated name may already exist as well!
+        result = makeUserDefinedConnectionNameUnique(user_defined_name + "_copy");
+    }
+
+    return result;
 }

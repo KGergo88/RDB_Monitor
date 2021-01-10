@@ -31,14 +31,16 @@
 #include <QFileInfo>
 
 #include "global.hpp"
-#include "backend_signal_interface.hpp"
-#include "gui_signal_interface.hpp"
+#include "i_backend_signal.hpp"
+#include "i_gui_signal.hpp"
+#include "i_protocol.hpp"
 #include "diagram.hpp"
 #include "serial_port.hpp"
-#include "measurement_data_protocol.hpp"
 #include "network_handler.hpp"
 #include "diagram_container.hpp"
 #include "configuration.hpp"
+#include "connection_factory.hpp"
+#include "protocol_factory.hpp"
 
 
 
@@ -47,10 +49,10 @@
 
 
 
-class Backend : public QObject, public BackendSignalInterface
+class Backend : public QObject, public I_BackendSignal
 {
     Q_OBJECT
-    Q_INTERFACES(BackendSignalInterface)
+    Q_INTERFACES(I_BackendSignal)
 
 public:
     Backend();
@@ -62,26 +64,28 @@ public:
     Backend& operator=(const Backend&  new_backend) = delete;
     Backend& operator=(Backend&& new_backend) = delete;
 
-    void RegisterGuiSignalInterface(GuiSignalInterface* new_gui_signal_interface);
+    void RegisterGuiSignalInterface(I_GuiSignal* new_gui_signal_interface);
 
     void ReportStatus(const std::string& message);
 
-    void StoreNetworkDiagrams(const std::string& connection_name, std::vector<DiagramSpecialized>& new_diagrams);
+    void StoreNetworkDiagrams(const QString& connection_name, std::vector<DiagramSpecialized>& new_diagrams);
     void StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DiagramSpecialized>& new_diagrams);
 
     QAbstractItemModel* GetDiagramContainerModel(void) override {return &diagram_container;}
     std::string GetFileImportDefaultFolder(void) override {return configuration.ImportFolder();}
     std::string GetFileExportDefaultFolder(void) override {return configuration.ExportFolder();}
     std::vector<std::string> GetSupportedFileExtensions(void) override;
+    QStringList GetAvailableConnections(void) override;
+    QStringList GetAvailableProtocols(void) override;
 
 signals:
     void NewStatusMessage(const std::string& message_text) override;
-    void NetworkOperationFinished(const std::string& port_name, bool result) override;
+    void ListOfActiveConnectionsChanged(const QStringList& active_connections) override;
     void ShowThisDiagram(const DiagramSpecialized& diagram) override;
 
 private slots:
-    void OpenNetwokConnection(const std::string&);
-    void CloseNetworkConnection(const std::string&);
+    void OpenNetworkConnection(const ConnectionRequestData& request_data);
+    void CloseNetworkConnection(const QString& user_defined_name);
     void RequestForDiagram(const QModelIndex& model_index);
     void ImportFile(const std::string& path_to_file);
     void ExportFileShowCheckBoxes(void);
@@ -90,12 +94,15 @@ private slots:
 
 private:
     void StoreDiagrams(std::vector<DiagramSpecialized>& new_diagrams, const std::function<QModelIndex(const DiagramSpecialized&)> storage_logic);
+    QStringList getActiveConnections(void);
+    QString makeUserDefinedConnectionNameUnique(const QString& user_defined_name);
 
-    SerialPort serial_port;
-    MeasurementDataProtocol measurement_data_protocol;
-    NetworkHandler serial_network_handler;
+    QStringList available_connection_handlers;
+    QStringList available_protocol_handlers;
+    std::vector<std::shared_ptr<I_Protocol> > file_handlers;
+    std::map<QString, std::shared_ptr<NetworkHandler> > network_handlers;
 
-    GuiSignalInterface *gui_signal_interface;
+    I_GuiSignal *gui_signal_interface;
 
     DiagramContainer diagram_container;
     Configuration configuration;
