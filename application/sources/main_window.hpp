@@ -131,8 +131,7 @@ private:
             horizontal_layout->addWidget(remove_connection_button);
             vertical_layout->addLayout(horizontal_layout);
 
-            auto groupbox = new QGroupBox("Connections", this);
-            groupbox->setLayout(vertical_layout);
+            setLayout(vertical_layout);
         }
 
         ConnectionManagerWidget(const ConnectionManagerWidget&) = delete;
@@ -153,11 +152,13 @@ private:
     public:
         DiagramExportWidget(QWidget* parent = nullptr) : QWidget(parent)
         {
-            layout = new QVBoxLayout(this);
+            layout = new QVBoxLayout;
             button_export = new QPushButton(button_export_text, this);
             button_cancel = new QPushButton(button_cancel_text, this);
             layout->addWidget(button_export);
             layout->addWidget(button_cancel);
+
+            setLayout(layout);
         }
 
         DiagramExportWidget(const DiagramExportWidget&) = delete;
