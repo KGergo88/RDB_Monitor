@@ -146,7 +146,7 @@ void AddConnectionDialog::dialogContentChanged(bool connection_settings_valid, c
 
         if(1 == selected_connections.size())
         {
-            auto selected_connection = pConnectionsAvailableList->selectedItems()[0]->text();
+            auto selected_connection = selected_connections[0]->text();
             updateConnectionSettingsEditor(selected_connection);
 
             if(1 == selected_protocols.size())

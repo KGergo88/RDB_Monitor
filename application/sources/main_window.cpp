@@ -189,8 +189,12 @@ void MainWindow::ConnectionManagerAddConnectionButtonWasClicked(void)
 
 void MainWindow::ConnectionManagerRemoveConnectionButtonWasClicked(void)
 {
-    auto connection_name = pWidgetConnectionManager->active_connections_list->selectedItems()[0]->text();
-    emit CloseNetworkConnection(connection_name);
+    auto selected_connections = pWidgetConnectionManager->active_connections_list->selectedItems();
+    for(const auto& i: selected_connections)
+    {
+        auto connection_name = i->text();
+        emit CloseNetworkConnection(connection_name);
+    }
 }
 
 void MainWindow::ListOfActiveConnectionsChanged(const QStringList& active_connections)
