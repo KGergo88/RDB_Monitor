@@ -25,11 +25,6 @@
 
 
 
-SerialPort::SerialPort() : QObject()
-{
-
-}
-
 SerialPort::~SerialPort()
 {
     if(port)
@@ -59,6 +54,8 @@ bool SerialPort::Open(const std::shared_ptr<I_ConnectionSettings> settings)
 
             if(port->open(QIODevice::ReadOnly))
             {
+                QObject::connect(port.get(), &QSerialPort::readyRead,       this, &SerialPort::ReadLineFromPort);
+                QObject::connect(port.get(), &QSerialPort::errorOccurred,   this, &SerialPort::HandleErrors);
                 result = true;
             }
             else
@@ -89,10 +86,9 @@ bool SerialPort::Open(const std::shared_ptr<I_ConnectionSettings> settings)
 
 void SerialPort::Close()
 {
-    QObject::disconnect(port.get(), &QSerialPort::readyRead, this, &SerialPort::ReadLineFromPort);
-
     if(port)
     {
+        QObject::disconnect(port.get(), &QSerialPort::readyRead, this, &SerialPort::ReadLineFromPort);
         port->close();
         port.reset();
     }
@@ -101,20 +97,6 @@ void SerialPort::Close()
 bool SerialPort::IsOpen()
 {
     return (nullptr != port);
-}
-
-bool SerialPort::StartListening(void)
-{
-    bool result = false;
-
-    if(IsOpen())
-    {
-        QObject::connect(port.get(), &QSerialPort::readyRead,       this, &SerialPort::ReadLineFromPort);
-        QObject::connect(port.get(), &QSerialPort::errorOccurred,   this, &SerialPort::HandleErrors);
-        result = true;
-    }
-
-    return result;
 }
 
 void SerialPort::ReadLineFromPort(void)

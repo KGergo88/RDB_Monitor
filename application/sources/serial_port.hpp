@@ -26,7 +26,6 @@
 #include <memory>
 
 #include <QString>
-#include <QObject>
 #include <QSerialPort>
 #include <QSerialPortInfo>
 
@@ -48,8 +47,8 @@ class SerialPort : public QObject, public I_Connection
     Q_INTERFACES(I_Connection)
 
 public:
-    SerialPort();
-    ~SerialPort() override;
+    SerialPort() = default;
+    ~SerialPort();
 
     SerialPort(const SerialPort&) = delete;
     SerialPort(SerialPort&&) = delete;
@@ -61,7 +60,6 @@ public:
     bool Open(const std::shared_ptr<I_ConnectionSettings> settings) override;
     void Close(void) override;
     bool IsOpen(void) override;
-    bool StartListening(void) override;
 
 signals:
     void DataReceived(std::istream& received_data) override;

@@ -40,14 +40,12 @@
 class I_Connection
 {
 public:
+    virtual ~I_Connection() = default;
+
     virtual std::string getName(void) = 0;
     virtual bool Open(const std::shared_ptr<I_ConnectionSettings> settings) = 0;
     virtual void Close(void) = 0;
     virtual bool IsOpen(void) = 0;
-    virtual bool StartListening(void) = 0;
-
-protected:
-    ~I_Connection() {}
 
 signals:
     virtual void DataReceived(std::istream& received_data) = 0;

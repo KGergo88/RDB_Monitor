@@ -31,12 +31,9 @@ bool NetworkHandler::Run(void)
 
     if(connection_interface->Open(connection_settings))
     {
-        if(connection_interface->StartListening())
-        {
-            QObject::connect(dynamic_cast<QObject*>(connection_interface.get()), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
-            QObject::connect(dynamic_cast<QObject*>(connection_interface.get()), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
-            result = true;
-        }
+        QObject::connect(dynamic_cast<QObject*>(connection_interface.get()), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
+        QObject::connect(dynamic_cast<QObject*>(connection_interface.get()), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
+        result = true;
     }
 
     return result;
