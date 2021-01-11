@@ -75,6 +75,7 @@ set(TEST_SOURCES
     sources/test_configuration.cpp
     sources/test_diagram_container.cpp
     sources/test_measurement_data_protocol.cpp
+    sources/test_continous_measurement_data_protocol.cpp
     sources/test_ordered_dict.cpp
     sources/test_serial_port.cpp
     sources/test_backend.cpp
@@ -84,6 +85,7 @@ set(TEST_SOURCES
 set(APPLICATION_SOURCES
     ../application/sources/configuration.cpp
     ../application/sources/measurement_data_protocol.cpp
+    ../application/sources/continous_measurement_data_protocol.cpp
 )
 
 set(EXECUTABLE_NAME ${PROJECT_NAME}_Unit_Tests)
