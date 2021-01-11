@@ -35,7 +35,8 @@ Backend::Backend() : QObject(), gui_signal_interface(nullptr)
     available_connection_handlers.append(QString(serial_port_connection_name));
 
     available_protocol_handlers.append(QString(measurement_data_protocol_name));
-    available_protocol_handlers.append(QString(continous_measurement_data_protocol_name));
+    // Deactivate the CMDP before merging as this Protocol is not fully implemented yet!
+    //available_protocol_handlers.append(QString(continous_measurement_data_protocol_name));
 
     file_handlers.push_back(std::make_shared<MeasurementDataProtocol>());
 }
