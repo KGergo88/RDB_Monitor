@@ -1,6 +1,6 @@
 #===============================================================================#
 #                                                                               #
-#    RDB Diplomaterv Monitor                                                    #
+#    RDB Monitor                                                                #
 #       A monitor program for the RDB Diplomaterv project                       #
 #    Copyright (C) 2018  András Gergő Kocsis                                    #
 #                                                                               #

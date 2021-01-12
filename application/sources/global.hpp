@@ -1,6 +1,6 @@
 //==============================================================================//
 //                                                                              //
-//    RDB Diplomaterv Monitor                                                   //
+//    RDB Monitor                                                               //
 //    A monitor program for the RDB Diplomaterv project                         //
 //    Copyright (C) 2018  András Gergő Kocsis                                   //
 //                                                                              //
@@ -46,7 +46,7 @@ template <typename T_DATA_POINT>
 class DataPoint;
 using DataPointSpecialized = DataPoint<DataPointType>;
 
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
+#define APPLICATION_NAME                ("RDB Monitor v2.1.0")
 
 
 

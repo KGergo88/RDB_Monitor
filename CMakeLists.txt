@@ -1,6 +1,6 @@
 #===============================================================================#
 #                                                                               #
-#    RDB Diplomaterv Monitor                                                    #
+#    RDB Monitor                                                                #
 #       A monitor program for the RDB Diplomaterv project                       #
 #    Copyright (C) 2018  András Gergő Kocsis                                    #
 #                                                                               #
@@ -22,13 +22,13 @@
 
 
 message(STATUS "===============================")
-message(STATUS "=== RDB Diplomaterv Monitor ===")
+message(STATUS "===       RDB Monitor       ===")
 message(STATUS "===============================")
 message(STATUS "")
 
 cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
 
-project(RDB_Diplomaterv_Monitor)
+project(RDB_Monitor)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

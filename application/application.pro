@@ -1,6 +1,6 @@
 #===============================================================================#
 #                                                                               #
-#    RDB Diplomaterv Monitor                                                    #
+#    RDB Monitor                                                                #
 #       A monitor program for the RDB Diplomaterv project                       #
 #    Copyright (C) 2018  András Gergő Kocsis                                    #
 #                                                                               #
@@ -98,4 +98,4 @@ HEADERS +=                                          \
 
 RESOURCES = ../resources.qrc
 
-TARGET = RDB_Diplomaterv_Monitor
+TARGET = RDB_Monitor

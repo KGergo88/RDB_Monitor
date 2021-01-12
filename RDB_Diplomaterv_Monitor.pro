@@ -1,6 +1,6 @@
 #===============================================================================#
 #                                                                               #
-#    RDB Diplomaterv Monitor                                                    #
+#    RDB Monitor                                                                #
 #       A monitor program for the RDB Diplomaterv project                       #
 #    Copyright (C) 2018  András Gergő Kocsis                                    #
 #                                                                               #
@@ -24,7 +24,7 @@
 TEMPLATE = subdirs
 
 message(===============================)
-message(=== RDB Diplomaterv Monitor ===)
+message(===       RDB Monitor       ===)
 message(===============================)
 message(" ")
 message(Qt version: $$[QT_VERSION])

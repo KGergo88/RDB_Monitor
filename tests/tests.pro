@@ -1,6 +1,6 @@
 #===============================================================================#
 #                                                                               #
-#    RDB Diplomaterv Monitor                                                    #
+#    RDB Monitor                                                                #
 #       A monitor program for the RDB Diplomaterv project                       #
 #    Copyright (C) 2018  András Gergő Kocsis                                    #
 #                                                                               #
@@ -89,7 +89,7 @@ DISTFILES +=                                    \
     test_files/TEST_1C_0E_CMDP_NoTitles.cmdp    \
     test_files/TEST_1C_0E_CMDP_Simple.cmdp
 
-TARGET = RDB_Diplomaterv_Monitor_Unit_Tests
+TARGET = RDB_Monitor_Unit_Tests
 
 # Copying the test files next to the binary
 TEST_FILES_SOURCE_PATH = $$PWD/test_files
