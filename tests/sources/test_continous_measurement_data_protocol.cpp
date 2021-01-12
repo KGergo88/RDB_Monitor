@@ -35,7 +35,7 @@ class TestContinousMeasurementDataProtocol : public ::testing::Test,
 {
 protected:
     ContinousMeasurementDataProtocol test_cmdp_processor;
-    std::string expected_protocol_name = "Continous Measurement Data Protocol CMDP";
+    std::string expected_protocol_name = continous_measurement_data_protocol_name;
     std::vector<DiagramSpecialized> processed_diagrams;
     // Empty string as the CMDP does not support file handling
     std::string expected_file_type;

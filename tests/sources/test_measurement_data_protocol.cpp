@@ -35,7 +35,7 @@ class TestMeasurementDataProtocol : public ::testing::Test,
 {
 protected:
     MeasurementDataProtocol test_mdp_processor;
-    std::string expected_protocol_name = "Measurement Data Protocol MDP";
+    std::string expected_protocol_name = measurement_data_protocol_name;
     std::string expected_file_type = "mdp";
     std::vector<DiagramSpecialized> processed_diagrams;
 };
