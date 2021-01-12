@@ -87,9 +87,6 @@ class AddConnectionDialog : public QDialog
     Q_OBJECT
 
 public:
-    // This is needed because we inherit from QDialog non-public
-    using QDialog::QObject;
-
     AddConnectionDialog(QWidget* parent);
 
     AddConnectionDialog(const AddConnectionDialog&) = delete;
