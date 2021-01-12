@@ -3,6 +3,8 @@
 
 A monitor program for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project.
 
+![alt text](images/RDB_Monitor_Screenshot.png "RDB_Diplomaterv_Monitor")
+
 
 ## Table of contents <!-- omit in toc -->
 - [Introduction](#introduction)
