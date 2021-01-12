@@ -21,42 +21,45 @@
 
 
 
-#include <istream>
-#include <memory>
-#include <string>
+#include <fstream>
 
-#include <QtPlugin>
+#include <gtest/gtest.h>
+#include <gmock/gmock-matchers.h>
 
-#include "global.hpp"
-
-
-
-#ifndef NETWORK_CONNECTION_INTERFACE_HPP
-#define NETWORK_CONNECTION_INTERFACE_HPP
+#include <QString>
+#include <QDir>
+#include <QCoreApplication>
 
 
 
-class NetworkConnectionInterface
+#ifndef TEST_PROTOCOL_COMMON_H
+#define TEST_PROTOCOL_COMMON_H
+
+
+
+struct TestProtocolParameter
 {
-public:
-    virtual bool Open(const std::string& port_name) = 0;
-
-    virtual void Close(void) = 0;
-
-    virtual bool IsOpen(void) = 0;
-
-    virtual bool StartListening(void) = 0;
-
-protected:
-    ~NetworkConnectionInterface() {}
-
-signals:
-    virtual void DataReceived(std::istream& received_data) = 0;
-    virtual void ErrorReport(const std::string& error_message) = 0;
+    TestProtocolParameter(const QString& new_file_name,
+                          const int& new_expected_correct_diagrams) : file_name(new_file_name),
+                                                                      expected_correct_diagrams(new_expected_correct_diagrams) {}
+    QString file_name;
+    int expected_correct_diagrams;
 };
 
-Q_DECLARE_INTERFACE(NetworkConnectionInterface, "NetworkConnectionInterface")
+struct TestFileReader
+{
+    static std::ifstream read(const QString& file_name, const QString& test_files_path = QDir(QCoreApplication::applicationDirPath()).filePath("test_files"))
+    {
+        std::string test_file_path = QDir(test_files_path).filePath(file_name).toStdString();
+        std::ifstream test_file_stream(test_file_path);
 
+        if(!test_file_stream.is_open())
+        {
+            ADD_FAILURE() << "The file could not be opened! Path: " << test_file_path;
+        }
 
+        return test_file_stream;
+    }
+};
 
-#endif // NETWORK_CONNECTION_INTERFACE_HPP
+#endif // TEST_PROTOCOL_COMMON_H

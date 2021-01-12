@@ -36,6 +36,7 @@ QT += core        \
       gui         \
       charts      \
       serialport
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG(debug, debug|release) {
@@ -59,26 +60,34 @@ win32 {
 }
 
 # Source files of the target
-SOURCES +=                                                  \
-    ../application/sources/configuration.cpp                \
-    ../application/sources/measurement_data_protocol.cpp    \
-    sources/test_main.cpp                                   \
-    sources/test_data_point.cpp                             \
-    sources/test_data_line.cpp                              \
-    sources/test_diagram.cpp                                \
-    sources/test_configuration.cpp                          \
-    sources/test_diagram_container.cpp                      \
-    sources/test_measurement_data_protocol.cpp              \
-    sources/test_ordered_dict.cpp                           \
-    sources/test_serial_port.cpp                            \
+SOURCES +=                                                          \
+    ../application/sources/configuration.cpp                        \
+    ../application/sources/measurement_data_protocol.cpp            \
+    ../application/sources/continous_measurement_data_protocol.cpp  \
+    sources/test_main.cpp                                           \
+    sources/test_data_point.cpp                                     \
+    sources/test_data_line.cpp                                      \
+    sources/test_diagram.cpp                                        \
+    sources/test_configuration.cpp                                  \
+    sources/test_diagram_container.cpp                              \
+    sources/test_measurement_data_protocol.cpp                      \
+    sources/test_continous_measurement_data_protocol.cpp            \
+    sources/test_ordered_dict.cpp                                   \
+    sources/test_serial_port.cpp                                    \
     sources/test_backend.cpp
 
-DISTFILES +=                                        \
-    gtest_dendency.pri                              \
-    test_files/TEST_1C_0E_MDP.mdp                   \
-    test_files/TEST_1C_1E_MDP_HeadlineError.mdp     \
-    test_files/TEST_1C_2E_MDP_DatalineError.mdp     \
-    test_files/TEST_2C_0E_MDP.mdp
+HEADERS +=                          \
+    sources/test_protocol_common.h
+
+DISTFILES +=                                    \
+    gtest_dendency.pri                          \
+    test_files/TEST_1C_0E_MDP.mdp               \
+    test_files/TEST_1C_1E_MDP_HeadlineError.mdp \
+    test_files/TEST_1C_2E_MDP_DatalineError.mdp \
+    test_files/TEST_2C_0E_MDP.mdp               \
+    test_files/TEST_1C_0E_CMDP.cmdp             \
+    test_files/TEST_1C_0E_CMDP_NoTitles.cmdp    \
+    test_files/TEST_1C_0E_CMDP_Simple.cmdp
 
 TARGET = RDB_Diplomaterv_Monitor_Unit_Tests
 

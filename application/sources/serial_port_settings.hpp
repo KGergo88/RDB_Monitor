@@ -21,33 +21,52 @@
 
 
 
-#include <cstddef>
-#include <cstdint>
+#include <QSysInfo>
+#include <QSerialPort>
+
+#include "i_connection_settings.hpp"
 
 
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef SERIAL_PORT_SETTINGS_HPP
+#define SERIAL_PORT_SETTINGS_HPP
 
 
 
-using DataPointType = double;
-using DataIndexType = std::size_t;
+static constexpr char serial_port_connection_name[] = "SerialPort";
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class Diagram;
-using DiagramSpecialized = Diagram<DataPointType, DataIndexType>;
+class SerialPortSettings : public I_ConnectionSettings
+{
+public:
+    SerialPortSettings()
+    {
+        auto os_name = QSysInfo::productType();
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class DataLine;
-using DataLineSpecialized = DataLine<DataPointType, DataIndexType>;
+        if(("winrt" == os_name) && ("windows" == os_name))
+        {
+            portName = "COM3";
+        }
+        else
+        {
+            portName = "/dev/ttyACM0";
+        }
+        baudRate = QSerialPort::BaudRate::Baud115200;
+        dataBits = QSerialPort::DataBits::Data8;
+        stopBits = QSerialPort::StopBits::OneStop;
+        parity = QSerialPort::Parity::NoParity;
+        flowControl = QSerialPort::FlowControl::NoFlowControl;
+    }
 
-template <typename T_DATA_POINT>
-class DataPoint;
-using DataPointSpecialized = DataPoint<DataPointType>;
+    virtual ~SerialPortSettings() {};
 
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
+    QString portName;
+    QSerialPort::BaudRate baudRate;
+    QSerialPort::DataBits dataBits;
+    QSerialPort::StopBits stopBits;
+    QSerialPort::Parity parity;
+    QSerialPort::FlowControl flowControl;
+};
 
 
 
-#endif /* GLOBAL_HPP */
+#endif // SERIAL_PORT_SETTINGS_HPP

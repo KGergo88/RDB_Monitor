@@ -25,66 +25,64 @@
 #include <QDir>
 
 #include "../application/sources/global.hpp"
-#include "../application/sources/measurement_data_protocol.hpp"
+#include "../application/sources/continous_measurement_data_protocol.hpp"
 #include "test_protocol_common.h"
 
 
 
-class TestMeasurementDataProtocol : public ::testing::Test,
-                                    public testing::WithParamInterface<TestProtocolParameter>
+class TestContinousMeasurementDataProtocol : public ::testing::Test,
+                                             public testing::WithParamInterface<TestProtocolParameter>
 {
 protected:
-    MeasurementDataProtocol test_mdp_processor;
-    std::string expected_protocol_name = measurement_data_protocol_name;
-    std::string expected_file_type = "mdp";
+    ContinousMeasurementDataProtocol test_cmdp_processor;
+    std::string expected_protocol_name = continous_measurement_data_protocol_name;
     std::vector<DiagramSpecialized> processed_diagrams;
+    // Empty string as the CMDP does not support file handling
+    std::string expected_file_type;
 };
 
-TEST_F(TestMeasurementDataProtocol, GetProtocolName)
+TEST_F(TestContinousMeasurementDataProtocol, GetProtocolName)
 {
-    EXPECT_EQ(test_mdp_processor.GetProtocolName(), expected_protocol_name);
+    EXPECT_EQ(test_cmdp_processor.GetProtocolName(), expected_protocol_name);
 }
 
-TEST_F(TestMeasurementDataProtocol, CanThisFileBeProcessed)
+TEST_F(TestContinousMeasurementDataProtocol, CanThisFileBeProcessed)
 {
     std::string filename_to_test = std::string("myfile.") + expected_file_type;
-    EXPECT_TRUE(test_mdp_processor.CanThisFileBeProcessed(filename_to_test));
+    EXPECT_FALSE(test_cmdp_processor.CanThisFileBeProcessed(filename_to_test));
     filename_to_test = std::string("mymdpfile.") + std::string("txt");
-    EXPECT_FALSE(test_mdp_processor.CanThisFileBeProcessed(filename_to_test));
+    EXPECT_FALSE(test_cmdp_processor.CanThisFileBeProcessed(filename_to_test));
 }
 
-TEST_F(TestMeasurementDataProtocol, GetSupportedFileType)
+TEST_F(TestContinousMeasurementDataProtocol, GetSupportedFileType)
 {
-    EXPECT_EQ(test_mdp_processor.GetSupportedFileType(), expected_file_type);
+    EXPECT_EQ(test_cmdp_processor.GetSupportedFileType(), expected_file_type);
 }
 
-TEST_F(TestMeasurementDataProtocol, ProcessData_ExportData_EmptyStream)
+TEST_F(TestContinousMeasurementDataProtocol, ProcessData_EmptyStream)
 {
     std::ifstream empty_stream;
-    processed_diagrams = test_mdp_processor.ProcessData(empty_stream);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(0));
-
-    std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
-    processed_diagrams = test_mdp_processor.ProcessData(exported_data);
+    processed_diagrams = test_cmdp_processor.ProcessData(empty_stream);
     EXPECT_EQ(processed_diagrams.size(), std::size_t(0));
 }
 
-TEST_P(TestMeasurementDataProtocol, ProcessData_ExportData)
+TEST_F(TestContinousMeasurementDataProtocol, ExportData)
+{
+    std::stringstream exported_data;
+    EXPECT_ANY_THROW(exported_data = test_cmdp_processor.ExportData(std::vector<DiagramSpecialized>()));
+    EXPECT_EQ(exported_data.str(), std::string());
+}
+
+TEST_P(TestContinousMeasurementDataProtocol, ProcessData)
 {
     auto test_parameter = GetParam();
     std::ifstream file_stream = TestFileReader::read(test_parameter.file_name);
-    processed_diagrams = test_mdp_processor.ProcessData(file_stream);
-    EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams)) << "test_file: " << test_parameter.file_name.toStdString();
-
-    std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
-    processed_diagrams = test_mdp_processor.ProcessData(exported_data);
+    processed_diagrams = test_cmdp_processor.ProcessData(file_stream);
     EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams)) << "test_file: " << test_parameter.file_name.toStdString();
 }
 
-INSTANTIATE_TEST_SUITE_P(TestMeasurementDataProtocolInstantiation,
-                         TestMeasurementDataProtocol,
-                         testing::Values(TestProtocolParameter("TEST_1C_0E_MDP.mdp", 1),
-                                         TestProtocolParameter("TEST_2C_0E_MDP.mdp", 2),
-                                         TestProtocolParameter("TEST_1C_1E_MDP_HeadlineError.mdp", 1),
-                                         TestProtocolParameter("TEST_1C_2E_MDP_DatalineError.mdp", 1)
-                                         ));
+INSTANTIATE_TEST_SUITE_P(TestContinousMeasurementDataProtocolInstantiation,
+                         TestContinousMeasurementDataProtocol,
+                         testing::Values(TestProtocolParameter("TEST_1C_0E_CMDP.cmdp", 1),
+                                         TestProtocolParameter("TEST_1C_0E_CMDP_NoTitles.cmdp", 1),
+                                         TestProtocolParameter("TEST_1C_0E_CMDP_Simple.cmdp", 1)));

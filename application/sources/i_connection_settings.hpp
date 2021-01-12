@@ -21,37 +21,21 @@
 
 
 
-#include <vector>
-#include <string>
-
-#include <QtPlugin>
-
-#include "global.hpp"
+#include <QString>
 
 
 
-#ifndef GUI_SIGNAL_INTERFACE_HPP
-#define GUI_SIGNAL_INTERFACE_HPP
+#ifndef I_CONNECTION_SETTINGS_HPP
+#define I_CONNECTION_SETTINGS_HPP
 
 
 
-class GuiSignalInterface
+class I_ConnectionSettings
 {
-signals:
-    virtual void StartsToRun(void) = 0;
-    virtual void ShuttingDown(void) = 0;
-    virtual void OpenNetworkConnection(const std::string& port_name) = 0;
-    virtual void CloseNetworkConnection(const std::string& port_name) = 0;
-    virtual void RequestForDiagram(const QModelIndex& model_index) = 0;
-    virtual void ImportFile(const std::string& path_to_file) = 0;
-    virtual void ExportFileShowCheckBoxes(void) = 0;
-    virtual void ExportFileHideCheckBoxes(void) = 0;
-    virtual void ExportFileStoreCheckedDiagrams(const std::string& path_to_file) = 0;
-
-protected:
-    ~GuiSignalInterface() {}
+public:
+    virtual ~I_ConnectionSettings() = default;
 };
 
-Q_DECLARE_INTERFACE(GuiSignalInterface, "GuiSignalInterface")
 
-#endif // GUI_SIGNAL_INTERFACE_HPP
+
+#endif // I_CONNECTION_SETTINGS_HPP

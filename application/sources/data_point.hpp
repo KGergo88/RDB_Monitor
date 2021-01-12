@@ -34,7 +34,9 @@ template <typename T_DATA_POINT>
 class DataPoint
 {
 public:
-    DataPoint(const T_DATA_POINT& newX = 0, const T_DATA_POINT& newY = 0) : x(newX), y(newY) {}
+    using coordinate_t = T_DATA_POINT;
+
+    DataPoint(const coordinate_t& newX = 0, const coordinate_t& newY = 0) : x(newX), y(newY) {}
     DataPoint(const DataPoint&  newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
     DataPoint(DataPoint&& newDataPoint) : x(newDataPoint.x), y(newDataPoint.y) {}
 
@@ -45,24 +47,24 @@ public:
     bool operator==(const DataPoint& other) const {return ((x == other.x) && (y == other.y));}
     bool operator!=(const DataPoint& other) const {return !(*this == other);}
 
-    inline const T_DATA_POINT GetX(void) const {return x;}
-    inline const T_DATA_POINT GetY(void) const {return y;}
+    inline const coordinate_t GetX(void) const {return x;}
+    inline const coordinate_t GetY(void) const {return y;}
 
-    inline static const T_DATA_POINT GetXValueOf(const DataPoint& object) {return object.GetX();}
-    inline static const T_DATA_POINT GetYValueOf(const DataPoint& object) {return object.GetY();}
+    inline static const coordinate_t GetXValueOf(const DataPoint& object) {return object.GetX();}
+    inline static const coordinate_t GetYValueOf(const DataPoint& object) {return object.GetY();}
 
-    inline void SetX(const T_DATA_POINT newX = 0) {x = newX;}
-    inline void SetY(const T_DATA_POINT newY = 0) {y = newY;}
+    inline void SetX(const coordinate_t newX = 0) {x = newX;}
+    inline void SetY(const coordinate_t newY = 0) {y = newY;}
 
-    inline static void SetXValueOf(DataPoint& object, const T_DATA_POINT newX = 0) {object.SetX(newX);}
-    inline static void SetYValueOf(DataPoint& object, const T_DATA_POINT newY = 0) {object.SetY(newY);}
+    inline static void SetXValueOf(DataPoint& object, const coordinate_t newX = 0) {object.SetX(newX);}
+    inline static void SetYValueOf(DataPoint& object, const coordinate_t newY = 0) {object.SetY(newY);}
 
     inline static bool CompareXValues(const DataPoint& object_A, const DataPoint& object_B) {return (GetXValueOf(object_A) < GetXValueOf(object_B));}
     inline static bool CompareYValues(const DataPoint& object_A, const DataPoint& object_B) {return (GetYValueOf(object_A) < GetYValueOf(object_B));}
 
 private:
-    T_DATA_POINT x;
-    T_DATA_POINT y;
+    coordinate_t x;
+    coordinate_t y;
 };
 
 

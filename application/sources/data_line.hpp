@@ -40,6 +40,9 @@ template <typename T_DATA_POINT, typename T_INDEX >
 class DataLine
 {
 public:
+    using coordinate_t = T_DATA_POINT;
+    using index_t = T_INDEX;
+
     explicit DataLine(const std::string& newDataLineTitle = "") : DataLineTitle(newDataLineTitle) {}
 
     DataLine(const DataLine& newDataLine) = default;
@@ -50,7 +53,7 @@ public:
     DataLine& operator=(const DataLine& newDataLine) = default;
     DataLine& operator=(DataLine&& newDataLine) = default;
     
-    inline const std::string& GetTitle(void) const
+    inline std::string GetTitle(void) const
     {
         return DataLineTitle;
     }
@@ -60,37 +63,38 @@ public:
         DataLineTitle = newDataLineTitle;
     }
     
-    inline void AddNewDataPoint(const DataPoint<T_DATA_POINT>& newDataPoint)
+    inline void AddNewDataPoint(const DataPoint<coordinate_t>& newDataPoint)
     {
-        Data.push_back(newDataPoint);       
+        Data.push_back(newDataPoint);
     }
 
-    inline DataLine<T_DATA_POINT, T_INDEX>& operator<<(const DataPoint<T_DATA_POINT>& newDataPoint)
+    inline DataLine<coordinate_t, index_t>& operator<<(const DataPoint<coordinate_t>& newDataPoint)
     {
         AddNewDataPoint(newDataPoint);
         return *this;
     }
 
-    inline T_INDEX GetTheNumberOfDataPoints(void) const
+    inline index_t GetTheNumberOfDataPoints(void) const
     {
         return Data.size();
     }
     
-    inline const DataPoint<T_DATA_POINT> GetDataPoint(const T_INDEX& dataPointIndex) const
+    inline const DataPoint<coordinate_t> GetDataPoint(const index_t& dataPointIndex) const
     {
         CheckDataPointIndex(dataPointIndex);
 
         return Data[dataPointIndex];
     }  
     
-    inline void SetDataPoint(const T_INDEX& dataPointIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
+    inline void SetDataPoint(const index_t& dataPointIndex, const DataPoint<coordinate_t>& newDataPoint)
     {
         CheckDataPointIndex(dataPointIndex);
 
         Data[dataPointIndex] = newDataPoint;
     }
 
-    inline const DataPoint<T_DATA_POINT> GetDataPointWithMinValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
+    inline const DataPoint<coordinate_t> GetDataPointWithMinValue(const std::function<bool(DataPoint<coordinate_t>,
+                                                                                           DataPoint<coordinate_t>)>& compare) const
     {
         auto min_value = std::min_element(Data.begin(), Data.end(), compare);
 
@@ -103,7 +107,8 @@ public:
         return *min_value;
     }
 
-    inline const DataPoint<T_DATA_POINT> GetDataPointWithMaxValue(const std::function<bool(DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT>)>& compare) const
+    inline const DataPoint<coordinate_t> GetDataPointWithMaxValue(const std::function<bool(DataPoint<coordinate_t>,
+                                                                                           DataPoint<coordinate_t>)>& compare) const
     {
         auto max_value = std::max_element(Data.begin(), Data.end(), compare);
 
@@ -117,7 +122,7 @@ public:
     }
     
 private:
-    void CheckDataPointIndex(const T_INDEX& dataPointIndex) const
+    void CheckDataPointIndex(const index_t& dataPointIndex) const
     {
         if(Data.size() <= dataPointIndex)
         {
@@ -130,7 +135,7 @@ private:
     }
     
     std::string DataLineTitle;
-    std::vector<DataPoint<T_DATA_POINT> > Data;
+    std::vector<DataPoint<coordinate_t> > Data;
 };
 
 

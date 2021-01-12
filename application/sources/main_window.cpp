@@ -30,38 +30,46 @@ MainWindow::MainWindow() : QMainWindow(),
 {
     network_connection_is_open = false;
 
-    // Adding the object to the main window that will display the charts with anti-aliasing and the zooming turned off
+    // AddConnectionDialog
+    pAddConnectionDialog = new AddConnectionDialog(this);
+
+    // QChartView to display the charts containing the diagrams
     pChartView = new QChartView();
     pChartView->setRenderHint(QPainter::Antialiasing);
     pChartView->setRubberBand(QChartView::NoRubberBand);
 
-    // Adding the object to the main window that will list the processed diagrams to be selected to display
+    // QTreeView to list the available diagrams
     pTreeView = new QTreeView();
     pTreeView->setAnimated(true);
 
-    // Adding the object to the main window that will list the status messages
+    // QListWidget to display the status messages
     pListWidgetStatus = new QListWidget();
 
-    pWidgetConnectionManager = new ConnectionManagerWidget();
-    pWidgetDiagramExport = new DiagramExportWidget();
-
+    // QVBoxLayout to order the QChartview and QTreeView
     QVBoxLayout *pLeftVerticalLayout = new QVBoxLayout();
     pLeftVerticalLayout->addWidget(pChartView, chart_view_size_percentage);
     pLeftVerticalLayout->addWidget(pListWidgetStatus, list_widget_status_size_percentage);
 
+    pWidgetConnectionManager = new ConnectionManagerWidget();
+    pWidgetDiagramExport = new DiagramExportWidget();
+
+    // QStackedLayout to order the ConnectionManagerWidget and the DiagramExportWidget
     pStackedLayout = new QStackedLayout();
     pStackedLayout->addWidget(pWidgetConnectionManager);
     pStackedLayout->addWidget(pWidgetDiagramExport);
     pStackedLayout->setCurrentWidget(pWidgetConnectionManager);
 
+    // QVBoxLayout to order the QTreeView and QStackedLayout
     QVBoxLayout *pRightVerticalLayout = new QVBoxLayout();
     pRightVerticalLayout->addWidget(pTreeView, tree_view_size_percentage);
     pRightVerticalLayout->addLayout(pStackedLayout, stacked_layout_size_percentage);
 
+    // QHBoxLayout to order the two QVBoxLayouts
     QHBoxLayout *pHorizontalLayout = new QHBoxLayout();
     pHorizontalLayout->addLayout(pLeftVerticalLayout, left_vertical_layout_size_percentage);
     pHorizontalLayout->addLayout(pRightVerticalLayout, right_vertical_layout_size_percentage);
 
+    // QWidget to contain the QHBoxLayout
     QWidget *pCentralWidget = new QWidget(this);
     pCentralWidget->setLayout(pHorizontalLayout);
     setCentralWidget(pCentralWidget);
@@ -70,13 +78,25 @@ MainWindow::MainWindow() : QMainWindow(),
     pDiagramsMenu->addAction(diagram_menu_import_diagrams_text, this, &MainWindow::MenuActionDiagramsImportDiagrams);
     pDiagramsMenu->addAction(diagram_menu_export_diagrams_text, this, &MainWindow::MenuActionDiagramsExportDiagrams);
 
+    // Registering the connections between the signals and the slots
+    QObject::connect(pWidgetConnectionManager->add_connection_button,    &QPushButton::clicked,
+                     this,                                               &MainWindow::ConnectionManagerAddConnectionButtonWasClicked);
+    QObject::connect(pWidgetConnectionManager->remove_connection_button, &QPushButton::clicked,
+                     this,                                               &MainWindow::ConnectionManagerRemoveConnectionButtonWasClicked);
+    QObject::connect(pAddConnectionDialog,                               &QDialog::accepted,
+                     this,                                               &MainWindow::AddConnectionDialogAccepted);
+    QObject::connect(pWidgetDiagramExport->button_export,                &QPushButton::clicked,
+                     this,                                               &MainWindow::DiagramExportButtonExportWasClicked);
+    QObject::connect(pWidgetDiagramExport->button_cancel,                &QPushButton::clicked,
+                     this,                                               &MainWindow::DiagramExportButtonCancelWasClicked);
+
     // Setting the minimum size, and the title of the window
     setMinimumSize(main_window_minimum_width, main_window_minimum_height);
     setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
 
     // Setting the window icon
     QString window_icon_image_path = ":/images/Icon.png";
-    if(QFileInfo(window_icon_image_path).exists())
+    if(QFileInfo::exists(window_icon_image_path))
     {
         QIcon window_icon(window_icon_image_path);
         setWindowIcon(window_icon);
@@ -86,7 +106,7 @@ MainWindow::MainWindow() : QMainWindow(),
         throw("The window icon can not be found! Check path: " + window_icon_image_path.toStdString());
     }
 
-    // The window will be opened as maximized
+    // The main window will be opened as maximized
     showMaximized();
 }
 
@@ -116,31 +136,26 @@ void MainWindow::TreeviewCurrentSelectionChanged(const QModelIndex &current, con
     emit RequestForDiagram(current);
 }
 
-void MainWindow::RegisterBackendSignalInterface(BackendSignalInterface* new_backend_signal_interface)
+void MainWindow::RegisterBackendSignalInterface(I_BackendSignal* new_backend_signal_interface)
 {
     // If the backend signal interface is valid
     if(new_backend_signal_interface)
     {
         // Registering the interface
         backend_signal_interface = new_backend_signal_interface;
-        // Setting up the TreeView with the Model from the interface (this needs to be done before establishing the signal connections)
-        pTreeView->setModel(backend_signal_interface->GetDiagramContainerModel());
 
         // Registering the connections between the signals and the slots
-        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface),       SIGNAL(NewStatusMessage(const std::string&)),
-                         this,                                                   SLOT(DisplayStatusMessage(const std::string&)));
-        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface),       SIGNAL(NetworkOperationFinished(const std::string&, const bool&)),
-                         this,                                                   SLOT(ProcessNetworkOperationResult(const std::string&, const bool&)));
-        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface),       SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
-                         this,                                                   SLOT(DisplayDiagram(const DiagramSpecialized&)));
-        QObject::connect(pWidgetConnectionManager->button_open_close_connection, &QPushButton::clicked,
-                         this,                                                   &MainWindow::ConnectionManagerButtonOpenCloseWasClicked);
-        QObject::connect(pWidgetDiagramExport->button_export,                    &QPushButton::clicked,
-                         this,                                                   &MainWindow::DiagramExportButtonExportWasClicked);
-        QObject::connect(pWidgetDiagramExport->button_cancel,                    &QPushButton::clicked,
-                         this,                                                   &MainWindow::DiagramExportButtonCancelWasClicked);
-        QObject::connect(pTreeView->selectionModel(),                            &QItemSelectionModel::currentChanged,
-                         this,                                                   &MainWindow::TreeviewCurrentSelectionChanged);
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(NewStatusMessage(const std::string&)),
+                         this,                                             SLOT(DisplayStatusMessage(const std::string&)));
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ListOfActiveConnectionsChanged(const QStringList&)),
+                         this,                                             SLOT(ListOfActiveConnectionsChanged(const QStringList&)));
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
+                         this,                                             SLOT(DisplayDiagram(const DiagramSpecialized&)));
+
+        // Setting up the TreeView with the Model from the interface (this needs to be done before establishing the signal connections for the pTreeView)
+        pTreeView->setModel(backend_signal_interface->GetDiagramContainerModel());
+        QObject::connect(pTreeView->selectionModel(),                      &QItemSelectionModel::currentChanged,
+                         this,                                             &MainWindow::TreeviewCurrentSelectionChanged);
     }
     else
     {
@@ -156,17 +171,38 @@ void MainWindow::DisplayStatusMessage(const std::string& message_text)
     pListWidgetStatus->insertItem(0, pListWidgetItem);
 }
 
-void MainWindow::ConnectionManagerButtonOpenCloseWasClicked(void)
+void MainWindow::AddConnectionDialogAccepted(void)
 {
-    std::string network_port_name(pWidgetConnectionManager->line_edit_port_name->text().toStdString());
+    ConnectionRequestData request_data = pAddConnectionDialog->getConnectionRequestData();
+    emit OpenNetworkConnection(request_data);
+}
 
-    if(!network_connection_is_open)
+void MainWindow::ConnectionManagerAddConnectionButtonWasClicked(void)
+{
+    // Get the list of available connections and protocols from the Backend
+    auto connections = backend_signal_interface->GetAvailableConnections();
+    auto protocols = backend_signal_interface->GetAvailableProtocols();
+
+    // Displaying the connection manager dialog
+    pAddConnectionDialog->popUp(connections, protocols);
+}
+
+void MainWindow::ConnectionManagerRemoveConnectionButtonWasClicked(void)
+{
+    auto selected_connections = pWidgetConnectionManager->active_connections_list->selectedItems();
+    for(const auto& i: selected_connections)
     {
-        emit OpenNetworkConnection(network_port_name);
+        auto connection_name = i->text();
+        emit CloseNetworkConnection(connection_name);
     }
-    else
+}
+
+void MainWindow::ListOfActiveConnectionsChanged(const QStringList& active_connections)
+{
+    pWidgetConnectionManager->active_connections_list->clear();
+    for(const auto& i : active_connections)
     {
-        emit CloseNetworkConnection(network_port_name);
+        pWidgetConnectionManager->active_connections_list->addItem(i);
     }
 }
 
@@ -195,33 +231,6 @@ void MainWindow::DiagramExportButtonCancelWasClicked(void)
     pDiagramsMenu->setEnabled(true);
     pStackedLayout->setCurrentWidget(pWidgetConnectionManager);
     emit ExportFileHideCheckBoxes();
-}
-
-void MainWindow::ProcessNetworkOperationResult(const std::string& port_name, const bool& result)
-{
-    if(port_name == pWidgetConnectionManager->line_edit_port_name->text().toStdString())
-    {
-        if(result)
-        {
-            if(!network_connection_is_open)
-            {
-                pWidgetConnectionManager->line_edit_port_name->setReadOnly(true);
-                pWidgetConnectionManager->button_open_close_connection->setText(ConnectionManagerWidget::button_close_connection_text);
-                network_connection_is_open = true;
-            }
-            else
-            {
-                pWidgetConnectionManager->line_edit_port_name->setReadOnly(false);
-                pWidgetConnectionManager->button_open_close_connection->setText(ConnectionManagerWidget::button_open_connection_text);
-                network_connection_is_open = false;
-            }
-        }
-    }
-    else
-    {
-        std::string errorMessage = "A signal was received by MainWindow::ProcessNetworkOperationResult with a wrong port_name: " + port_name;
-        throw errorMessage;
-    }
 }
 
 void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)

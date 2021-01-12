@@ -22,15 +22,16 @@
 
 
 #include <iostream>
-#include <string>
 #include <memory>
 #include <functional>
 
 #include <QObject>
+#include <QString>
 
 #include "global.hpp"
-#include "network_connection_interface.hpp"
-#include "data_processing_interface.hpp"
+#include "i_connection.hpp"
+#include "i_connection_settings.hpp"
+#include "i_protocol.hpp"
 #include "diagram.hpp"
 
 
@@ -46,26 +47,35 @@ class NetworkHandler : public QObject
 
 public:
 
-    using diagram_collector_type = std::function<void(const std::string, std::vector<DiagramSpecialized>&)>;
+    using diagram_collector_type = std::function<void(const QString&, std::vector<DiagramSpecialized>&)>;
     using error_collector_type = std::function<void(const std::string&)>;
 
-    NetworkHandler(NetworkConnectionInterface *new_network_connection_interface,
-                   DataProcessingInterface *new_data_processing_interface,
+    NetworkHandler(const QString& new_user_defined_name,
+                   std::shared_ptr<I_Connection> new_connection_interface,
+                   std::shared_ptr<I_ConnectionSettings> new_connection_settings,
+                   std::shared_ptr<I_Protocol> new_protocol_interface,
                    diagram_collector_type new_diagram_collector,
                    error_collector_type new_error_collector)
-                              : network_connection_interface(new_network_connection_interface),
-                                data_processing_interface(new_data_processing_interface),
+                              : user_defined_name(new_user_defined_name),
+                                connection_interface(new_connection_interface),
+                                connection_settings(new_connection_settings),
+                                protocol_interface(new_protocol_interface),
                                 diagram_collector(new_diagram_collector),
                                 error_collector(new_error_collector)
     {
-        if(!network_connection_interface)
+        if(!connection_interface)
         {
-            std::string errorMessage = "There was no network_connection_interface set in NetworkHandler::NetworkHandler!";
+            std::string errorMessage = "There was no connection_interface set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
-        if(!data_processing_interface)
+        if(!connection_settings)
         {
-            std::string errorMessage = "There was no data_processor_interface set in NetworkHandler::NetworkHandler!";
+            std::string errorMessage = "There was no connection_settings set in NetworkHandler::NetworkHandler!";
+            throw errorMessage;
+        }
+        if(!protocol_interface)
+        {
+            std::string errorMessage = "There was no protocol_interface set in NetworkHandler::NetworkHandler!";
             throw errorMessage;
         }
         if(!diagram_collector)
@@ -88,20 +98,21 @@ public:
     NetworkHandler& operator=(const NetworkHandler&) = delete;
     NetworkHandler& operator=(NetworkHandler&&) = delete;
 
-    bool Run(const std::string& new_port_name);
-
+    bool Run(void);
     void Stop(void);
+    QString getUserDefinedName(void) { return user_defined_name; }
 
 private slots:
     void DataAvailable(std::istream& received_data);
     void ErrorReport(const std::string& error_message);
 
 private:
-    NetworkConnectionInterface* network_connection_interface;
-    DataProcessingInterface* data_processing_interface;
+    QString user_defined_name;
+    std::shared_ptr<I_Connection> connection_interface;
+    std::shared_ptr<I_ConnectionSettings> connection_settings;
+    std::shared_ptr<I_Protocol> protocol_interface;
     diagram_collector_type diagram_collector;
     error_collector_type error_collector;
-    std::string port_name;
 };
 
 

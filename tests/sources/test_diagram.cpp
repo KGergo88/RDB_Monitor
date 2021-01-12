@@ -133,7 +133,7 @@ TEST(TestDiagram, GetDataLineTitle_SetDataLineTitle)
     EXPECT_THROW(diagram.SetDataLineTitle(0, new_title), std::string);
 
     // Testing the getting and setting of existing data_line objects
-    diagram.AddNewDataLine(old_title);
+    diagram.AddNewDataLine("", old_title);
     EXPECT_EQ(diagram.GetDataLineTitle(0), old_title);
     diagram.SetDataLineTitle(0, new_title);
     EXPECT_EQ(diagram.GetDataLineTitle(0), new_title);

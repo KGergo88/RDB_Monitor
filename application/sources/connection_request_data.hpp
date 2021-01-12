@@ -21,33 +21,27 @@
 
 
 
-#include <cstddef>
-#include <cstdint>
+#include <memory>
+
+#include <QString>
+
+#include "i_connection_settings.hpp"
 
 
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef CONNECTION_REQUEST_DATA_HPP
+#define CONNECTION_REQUEST_DATA_HPP
 
 
 
-using DataPointType = double;
-using DataIndexType = std::size_t;
-
-template <typename T_DATA_POINT, typename T_INDEX>
-class Diagram;
-using DiagramSpecialized = Diagram<DataPointType, DataIndexType>;
-
-template <typename T_DATA_POINT, typename T_INDEX>
-class DataLine;
-using DataLineSpecialized = DataLine<DataPointType, DataIndexType>;
-
-template <typename T_DATA_POINT>
-class DataPoint;
-using DataPointSpecialized = DataPoint<DataPointType>;
-
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
+struct ConnectionRequestData
+{
+    QString user_defined_name;
+    QString connection;
+    QString protocol;
+    std::shared_ptr<I_ConnectionSettings> connection_settings;
+};
 
 
 
-#endif /* GLOBAL_HPP */
+#endif // CONNECTION_REQUEST_DATA_HPP

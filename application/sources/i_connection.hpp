@@ -21,33 +21,39 @@
 
 
 
-#include <cstddef>
-#include <cstdint>
+#include <istream>
+#include <memory>
+#include <string>
+
+#include <QtPlugin>
+
+#include "global.hpp"
+#include "i_connection_settings.hpp"
 
 
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef I_CONNECTION_HPP
+#define I_CONNECTION_HPP
 
 
 
-using DataPointType = double;
-using DataIndexType = std::size_t;
+class I_Connection
+{
+public:
+    virtual ~I_Connection() = default;
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class Diagram;
-using DiagramSpecialized = Diagram<DataPointType, DataIndexType>;
+    virtual std::string getName(void) = 0;
+    virtual bool Open(const std::shared_ptr<I_ConnectionSettings> settings) = 0;
+    virtual void Close(void) = 0;
+    virtual bool IsOpen(void) = 0;
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class DataLine;
-using DataLineSpecialized = DataLine<DataPointType, DataIndexType>;
+signals:
+    virtual void DataReceived(std::istream& received_data) = 0;
+    virtual void ErrorReport(const std::string& error_message) = 0;
+};
 
-template <typename T_DATA_POINT>
-class DataPoint;
-using DataPointSpecialized = DataPoint<DataPointType>;
-
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
+Q_DECLARE_INTERFACE(I_Connection, "ConnectionInterface")
 
 
 
-#endif /* GLOBAL_HPP */
+#endif // I_CONNECTION_HPP

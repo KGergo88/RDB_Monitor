@@ -21,33 +21,60 @@
 
 
 
-#include <cstddef>
-#include <cstdint>
+#include <QWidget>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QComboBox>
+
+#include "i_connection_settings_editor.hpp"
+#include "serial_port_settings.hpp"
+
+
+#ifndef SERIAL_PORT_SETTINGS_EDITOR_HPP
+#define SERIAL_PORT_SETTINGS_EDITOR_HPP
 
 
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+class SerialPortSettingsEditor : public I_ConnectionSettingsEditor
+{
+    Q_OBJECT
+    Q_INTERFACES(I_ConnectionSettingsEditor)
+
+signals:
+    void settingsChanged(bool settings_valid, const QString& error_message) override;
+
+public:
+    SerialPortSettingsEditor(QWidget* parent);
+
+    SerialPortSettingsEditor(const SerialPortSettingsEditor&) = delete;
+    SerialPortSettingsEditor(SerialPortSettingsEditor&&) = delete;
+
+    virtual ~SerialPortSettingsEditor() = default;
+
+    SerialPortSettingsEditor& operator=(const SerialPortSettingsEditor&) = delete;
+    SerialPortSettingsEditor& operator=(SerialPortSettingsEditor&&) = delete;
+
+    QString getConnectionName(void) override { return serial_port_connection_name; }
+
+    std::shared_ptr<I_ConnectionSettings> getSettings(void) override;
+
+    std::shared_ptr<I_ConnectionSettings> getDefaultSettings(void) override;
+
+private slots:
+    void reviewSettings(void);
+
+private:
+    QGridLayout* pGridLayout;
+    QLineEdit* pPortNameLineEdit;
+    QComboBox* pBaudRateComboBox;
+    QComboBox* pDataBitsComboBox;
+    QComboBox* pStopBitsComboBox;
+    QComboBox* pParityComboBox;
+    QComboBox* pFlowControlComboBox;
+};
 
 
 
-using DataPointType = double;
-using DataIndexType = std::size_t;
-
-template <typename T_DATA_POINT, typename T_INDEX>
-class Diagram;
-using DiagramSpecialized = Diagram<DataPointType, DataIndexType>;
-
-template <typename T_DATA_POINT, typename T_INDEX>
-class DataLine;
-using DataLineSpecialized = DataLine<DataPointType, DataIndexType>;
-
-template <typename T_DATA_POINT>
-class DataPoint;
-using DataPointSpecialized = DataPoint<DataPointType>;
-
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
-
-
-
-#endif /* GLOBAL_HPP */
+#endif // SERIAL_PORT_SETTINGS_EDITOR_HPP

@@ -21,33 +21,42 @@
 
 
 
-#include <cstddef>
-#include <cstdint>
+#include <vector>
+#include <string>
+
+#include <QtPlugin>
+#include <QAbstractItemModel>
+
+#include "global.hpp"
 
 
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef I_BACKEND_SIGNAL_HPP
+#define I_BACKEND_SIGNAL_HPP
 
 
 
-using DataPointType = double;
-using DataIndexType = std::size_t;
+class I_BackendSignal
+{
+protected:
+    ~I_BackendSignal() {}
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class Diagram;
-using DiagramSpecialized = Diagram<DataPointType, DataIndexType>;
+public:
+    virtual QAbstractItemModel* GetDiagramContainerModel(void) = 0;
+    virtual std::string GetFileImportDefaultFolder(void) = 0;
+    virtual std::string GetFileExportDefaultFolder(void) = 0;
+    virtual std::vector<std::string> GetSupportedFileExtensions(void) = 0;
+    virtual QStringList GetAvailableConnections(void) = 0;
+    virtual QStringList GetAvailableProtocols(void) = 0;
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class DataLine;
-using DataLineSpecialized = DataLine<DataPointType, DataIndexType>;
+signals:
+    virtual void NewStatusMessage(const std::string& message_text) = 0;
+    virtual void ListOfActiveConnectionsChanged(const QStringList& active_connections) = 0;
+    virtual void ShowThisDiagram(const DiagramSpecialized& diagram) = 0;
+};
 
-template <typename T_DATA_POINT>
-class DataPoint;
-using DataPointSpecialized = DataPoint<DataPointType>;
-
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
+Q_DECLARE_INTERFACE(I_BackendSignal, "I_BackendSignal")
 
 
 
-#endif /* GLOBAL_HPP */
+#endif // I_BACKEND_SIGNAL_HPP

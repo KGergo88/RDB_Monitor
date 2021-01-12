@@ -28,15 +28,24 @@
 
 
 
-TEST(TestDataLine, Constructors_GetTitle)
+class TestDataLine : public ::testing::Test
+{
+protected:
+    using Coordinate_t = int;
+    using DataPoint_t = DataPoint<Coordinate_t>;
+    using DataLine_t = DataLine<Coordinate_t, std::size_t>;
+
+};
+
+TEST_F(TestDataLine, Constructors_GetTitle)
 {
     // Testing the default construction
-    DataLine<int, std::size_t> data_line_default;
+    DataLine_t data_line_default;
     EXPECT_EQ(data_line_default.GetTitle(), std::string(""));
 
     // Testing the construction from values
     std::string data_line_title = "DataLineTitle";
-    DataLine<int, std::size_t> data_line_with_title(data_line_title);
+    DataLine_t data_line_with_title(data_line_title);
     EXPECT_EQ(data_line_with_title.GetTitle(), data_line_title);
 
     // Testing the copy construction
@@ -49,31 +58,31 @@ TEST(TestDataLine, Constructors_GetTitle)
     EXPECT_EQ(moved_data_line.GetTitle(), data_line_title);
 }
 
-TEST(TestDataLine, Operators)
+TEST_F(TestDataLine, Operators)
 {
     std::string data_line_title = "DataLineTitle";
     std::string overwritten_title = "Title that will be lost...";
-    DataLine<int, std::size_t> data_line_with_title(data_line_title);
+    DataLine_t data_line_with_title(data_line_title);
 
     // Testing the copy operator
-    DataLine<int, std::size_t> copied_data_line;
+    DataLine_t copied_data_line;
     copied_data_line.SetTitle(overwritten_title);
     EXPECT_EQ(copied_data_line.GetTitle(), overwritten_title);
     copied_data_line = data_line_with_title;
     EXPECT_EQ(copied_data_line.GetTitle(), data_line_title);
 
     // Testing the move operator
-    DataLine<int, std::size_t> data_line_to_move(data_line_title);
-    DataLine<int, std::size_t> moved_data_line;
+    DataLine_t data_line_to_move(data_line_title);
+    DataLine_t moved_data_line;
     moved_data_line.SetTitle(overwritten_title);
     EXPECT_EQ(moved_data_line.GetTitle(), overwritten_title);
     moved_data_line = std::move(data_line_to_move);
     EXPECT_EQ(moved_data_line.GetTitle(), data_line_title);
 }
 
-TEST(TestDataLine, SetTitle)
+TEST_F(TestDataLine, SetTitle)
 {
-    DataLine<int, std::size_t> data_line_without_title;
+    DataLine_t data_line_without_title;
     std::string data_line_title = "DataLineTitle";
 
     // Testing the SetTitle
@@ -81,15 +90,15 @@ TEST(TestDataLine, SetTitle)
     EXPECT_EQ(data_line_without_title.GetTitle(), data_line_title);
 }
 
-TEST(TestDataLine, AddNewDataPoint_GetTheNumberOfDataPoints_GetDataPoint)
+TEST_F(TestDataLine, AddNewDataPoint_GetTheNumberOfDataPoints_GetDataPoint)
 {
     int x_value = 1;
     int y_value = 2;
-    DataPoint<int> first_data_point(x_value, y_value);
-    DataPoint<int> second_data_point(x_value * 2, y_value * 2);
-    DataPoint<int> third_data_point(x_value * 3, y_value * 3);
-    DataPoint<int> fourth_data_point(x_value * 4, y_value * 4);
-    DataLine<int, std::size_t> data_line;
+    DataPoint_t first_data_point(x_value, y_value);
+    DataPoint_t second_data_point(x_value * 2, y_value * 2);
+    DataPoint_t third_data_point(x_value * 3, y_value * 3);
+    DataPoint_t fourth_data_point(x_value * 4, y_value * 4);
+    DataLine_t data_line;
 
     // Testing the GetTheNumberOfDataPoints and AddNewDataPoint
     EXPECT_EQ(data_line.GetTheNumberOfDataPoints(), std::size_t(0));
@@ -107,13 +116,13 @@ TEST(TestDataLine, AddNewDataPoint_GetTheNumberOfDataPoints_GetDataPoint)
     EXPECT_EQ(fourth_data_point, data_line.GetDataPoint(3));
 }
 
-TEST(TestDataLine, SetDataPoint)
+TEST_F(TestDataLine, SetDataPoint)
 {
     int x_value = 1;
     int y_value = 2;
-    DataPoint<int> first_data_point(x_value, y_value);
-    DataPoint<int> second_data_point(x_value * 2, y_value * 2);
-    DataLine<int, std::size_t> data_line;
+    DataPoint_t first_data_point(x_value, y_value);
+    DataPoint_t second_data_point(x_value * 2, y_value * 2);
+    DataLine_t data_line;
     data_line << first_data_point << second_data_point;
     EXPECT_EQ(first_data_point, data_line.GetDataPoint(0));
     EXPECT_EQ(second_data_point, data_line.GetDataPoint(1));
@@ -125,14 +134,14 @@ TEST(TestDataLine, SetDataPoint)
     ASSERT_THROW(data_line.SetDataPoint(2, first_data_point), std::string);
 }
 
-TEST(TestDataLine, GetDataPointWithMinValue_GetDataPointWithMaxValue)
+TEST_F(TestDataLine, GetDataPointWithMinValue_GetDataPointWithMaxValue)
 {
-    DataPoint<int> first_data_point(1, 5);
-    DataPoint<int> second_data_point(3, 2);
-    DataLine<int, std::size_t> data_line;
+    DataPoint_t first_data_point(1, 5);
+    DataPoint_t second_data_point(3, 2);
+    DataLine_t data_line;
 
-    auto lower_than_x_based = [](DataPoint<int> first, DataPoint<int> second) -> bool {return (first.GetX() < second.GetX());};
-    auto lower_than_y_based = [](DataPoint<int> first, DataPoint<int> second) -> bool {return (first.GetY() < second.GetY());};
+    auto lower_than_x_based = [](DataPoint_t first, DataPoint_t second) -> bool {return (first.GetX() < second.GetX());};
+    auto lower_than_y_based = [](DataPoint_t first, DataPoint_t second) -> bool {return (first.GetY() < second.GetY());};
 
     // Testing the functions on an empty data line
     ASSERT_THROW(data_line.GetDataPointWithMinValue(lower_than_x_based), std::string);
@@ -148,12 +157,12 @@ TEST(TestDataLine, GetDataPointWithMinValue_GetDataPointWithMaxValue)
     EXPECT_EQ(data_line.GetDataPointWithMaxValue(lower_than_y_based), first_data_point);
 }
 
-TEST(TestDataLine, CheckDataPointIndex)
+TEST_F(TestDataLine, CheckDataPointIndex)
 {
     int x_value = 1;
     int y_value = 2;
-    DataPoint<int> first_data_point(x_value, y_value);
-    DataLine<int, std::size_t> data_line;
+    DataPoint_t first_data_point(x_value, y_value);
+    DataLine_t data_line;
     EXPECT_EQ(data_line.GetTheNumberOfDataPoints(), std::size_t(0));
     data_line.AddNewDataPoint(first_data_point);
     EXPECT_EQ(data_line.GetTheNumberOfDataPoints(), std::size_t(1));

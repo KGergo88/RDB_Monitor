@@ -30,6 +30,8 @@ message(STATUS "")
 set(SOURCES
     sources/backend.cpp
     sources/configuration.cpp
+    sources/add_connection_dialog.cpp
+    sources/continous_measurement_data_protocol.cpp
     sources/data_line.cpp
     sources/data_point.cpp
     sources/diagram.cpp
@@ -39,6 +41,7 @@ set(SOURCES
     sources/measurement_data_protocol.cpp
     sources/network_handler.cpp
     sources/serial_port.cpp
+    sources/serial_port_settings_editor.cpp
 )
 
 set(EXECUTABLE_NAME ${PROJECT_NAME})

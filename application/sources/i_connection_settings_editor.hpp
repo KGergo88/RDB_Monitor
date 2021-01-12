@@ -21,33 +21,36 @@
 
 
 
-#include <cstddef>
-#include <cstdint>
+#include <memory>
+
+#include <QWidget>
+
+#include "i_connection_settings.hpp"
 
 
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef I_CONNECTION_SETTINGS_EDITOR_HPP
+#define I_CONNECTION_SETTINGS_EDITOR_HPP
 
 
 
-using DataPointType = double;
-using DataIndexType = std::size_t;
+class I_ConnectionSettingsEditor : public QWidget
+{
+signals:
+    virtual void settingsChanged(bool settings_valid, const QString& error_message) = 0;
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class Diagram;
-using DiagramSpecialized = Diagram<DataPointType, DataIndexType>;
+public:
+    I_ConnectionSettingsEditor(QWidget* parent) : QWidget(parent) { }
+    virtual ~I_ConnectionSettingsEditor() = default;
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class DataLine;
-using DataLineSpecialized = DataLine<DataPointType, DataIndexType>;
+    // Returns a the name of the connection (eg. SerialPort)
+    virtual QString getConnectionName(void) = 0;
+    // Returns the current settings
+    virtual std::shared_ptr<I_ConnectionSettings> getSettings(void) = 0;
+    // Returns the default settings
+    virtual std::shared_ptr<I_ConnectionSettings> getDefaultSettings(void) = 0;    
+};
 
-template <typename T_DATA_POINT>
-class DataPoint;
-using DataPointSpecialized = DataPoint<DataPointType>;
+Q_DECLARE_INTERFACE(I_ConnectionSettingsEditor, "I_ConnectionSettingsEditor")
 
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
-
-
-
-#endif /* GLOBAL_HPP */
+#endif // I_CONNECTION_SETTINGS_EDITOR_HPP

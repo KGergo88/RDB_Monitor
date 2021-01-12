@@ -21,33 +21,42 @@
 
 
 
-#include <cstddef>
-#include <cstdint>
+#include <memory>
+
+#include "i_protocol.hpp"
+#include "measurement_data_protocol.hpp"
+#include "continous_measurement_data_protocol.hpp"
 
 
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef PROTOCOL_FACTORY_HPP
+#define PROTOCOL_FACTORY_HPP
 
 
 
-using DataPointType = double;
-using DataIndexType = std::size_t;
+class ProtocolFactory
+{
+public:
+    static std::shared_ptr<I_Protocol> make(const QString& protocol_name)
+    {
+        std::shared_ptr<I_Protocol> protocol;
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class Diagram;
-using DiagramSpecialized = Diagram<DataPointType, DataIndexType>;
+        if(protocol_name == QString(measurement_data_protocol_name))
+        {
+            protocol = std::make_shared<MeasurementDataProtocol>();
+        }
+        else if(protocol_name == QString(continous_measurement_data_protocol_name))
+        {
+            protocol = std::make_shared<ContinousMeasurementDataProtocol>();
+        }
+        else
+        {
+            throw ("ProtocolFactory::make(): Unknown protocol \"" + protocol_name.toStdString() + "\"");
+        }
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class DataLine;
-using DataLineSpecialized = DataLine<DataPointType, DataIndexType>;
-
-template <typename T_DATA_POINT>
-class DataPoint;
-using DataPointSpecialized = DataPoint<DataPointType>;
-
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
+        return protocol;
+    }
+};
 
 
-
-#endif /* GLOBAL_HPP */
+#endif // PROTOCOL_FACTORY_HPP

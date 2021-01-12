@@ -24,15 +24,16 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 #include <sstream>
 #include <algorithm>
 #include <functional>
 #include <ctime>
 #include <cctype>
-#include <regex>
 #include <type_traits>
 
 #include <QFileInfo>
+#include <QRegularExpression>
 
 #include "global.hpp"
 #include "i_protocol.hpp"
@@ -40,72 +41,68 @@
 
 
 
-#ifndef MEAUREMENT_DATA_PROTOCOL_HPP
-#define MEAUREMENT_DATA_PROTOCOL_HPP
+#ifndef CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP
+#define CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP
 
 
 
-static constexpr char measurement_data_protocol_name[] = "Measurement Data Protocol - MDP";
+static constexpr char continous_measurement_data_protocol_name[] = "Continous Measurement Data Protocol - CMDP";
 
-class MeasurementDataProtocol : public I_Protocol
+class ContinousMeasurementDataProtocol : public I_Protocol
 {
 public:
-    MeasurementDataProtocol();
-    virtual ~MeasurementDataProtocol() = default;
+    ContinousMeasurementDataProtocol();
+    virtual ~ContinousMeasurementDataProtocol() = default;
 
-    MeasurementDataProtocol(const MeasurementDataProtocol&) = delete;
-    MeasurementDataProtocol(MeasurementDataProtocol&&) = delete;
+    ContinousMeasurementDataProtocol(const ContinousMeasurementDataProtocol&) = delete;
+    ContinousMeasurementDataProtocol(ContinousMeasurementDataProtocol&&) = delete;
 
-    MeasurementDataProtocol& operator=(const MeasurementDataProtocol&) = delete;
-    MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
+    ContinousMeasurementDataProtocol& operator=(const ContinousMeasurementDataProtocol&) = delete;
+    ContinousMeasurementDataProtocol& operator=(ContinousMeasurementDataProtocol&&) = delete;
 
     virtual std::string GetProtocolName(void) override;
     virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
-    virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
-    virtual std::string GetSupportedFileType(void) override { return Constants::native_file_extension; }
     virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
+    virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
     virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
+    virtual std::string GetSupportedFileType(void) override;
 
 private:
     struct Constants
     {
-        static constexpr char native_file_extension[] = "mdp";
-
         enum class States : uint8_t
         {
             INVALID = 0,
-            WaitingForStartLine,
-            ProcessingTitleLine,
-            ProcessingHeadline,
-            ProcessingDataLines
+            WaitingForHeaderMessageStart,
+            ProcessingHeaderDiagramTitle,
+            ProcessingHeaderDataLines,
+            WaitingForHeaderMessageEnd,
+            WaitingForDataMessageStart,
+            ProcessingDataMessageContent,
         };
+    };
 
-        struct Regex
-        {
-            // REGEX strings to search the input data for valid measurement session
-            static constexpr char start_line[]         = R"(^\s*<<<START>>>$)";
-            static constexpr char title_line[]         = R"(^<(.*)>$)";
-            static constexpr char headline[]           = R"(^\s*(\w+,){2,}$)";
-            static constexpr char headline_analyzer[]  = R"(^\s*(\w+),)";
-            static constexpr char data_line[]          = R"(^\s*(((?:\+|\-)?\d+),){2,}$)";
-            static constexpr char data_line_analyzer[] = R"(^\s*((?:\+|\-)?\d+),)";
-            static constexpr char end_line[]           = R"(^\s*<<<END>>>$)";
-        };
-
-        struct Export
-        {
-            static constexpr char start_line[]          = "<<<START>>>";
-            static constexpr char end_line[]            = "<<<END>>>";
-            static constexpr char diagram_title_start[] = "<";
-            static constexpr char diagram_title_end[]   = ">";
-            static constexpr char element_separator     = ',';
-        };
+    struct RegexPatterns
+    {
+        // REGEX patterns to search the input data for valid measurement session
+        QRegularExpression header_start             = QRegularExpression(R"(^<CMDP_H>$)");
+        QRegularExpression header_diagram_title     = QRegularExpression(R"(^<(?<diagram_title>.*)>$)");
+        QRegularExpression header_datalines         = QRegularExpression(R"(^X:(?<x_title>[^,]*),(?<y_titles>(Y\d+:[^,]*,)+)$)");
+        QRegularExpression header_dataline_y_titles = QRegularExpression(R"((?<id>Y\d+):(?<title>[^,]*),)");
+        QRegularExpression header_end               = QRegularExpression(R"(^>CMDP_H<$)");
+        QRegularExpression data_start               = QRegularExpression(R"(^<CMDP_D>$)");
+        QRegularExpression data_content             = QRegularExpression(R"(^X:(?<x_value>\d+),(?<y_content>(Y\d+:\d+,)+)$)");
+        QRegularExpression data_y_content           = QRegularExpression(R"((?<id>Y\d+):(?<value>\d+),)");
+        QRegularExpression data_end                 = QRegularExpression(R"(^>CMDP_D<$)");
+        QRegularExpression tail                     = QRegularExpression(R"(^<CMDP_T>$)");
+        QRegularExpression reset                    = QRegularExpression(R"(^<CMDP_R>$)");
     };
 
     Constants::States state;
     DiagramSpecialized actual_diagram;
+    RegexPatterns regex_patterns;
 };
 
 
 
-#endif // MEAUREMENT_DATA_PROTOCOL_HPP
+#endif // CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP

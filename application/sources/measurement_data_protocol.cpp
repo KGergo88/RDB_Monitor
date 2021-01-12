@@ -25,28 +25,24 @@
 
 
 
-MeasurementDataProtocol::MeasurementDataProtocol() : DataProcessingInterface("Measurement Data Protocol MDP", "mdp")
+MeasurementDataProtocol::MeasurementDataProtocol()
 {
     state = Constants::States::WaitingForStartLine;
 }
 
 std::string MeasurementDataProtocol::GetProtocolName(void)
 {
-    return protocol_name;
+    return std::string(measurement_data_protocol_name);
 }
 
 std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istream& input_data)
 {
     std::vector<DiagramSpecialized> assembled_diagrams;
-    std::string received_data;
     std::string actual_line;
 
     while(std::getline(input_data, actual_line))
     {
         std::smatch match_results;
-
-        // Removing the whitespaces from the actual line
-        actual_line.erase(std::remove_if(actual_line.begin(), actual_line.end(), isspace), actual_line.end());
 
         try
         {
@@ -81,7 +77,7 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                         // Switching to the next state without a break --> a new line will NOT be fetched, because this line is the headline
                     }
 
-                    // The falltrough is not an error in this case, this behaviour needed because there was no diagram title found, the actual_line contains the headline
+                // The falltrough is not an error in this case, this behaviour needed because there was no diagram title found, the actual_line contains the headline
                 [[fallthrough]];
                 case Constants::States::ProcessingHeadline:
                     // If this is a headline but not a dataline
@@ -101,7 +97,8 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                             }
                             else
                             {
-                                actual_diagram.AddNewDataLine(match_results[1]);
+                                std::string dataline_id = "Y" + std::to_string(column_index - 1);
+                                actual_diagram.AddNewDataLine(dataline_id, match_results[1]);
                             }
 
                             ++column_index;
@@ -184,10 +181,11 @@ bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_f
 
     std::string file_extension = QFileInfo(QString::fromStdString(path_to_file)).completeSuffix().toStdString();
 
-    if(native_file_extension == file_extension)
+    if(std::string(Constants::native_file_extension) == file_extension)
     {
         bResult = true;
     }
+
     return bResult;
 }
 
@@ -227,4 +225,18 @@ std::stringstream MeasurementDataProtocol::ExportData(const std::vector<DiagramS
     }
 
     return exported_data;
+}
+
+bool MeasurementDataProtocol::CanThisFileBeExportedInto(const std::string path_to_file)
+{
+    bool bResult = false;
+
+    std::string file_extension = QFileInfo(QString::fromStdString(path_to_file)).completeSuffix().toStdString();
+
+    if(std::string(Constants::native_file_extension) == file_extension)
+    {
+        bResult = true;
+    }
+
+    return bResult;
 }

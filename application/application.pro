@@ -46,39 +46,55 @@ win32 {
     QMAKE_CXXFLAGS += /std:c++17
 }
 
+CONFIG(debug, debug|release) {
+    CONFIG += -O0
+}
+
 # Source files of the target
-SOURCES +=                                  \
-    sources/backend.cpp                     \
-    sources/configuration.cpp               \
-    sources/data_line.cpp                   \
-    sources/data_point.cpp                  \
-    sources/diagram.cpp                     \
-    sources/diagram_container.cpp           \
-    sources/main.cpp                        \
-    sources/main_window.cpp                 \
-    sources/measurement_data_protocol.cpp   \
-    sources/network_handler.cpp             \
-    sources/serial_port.cpp
+SOURCES +=                                          \
+    sources/backend.cpp                             \
+    sources/configuration.cpp                       \
+    sources/add_connection_dialog.cpp               \
+    sources/continous_measurement_data_protocol.cpp \
+    sources/data_line.cpp                           \
+    sources/data_point.cpp                          \
+    sources/diagram.cpp                             \
+    sources/diagram_container.cpp                   \
+    sources/main.cpp                                \
+    sources/main_window.cpp                         \
+    sources/measurement_data_protocol.cpp           \
+    sources/network_handler.cpp                     \
+    sources/serial_port.cpp                         \
+    sources/serial_port_settings_editor.cpp
 
 # Header files of the target
-HEADERS +=                                      \
-    sources/backend.hpp                         \
-    sources/backend_signal_interface.hpp        \
-    sources/configuration.hpp                   \
-    sources/data_connection_interface.hpp       \
-    sources/data_line.hpp                       \
-    sources/data_point.hpp                      \
-    sources/data_processing_interface.hpp       \
-    sources/diagram.hpp                         \
-    sources/diagram_container.hpp               \
-    sources/global.hpp                          \
-    sources/gui_signal_interface.hpp            \
-    sources/main_window.hpp                     \
-    sources/measurement_data_protocol.hpp       \
-    sources/network_connection_interface.hpp    \
-    sources/network_handler.hpp                 \
-    sources/ordered_dict.h                      \
-    sources/serial_port.hpp
+HEADERS +=                                          \
+    sources/backend.hpp                             \
+    sources/configuration.hpp                       \
+    sources/add_connection_dialog.hpp               \
+    sources/connection_factory.hpp                  \
+    sources/connection_request_data.hpp             \
+    sources/continous_measurement_data_protocol.hpp \
+    sources/data_connection_interface.hpp           \
+    sources/data_line.hpp                           \
+    sources/data_point.hpp                          \
+    sources/diagram.hpp                             \
+    sources/diagram_container.hpp                   \
+    sources/global.hpp                              \
+    sources/i_backend_signal.hpp                    \
+    sources/i_connection.hpp                        \
+    sources/i_connection_settings.hpp               \
+    sources/i_connection_settings_editor.hpp        \
+    sources/i_gui_signal.hpp                        \
+    sources/i_protocol.hpp                          \
+    sources/main_window.hpp                         \
+    sources/measurement_data_protocol.hpp           \
+    sources/network_handler.hpp                     \
+    sources/ordered_dict.h                          \
+    sources/protocol_factory.hpp                    \
+    sources/serial_port.hpp                         \
+    sources/serial_port_settings.hpp                \
+    sources/serial_port_settings_editor.hpp
 
 RESOURCES = ../resources.qrc
 

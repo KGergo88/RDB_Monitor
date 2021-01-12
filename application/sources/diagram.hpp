@@ -22,10 +22,10 @@
 
 
 #include <string>
-#include <vector>
 #include <algorithm>
 
 #include "global.hpp"
+#include "ordered_dict.h"
 #include "data_point.hpp"
 #include "data_line.hpp"
 
@@ -39,6 +39,12 @@
 template <typename T_DATA_POINT, typename T_INDEX >
 class Diagram {
 public:
+    using coordinate_t = T_DATA_POINT;
+    using index_t = T_INDEX;
+    using DataPoint_t = DataPoint<coordinate_t>;
+    using DataLine_t = DataLine<coordinate_t, index_t>;
+    using DataContainer_t = OrderedDict<DataLine_t>;
+
     Diagram(const std::string& newDiagramTitle = "", const std::string& newAxisXTitle = "") : DiagramTitle(newDiagramTitle), AxisXTitle(newAxisXTitle) {}
 
     Diagram(const Diagram& newDiagram) = default;
@@ -69,97 +75,111 @@ public:
         AxisXTitle = newAxisXTitle;
     }
 
-    void AddNewDataLine(const std::string& newDataLineTitle = "")
+    bool AddNewDataLine(const std::string& newDataLineId,
+                        const std::string& newDataLineTitle = "")
     {
-        Data.push_back(DataLine<T_DATA_POINT, T_INDEX>(newDataLineTitle));
+        return Data.emplace_back(newDataLineId, DataLine_t(newDataLineTitle));
     }
 
-    inline const T_INDEX GetTheNumberOfDataLines(void) const
+    inline bool HasDataLine(const index_t& dataLineIndex) const
+    {
+        return (!Data.empty() && (dataLineIndex <= GetTheNumberOfDataLines()));
+    }
+
+    inline bool HasDataLine(const std::string& dataLineId) const
+    {
+        return Data.hasKey(dataLineId);
+    }
+
+    inline const index_t GetTheNumberOfDataLines(void) const
     {
         return Data.size();
     }
 
-    inline const std::string& GetDataLineTitle(const T_INDEX& dataLineIndex) const
+    inline const std::string GetDataLineTitle(const index_t& dataLineIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
         return Data[dataLineIndex].GetTitle();
     }
 
-    inline void SetDataLineTitle(const T_INDEX& dataLineIndex, const std::string& newDataLineTitle)
+    inline void SetDataLineTitle(const index_t& dataLineIndex, const std::string& newDataLineTitle)
     {
         CheckDataLineIndex(dataLineIndex);
 
         Data[dataLineIndex].SetTitle(newDataLineTitle);
     }
 
-    void AddNewDataPoint(T_INDEX dataLineIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
+    void AddNewDataPoint(const index_t& dataLineIndex, const DataPoint_t& newDataPoint)
     {
         CheckDataLineIndex(dataLineIndex);
 
         Data[dataLineIndex].AddNewDataPoint(newDataPoint);
     }
 
-    inline const T_INDEX GetTheNumberOfDataPoints(const T_INDEX& dataLineIndex) const
+    void AddNewDataPoint(const std::string& dataLineId, const DataPoint_t& newDataPoint)
+    {
+        Data[dataLineId].AddNewDataPoint(newDataPoint);
+    }
+
+    inline const index_t GetTheNumberOfDataPoints(const index_t& dataLineIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
         return Data[dataLineIndex].GetTheNumberOfDataPoints();
     }
 
-    inline const DataPoint<T_DATA_POINT> GetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex) const
+    inline const DataPoint_t GetDataPoint(const index_t& dataLineIndex, const index_t& dataPointIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
         return Data[dataLineIndex].GetDataPoint(dataPointIndex);
     }
     
-    void SetDataPoint(const T_INDEX& dataLineIndex, const T_INDEX& dataPointIndex, const DataPoint<T_DATA_POINT>& newDataPoint)
+    void SetDataPoint(const index_t& dataLineIndex, const index_t& dataPointIndex, const DataPoint_t& newDataPoint)
     {
         CheckDataLineIndex(dataLineIndex);
 
         Data[dataLineIndex].SetDataPoint(dataPointIndex, newDataPoint);
     }    
 
-    std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > GetExtremeValues(const T_INDEX& dataLineIndex) const
+    std::pair<DataPoint_t, DataPoint_t> GetExtremeValues(const index_t& dataLineIndex) const
     {
         CheckDataLineIndex(dataLineIndex);
 
-        auto min_x_value = Data[dataLineIndex].GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
-        auto max_x_value = Data[dataLineIndex].GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
-        auto min_y_value = Data[dataLineIndex].GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
-        auto max_y_value = Data[dataLineIndex].GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+        auto min_x_value = Data[dataLineIndex].GetDataPointWithMinValue(DataPoint_t::CompareXValues).GetX();
+        auto max_x_value = Data[dataLineIndex].GetDataPointWithMaxValue(DataPoint_t::CompareXValues).GetX();
+        auto min_y_value = Data[dataLineIndex].GetDataPointWithMinValue(DataPoint_t::CompareYValues).GetY();
+        auto max_y_value = Data[dataLineIndex].GetDataPointWithMaxValue(DataPoint_t::CompareYValues).GetY();
 
-        std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > extreme_values(DataPoint<T_DATA_POINT>(min_x_value, min_y_value),
-                                                                                    DataPoint<T_DATA_POINT>(max_x_value, max_y_value));
+        std::pair<DataPoint_t, DataPoint_t> extreme_values(DataPoint_t(min_x_value, min_y_value), DataPoint_t(max_x_value, max_y_value));
 
         return extreme_values;
     }
 
-    std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > GetExtremeValues(void) const
+    std::pair<DataPoint_t, DataPoint_t> GetExtremeValues(void) const
     {
         if(!Data.empty())
         {
-            DataLine<T_DATA_POINT, T_INDEX> data_points_with_min_x_values;
-            DataLine<T_DATA_POINT, T_INDEX> data_points_with_max_x_values;
-            DataLine<T_DATA_POINT, T_INDEX> data_points_with_min_y_values;
-            DataLine<T_DATA_POINT, T_INDEX> data_points_with_max_y_values;
+            DataLine_t data_points_with_min_x_values;
+            DataLine_t data_points_with_max_x_values;
+            DataLine_t data_points_with_min_y_values;
+            DataLine_t data_points_with_max_y_values;
 
             for(const auto& i : Data)
             {
-                data_points_with_min_x_values.AddNewDataPoint(i.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareXValues));
-                data_points_with_max_x_values.AddNewDataPoint(i.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareXValues));
-                data_points_with_min_y_values.AddNewDataPoint(i.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareYValues));
-                data_points_with_max_y_values.AddNewDataPoint(i.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareYValues));
+                data_points_with_min_x_values.AddNewDataPoint(i.second.GetDataPointWithMinValue(DataPoint_t::CompareXValues));
+                data_points_with_max_x_values.AddNewDataPoint(i.second.GetDataPointWithMaxValue(DataPoint_t::CompareXValues));
+                data_points_with_min_y_values.AddNewDataPoint(i.second.GetDataPointWithMinValue(DataPoint_t::CompareYValues));
+                data_points_with_max_y_values.AddNewDataPoint(i.second.GetDataPointWithMaxValue(DataPoint_t::CompareYValues));
             }
 
-            auto min_x_value = data_points_with_min_x_values.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
-            auto max_x_value = data_points_with_max_x_values.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareXValues).GetX();
-            auto min_y_value = data_points_with_min_y_values.GetDataPointWithMinValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
-            auto max_y_value = data_points_with_max_y_values.GetDataPointWithMaxValue(DataPoint<T_DATA_POINT>::CompareYValues).GetY();
+            auto min_x_value = data_points_with_min_x_values.GetDataPointWithMinValue(DataPoint_t::CompareXValues).GetX();
+            auto max_x_value = data_points_with_max_x_values.GetDataPointWithMaxValue(DataPoint_t::CompareXValues).GetX();
+            auto min_y_value = data_points_with_min_y_values.GetDataPointWithMinValue(DataPoint_t::CompareYValues).GetY();
+            auto max_y_value = data_points_with_max_y_values.GetDataPointWithMaxValue(DataPoint_t::CompareYValues).GetY();
 
-            std::pair<DataPoint<T_DATA_POINT>, DataPoint<T_DATA_POINT> > extreme_values(DataPoint<T_DATA_POINT>(min_x_value, min_y_value),
-                                                                                        DataPoint<T_DATA_POINT>(max_x_value, max_y_value));
+            std::pair<DataPoint_t, DataPoint_t> extreme_values(DataPoint_t(min_x_value, min_y_value), DataPoint_t(max_x_value, max_y_value));
 
             return extreme_values;
         }
@@ -178,7 +198,7 @@ public:
     }
 
 private:
-    void CheckDataLineIndex(const T_INDEX& dataLineIndex) const
+    void CheckDataLineIndex(const index_t& dataLineIndex) const
     {
         if(Data.size() <= dataLineIndex)
         {
@@ -189,10 +209,10 @@ private:
             throw errorMessage;
         }
     }
-    
+
     std::string DiagramTitle;
     std::string AxisXTitle;
-    std::vector<DataLine<T_DATA_POINT, T_INDEX> > Data;
+    DataContainer_t Data;
 };
 
 

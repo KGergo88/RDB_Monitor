@@ -21,33 +21,37 @@
 
 
 
-#include <cstddef>
-#include <cstdint>
+#include <memory>
+
+#include "i_connection.hpp"
+#include "serial_port.hpp"
 
 
 
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef CONNECTION_FACTORY_HPP
+#define CONNECTION_FACTORY_HPP
 
 
 
-using DataPointType = double;
-using DataIndexType = std::size_t;
+class ConnectionFactory
+{
+public:
+    static std::shared_ptr<I_Connection> make(const QString& connection_name)
+    {
+        std::shared_ptr<I_Connection> protocol;
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class Diagram;
-using DiagramSpecialized = Diagram<DataPointType, DataIndexType>;
+        if(connection_name == QString(serial_port_connection_name))
+        {
+            protocol = std::make_shared<SerialPort>();
+        }
+        else
+        {
+            throw ("ConnectionFactory::make(): Unknown connection \"" + connection_name.toStdString() + "\"");
+        }
 
-template <typename T_DATA_POINT, typename T_INDEX>
-class DataLine;
-using DataLineSpecialized = DataLine<DataPointType, DataIndexType>;
-
-template <typename T_DATA_POINT>
-class DataPoint;
-using DataPointSpecialized = DataPoint<DataPointType>;
-
-#define APPLICATION_NAME                ("RDB Diplomaterv Monitor v2.1.0")
-
+        return protocol;
+    }
+};
 
 
-#endif /* GLOBAL_HPP */
+#endif // CONNECTION_FACTORY_HPP

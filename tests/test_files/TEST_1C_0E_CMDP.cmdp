@@ -1,0 +1,20 @@
+<CMDP_H>
+<Temperature and Pressure>
+X:Time [s],Y0:Temperature [C],Y1:Pressure [bar],
+>CMDP_H<
+
+<CMDP_D>
+X:0,Y0:10,Y1:1,
+>CMDP_D<
+
+<CMDP_D>
+X:10,Y0:12,
+X:15,Y0:13,
+>CMDP_D<
+
+<CMDP_D>
+X:5,Y0:11,Y1:2,
+X:20,Y0:14,
+>CMDP_D<
+
+<CMDP_T>
