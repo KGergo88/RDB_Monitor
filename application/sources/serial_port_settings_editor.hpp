@@ -1,7 +1,6 @@
 //==============================================================================//
 //                                                                              //
-//    RDB Diplomaterv Monitor                                                   //
-//    A monitor program for the RDB Diplomaterv project                         //
+//    RDB Monitor                                                               //
 //    Copyright (C) 2018  András Gergő Kocsis                                   //
 //                                                                              //
 //    This program is free software: you can redistribute it and/or modify      //

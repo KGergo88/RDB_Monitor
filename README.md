@@ -1,9 +1,9 @@
-# RDB Diplomaterv Monitor <!-- omit in toc -->
+# RDB Monitor <!-- omit in toc -->
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-A monitor program for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project.
+A monitor program originally developed for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project.
 
-![alt text](images/RDB_Monitor_Screenshot.png "RDB_Diplomaterv_Monitor")
+![alt text](images/RDB_Monitor_Screenshot.png "RDB_Monitor")
 
 
 ## Table of contents <!-- omit in toc -->
@@ -25,11 +25,11 @@ A monitor program for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Dipl
 
 ## Introduction
 
-The RDB Diplomaterv Monitor was developed in order to visualise the measurement results of the RDB Diplomaterv project.
+The RDB Monitor was originally developed in order to visualise the measurement results of the RDB Diplomaterv project.
 Besides this, the program can be used with any other software or device that produces output as described in the [Supported protocols](#supported-protocols) chapter.
 
 At the moment only the serial port can be used for data reception. In the tested environment the ST_LinkV2 debugger of the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project
-was connected to the PC running the RDB Diplomaterv Monitor with a USB cable and the data was received through either a COM port (Windows) or a device in the /dev folder (Linux).
+was connected to the PC running the RDB Monitor with a USB cable and the data was received through either a COM port (Windows) or a device in the /dev folder (Linux).
 
 
 ## Usage
@@ -148,7 +148,7 @@ u32TimeHour,u8RoomTemperature,
 
 ## Dependencies
 
-The RDB Diplomaterv Monitor was developed in C++17 and it depends on the following external components:
+The RDB Monitor was developed in C++17 and it depends on the following external components:
   - Qt5 v5.12.0 or newer
     - The used components are Core, Widgets, and Charts SerialPort
     - You can download it from the [Qt website](www.qt.io)
@@ -156,13 +156,13 @@ The RDB Diplomaterv Monitor was developed in C++17 and it depends on the followi
 
 ## Portability
 
-The RDB Diplomaterv Monitor was developed on an Ubuntu 18.04.4 LTS (Bionic Beaver) but it tries to ensure compatibility with Windows 10 as much as possible.
+The RDB Monitor was developed on an Ubuntu 18.04.4 LTS (Bionic Beaver) but it tries to ensure compatibility with Windows 10 as much as possible.
 The tagged versions are tested under both Ubuntu and Windows.
 
 
 ## Building the project
 
-The RDB Diplomaterv Monitor can be compiled only using the Qt Creator IDE at the moment.
+The RDB Monitor can be compiled only using the Qt Creator IDE at the moment.
 
 
 ## Release notes
@@ -212,8 +212,7 @@ The RDB Diplomaterv Monitor can be compiled only using the Qt Creator IDE at the
 
 ## License
 
-RDB Diplomaterv Monitor
-A monitor program for the RDB Diplomaterv project
+RDB Monitor
 Copyright (C) 2018  András Gergő Kocsis
 
 This program is free software: you can redistribute it and/or modify
