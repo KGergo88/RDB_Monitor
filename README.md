@@ -1,7 +1,7 @@
 # RDB Monitor <!-- omit in toc -->
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-A monitor program originally developed for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project.
+ A generic measurement display program originally developed for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project.
 
 ![alt text](images/RDB_Monitor_Screenshot.png "RDB_Monitor")
 
@@ -9,11 +9,22 @@ A monitor program originally developed for the [RDB Diplomaterv](https://github.
 ## Table of contents <!-- omit in toc -->
 - [Introduction](#introduction)
 - [Usage](#usage)
+  - [Importing diagrams](#importing-diagrams)
+  - [Exporting diagrams](#exporting-diagrams)
+  - [Setting up a connection](#setting-up-a-connection)
+  - [Removing a connection](#removing-a-connection)
+- [Supported connections](#supported-connections)
+  - [Serial port](#serial-port)
 - [Supported protocols](#supported-protocols)
   - [Measurement Data Protocol (MDP)](#measurement-data-protocol-mdp)
-- [Dependencies](#dependencies)
-- [Portability](#portability)
+- [Dependencies and portability](#dependencies-and-portability)
 - [Building the project](#building-the-project)
+  - [Building the project on Linux](#building-the-project-on-linux)
+  - [Building the project on Windows](#building-the-project-on-windows)
+- [CI system](#ci-system)
+  - [Test jobs](#test-jobs)
+  - [Linux jobs](#linux-jobs)
+  - [Winodws jobs](#winodws-jobs)
 - [Release notes](#release-notes)
   - [v2.1.0 - File handling](#v210---file-handling)
   - [v2.0.0 - Architectural rework](#v200---architectural-rework)
@@ -25,46 +36,63 @@ A monitor program originally developed for the [RDB Diplomaterv](https://github.
 
 ## Introduction
 
-The RDB Monitor was originally developed in order to visualise the measurement results of the RDB Diplomaterv project.
-Besides this, the program can be used with any other software or device that produces output as described in the [Supported protocols](#supported-protocols) chapter.
-
-At the moment only the serial port can be used for data reception. In the tested environment the ST_LinkV2 debugger of the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project
-was connected to the PC running the RDB Monitor with a USB cable and the data was received through either a COM port (Windows) or a device in the /dev folder (Linux).
+The RDB Monitor was originally developed in order to visualise the measurement results of the RDB Diplomaterv project. Besides this, the program can be used with any other software or device that produces output as described in the [Supported protocols](#supported-protocols) chapter. The data can be received through one of the [supported connections](#supported-connections) or imported from a file. The diagrams can be also exported into a file.
 
 
 ## Usage
 
-The usage of the program is quite straightforward: you need to enter the name of the serial port that you want to listen to into the textfield in the bottom right corner and then click the
-"Open Serial Port" button. The port name can be for example "COM3" on Windows or "/dev/ttyACM0" on Linux. The correct name can be found out for example by checking the available ports
-before and after connecting the device to the PC and looking for a port that appeared and was not present before.
+### Importing diagrams
 
-The following serial port settings are expected by the program:
+ - Click the **Import / Export Diagrams** menu in the menubar
+ - Select **Import Diagrams**
+ - Select the file you want to import
+ - The imported files and their diagrams will apper under **Available diagrams**
 
-| Parameter    | Value      |
-|:-------------|:----------:|
-| Baudrate     | 115200 bps |
-| Data bits    | 8          |
-| Stop bits    | 1          |
-| Parity       | none       |
-| Flow control | none       |
+### Exporting diagrams
 
-The status field in the lower side of the window tells whether the port could be opened or not. After successfully connecting to the port, the text on the button will change to
-"Close Serial Port". Then the program will listen to the opened serial port and list every diagram
-that was received on the port on the right side of the window. The listed diagrams can be selected for display by clicking on them.
+ - Click the **Import / Export Diagrams** menu in the menubar
+ - Select **Export Diagrams**
+ - Select the diagrams you want to export under **Available diagrams**
+ - Click the **Export** Button in the lower right corner
 
-It should be noted that if any other program listens to the same port that you have opened, then the data on the port will not completely received by the monitor,
-and this might lead to dropped measurement results because of violations of the measurement data protocol.
+### Setting up a connection
 
+- Click the **Add connection** button
+- Select a connection from the **Available connections** trough the data is going to be received
+- Select a protocol from the **Available protocols** that will process the received data
+- Give a name for your connection that will appear in the connection manager
+- Edit the **Connection settings** if needed
+- Click the **Ok** button
+- The connection should apper in the connection manager, if not please check the status messages
+
+### Removing a connection
+
+- Select the connection you want to remove
+- Click the **Remove connection** button
+
+## Supported connections
+
+Connections are used for receiving raw data from the network. The following subchapters describing the available connections.
+
+### Serial port
+
+A simple connection typically used to receive data from embedded devices. It is implemented with the QSerialPort class. The following settings can be edited:
+
+ - Port name
+ - Baudrate
+ - Data bits
+ - Stop bits
+ - Parity
+ - Flow control
 
 ## Supported protocols
 
-Protocols are used for the data reception on the network and for data storage in the filesystem.
-Currently only one protocol, the Measurement Data Protocol is supported (see chapter [Measurement Data Protocol (MDP)](#measurement-data-protocol-mdp)).
+Protocols are used for processing the data received trough a connection and for importing and exporting files. The following subchapters describing the available protocols.
 
 ### Measurement Data Protocol (MDP)
 
-- This protocol is used for data reception trough the serial port and for data storage in the file system as well
-- It is simple and can be implemented on microcontrollers with limited resources as well
+This protocol is used for data reception trough the serial port and for data storage in the file system. It is a simple text based protocol and can be implemented on microcontrollers with limited resources.
+
 - One data transmission is called a session, that contains data for one diagram
 - A session is built up by the following parts:
     - Start pattern
@@ -135,7 +163,7 @@ u32TimeHour,u8RoomTemperature,
 4,19,
 6,18,
 8,20,
-1022,
+10,22,
 12,24,
 14,26,
 16,24,
@@ -146,24 +174,63 @@ u32TimeHour,u8RoomTemperature,
 ```
 
 
-## Dependencies
+## Dependencies and portability
 
-The RDB Monitor was developed in C++17 and it depends on the following external components:
+The RDB Monitor was developed using C++17 and it depends on the following external components:
   - Qt5 v5.12.0 or newer
     - The used components are Core, Widgets, and Charts SerialPort
     - You can download it from the [Qt website](www.qt.io)
 
-
-## Portability
-
-The RDB Monitor was developed on an Ubuntu 18.04.4 LTS (Bionic Beaver) but it tries to ensure compatibility with Windows 10 as much as possible.
-The tagged versions are tested under both Ubuntu and Windows.
-
+The project can be build and used on Linux and Windows as well. Please see the [CI system](#CI-system) chapter for more details on the supported OS versions.
 
 ## Building the project
 
-The RDB Monitor can be compiled only using the Qt Creator IDE at the moment.
+The RDB Monitor is supports QMake and CMAke as well. The project is separated into two parts: the **application** and the **tests**. The **tests** part is not build by default, only if expicitly requested trough the **BUILD_TESTS** flag.
 
+### Building the project on Linux
+
+On Linux the project can be built either by using the QtCreator or trough the terminal.
+
+For a build with QMake use the following commands inside the project folder:
+
+``` bash
+$ mkdir build
+$ cd build
+$ qmake BUILD_TESTS="On" .. # The BUILD_TESTS flag is optional
+$ make
+```
+For a build with CMake use the following commands inside the project folder:
+
+``` bash
+$ mkdir build
+$ cd build
+$ cmake -DBUILD_TESTS=On .. # The BUILD_TESTS flag is optional
+$ make
+```
+
+### Building the project on Windows
+
+On Windows the it is suggested to build the project using the QtCreator. If you need to build from the CMD you can use CMake.
+
+For a build with CMake use the following commands inside the project folder:
+
+``` bat
+mkdir build
+cd build
+REM The BUILD_TESTS flag is optional
+REM Replace the Visual Studio 16 2019 with your compiler version if needed
+REM Replace x64 if you intend to build for the x86 architecture
+cmake .. -DBUILD_TESTS=On -G "Visual Studio 16 2019" -A x64
+cmake --build . --config Release
+```
+
+## CI system
+
+### Test jobs
+
+### Linux jobs
+
+### Winodws jobs
 
 ## Release notes
 
