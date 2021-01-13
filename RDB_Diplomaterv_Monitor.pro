@@ -48,4 +48,4 @@ defined(BUILD_TESTS, var) {
     message("Example: \$ qmake BUILD_TESTS=\"On\" .")
 }
 
-DISTFILES += README
+DISTFILES += README.md
