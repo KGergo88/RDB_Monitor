@@ -1,7 +1,7 @@
 # RDB Monitor <!-- omit in toc -->
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-A monitor program for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project.
+A monitor program originally developed for the [RDB Diplomaterv](https://github.com/KGergo88/RDB_Diplomaterv) project.
 
 ![alt text](images/RDB_Monitor_Screenshot.png "RDB_Monitor")
 
@@ -213,7 +213,6 @@ The RDB Monitor can be compiled only using the Qt Creator IDE at the moment.
 ## License
 
 RDB Monitor
-A monitor program for the RDB Diplomaterv project
 Copyright (C) 2018  András Gergő Kocsis
 
 This program is free software: you can redistribute it and/or modify
