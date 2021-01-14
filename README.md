@@ -22,9 +22,9 @@
   - [Building the project on Linux](#building-the-project-on-linux)
   - [Building the project on Windows](#building-the-project-on-windows)
 - [CI system](#ci-system)
-  - [Test jobs](#test-jobs)
-  - [Linux jobs](#linux-jobs)
-  - [Winodws jobs](#winodws-jobs)
+  - [CppCheck](#cppcheck)
+  - [BuildAndTestOnLatestUbuntu](#buildandtestonlatestubuntu)
+  - [BuildAndTestOnLatestWindows](#buildandtestonlatestwindows)
 - [Release notes](#release-notes)
   - [v2.1.0 - File handling](#v210---file-handling)
   - [v2.0.0 - Architectural rework](#v200---architectural-rework)
@@ -70,6 +70,7 @@ The RDB Monitor was originally developed in order to visualise the measurement r
 - Select the connection you want to remove
 - Click the **Remove connection** button
 
+
 ## Supported connections
 
 Connections are used for receiving raw data from the network. The following subchapters describing the available connections.
@@ -84,6 +85,7 @@ A simple connection typically used to receive data from embedded devices. It is 
  - Stop bits
  - Parity
  - Flow control
+
 
 ## Supported protocols
 
@@ -183,6 +185,7 @@ The RDB Monitor was developed using C++17 and it depends on the following extern
 
 The project can be build and used on Linux and Windows as well. Please see the [CI system](#CI-system) chapter for more details on the supported OS versions.
 
+
 ## Building the project
 
 The RDB Monitor is supports QMake and CMAke as well. The project is separated into two parts: the **application** and the **tests**. The **tests** part is not build by default, only if expicitly requested trough the **BUILD_TESTS** flag.
@@ -224,13 +227,23 @@ cmake .. -DBUILD_TESTS=On -G "Visual Studio 16 2019" -A x64
 cmake --build . --config Release
 ```
 
+
 ## CI system
 
-### Test jobs
+The project is using CI to ensure that the pull requests are not merging commits that contain errors. The CI jobs are run with [GitHub Actions](https://github.com/features/actions). The job descriptions can be found [here](https://github.com/KGergo88/RDB_Monitor/tree/master/.github/workflows). The following subchapters describe the jobs that must succeed before a pull request can be merged.
 
-### Linux jobs
+### CppCheck
 
-### Winodws jobs
+This job runs the [CppCheck](http://cppcheck.sourceforge.net/) static analysis tool on the codebase and reports the findings.
+
+### BuildAndTestOnLatestUbuntu
+
+This job builds the project in the [ubuntu-latest](https://docs.github.com/en/free-pro-team@latest/actions/reference/specifications-for-github-hosted-runners) virtual environment. Both the QMake and CMake builds tested with this job. After a successful build the unit tests are run and the unit test coverage report is created with the [test_coverage.py](https://github.com/KGergo88/RDB_Monitor/blob/master/tests/test_coverage.py) script. The coverage results are posted in the pull request as a comment with the [Lcov reporter action](https://github.com/romeovs/lcov-reporter-action).
+
+### BuildAndTestOnLatestWindows
+
+This job builds the project in the [windows-latest](https://docs.github.com/en/free-pro-team@latest/actions/reference/specifications-for-github-hosted-runners) virtual environment. Only the CMake build is tested with this job. After a successful build the unit tests are run.
+
 
 ## Release notes
 
