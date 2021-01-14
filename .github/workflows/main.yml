@@ -54,13 +54,34 @@ jobs:
           sudo apt install -y cppcheck
           sudo apt install -y tree
 
-      - name: Run CppCheck
+      - name: Run
         run: cppcheck application/sources --verbose 2> cppcheck_errors.txt
 
-      - name: Process CppCheck results
+      - name: Process results
         run: |
           echo "Errors found by CppCheck:"
           cat cppcheck_errors.txt
+
+  CppClean:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          pip3 install --upgrade cppclean
+
+      - name: Run
+        run: cppclean . --include-path=tests > cppclean_errors.txt
+
+      - name: Process results
+        run: |
+          echo "Errors found by CppClean:"
+          cat cppclean_errors.txt
 
   BuildAndTestOnLatestUbuntu:
     # The type of runner that the job will run on
