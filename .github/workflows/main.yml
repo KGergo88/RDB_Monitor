@@ -73,6 +73,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip3 install setuptools
+          pip3 install wheel
           pip3 install --upgrade cppclean
 
       - name: Run
