@@ -55,12 +55,7 @@ jobs:
           sudo apt install -y tree
 
       - name: Run
-        run: cppcheck application/sources --verbose 2> cppcheck_errors.txt
-
-      - name: Process results
-        run: |
-          echo "Errors found by CppCheck:"
-          cat cppcheck_errors.txt
+        run: cppcheck application/sources --verbose 2
 
   CppClean:
     # The type of runner that the job will run on
@@ -73,17 +68,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip3 install setuptools
-          pip3 install wheel
+          python3 -m pip install --upgrade pip
+          pip3 install setuptools wheel
           pip3 install --upgrade cppclean
 
       - name: Run
-        run: cppclean . --include-path=tests > cppclean_errors.txt
-
-      - name: Process results
         run: |
-          echo "Errors found by CppClean:"
-          cat cppclean_errors.txt
+          ~/.local/bin/cppclean . --include-path=tests
 
   BuildAndTestOnLatestUbuntu:
     # The type of runner that the job will run on
