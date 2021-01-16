@@ -19,17 +19,14 @@
 //==============================================================================//
 
 
+#ifndef I_PROTOCOL_HPP
+#define I_PROTOCOL_HPP
+
 
 #include <string>
 #include <vector>
 
 #include "global.hpp"
-
-
-
-#ifndef I_PROTOCOL_HPP
-#define I_PROTOCOL_HPP
-
 
 
 class I_Protocol
@@ -42,5 +39,6 @@ public:
     virtual bool CanThisFileBeExportedInto(const std::string path_to_file) = 0;
     virtual std::string GetSupportedFileType(void) = 0;
 };
+
 
 #endif // I_PROTOCOL_HPP

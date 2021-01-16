@@ -19,9 +19,7 @@
 //==============================================================================//
 
 
-
 #include "measurement_data_protocol.hpp"
-
 
 
 MeasurementDataProtocol::MeasurementDataProtocol()

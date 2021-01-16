@@ -19,17 +19,14 @@
 //==============================================================================//
 
 
-
 #ifndef ORDERED_DICT_H
 #define ORDERED_DICT_H
-
 
 
 #include <string>
 #include <vector>
 #include <utility>
 #include <stdexcept>
-
 
 
 template<typename T_VALUE, typename T_INDEX = std::size_t, typename T_KEY = std::string>
@@ -190,7 +187,6 @@ public:
 private:
     data_container_t data;
 };
-
 
 
 #endif // ORDERED_DICT_H

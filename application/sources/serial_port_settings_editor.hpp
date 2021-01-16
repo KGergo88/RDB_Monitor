@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef SERIAL_PORT_SETTINGS_EDITOR_HPP
+#define SERIAL_PORT_SETTINGS_EDITOR_HPP
+
 
 #include <QWidget>
 #include <QGridLayout>
@@ -29,11 +32,6 @@
 
 #include "i_connection_settings_editor.hpp"
 #include "serial_port_settings.hpp"
-
-
-#ifndef SERIAL_PORT_SETTINGS_EDITOR_HPP
-#define SERIAL_PORT_SETTINGS_EDITOR_HPP
-
 
 
 class SerialPortSettingsEditor : public I_ConnectionSettingsEditor
@@ -73,7 +71,6 @@ private:
     QComboBox* pParityComboBox;
     QComboBox* pFlowControlComboBox;
 };
-
 
 
 #endif // SERIAL_PORT_SETTINGS_EDITOR_HPP

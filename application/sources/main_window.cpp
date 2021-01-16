@@ -19,9 +19,7 @@
 //==============================================================================//
 
 
-
 #include "main_window.hpp"
-
 
 
 MainWindow::MainWindow() : QMainWindow(),

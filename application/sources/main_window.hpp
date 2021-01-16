@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef MAIN_WINDOW_HPP
+#define MAIN_WINDOW_HPP
+
 
 #include <vector>
 #include <string>
@@ -37,12 +40,6 @@
 #include "i_backend_signal.hpp"
 #include "diagram.hpp"
 #include "add_connection_dialog.hpp"
-
-
-
-#ifndef MAIN_WINDOW_HPP
-#define MAIN_WINDOW_HPP
-
 
 
 class MainWindow : public QMainWindow, public I_GuiSignal
@@ -190,7 +187,6 @@ private:
     QStackedLayout*          pStackedLayout;
     AddConnectionDialog*     pAddConnectionDialog;
 };
-
 
 
 #endif /* MAIN_WINDOW_HPP */

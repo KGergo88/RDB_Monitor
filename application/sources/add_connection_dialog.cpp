@@ -19,9 +19,7 @@
 //==============================================================================//
 
 
-
 #include "add_connection_dialog.hpp"
-
 
 
 AddConnectionDialog::AddConnectionDialog(QWidget* parent) : QDialog(parent)

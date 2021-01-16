@@ -19,9 +19,7 @@
 //==============================================================================//
 
 
-
 #include "serial_port_settings_editor.hpp"
-
 
 
 SerialPortSettingsEditor::SerialPortSettingsEditor(QWidget* parent) : I_ConnectionSettingsEditor(parent)

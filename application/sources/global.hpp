@@ -19,15 +19,12 @@
 //==============================================================================//
 
 
-
-#include <cstddef>
-#include <cstdint>
-
-
-
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
+
+#include <cstddef>
+#include <cstdint>
 
 
 using DataPointType = double;
@@ -46,7 +43,6 @@ class DataPoint;
 using DataPointSpecialized = DataPoint<DataPointType>;
 
 #define APPLICATION_NAME                ("RDB Monitor v2.1.0")
-
 
 
 #endif /* GLOBAL_HPP */

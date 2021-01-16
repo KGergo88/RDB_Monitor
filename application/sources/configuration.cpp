@@ -19,9 +19,7 @@
 //==============================================================================//
 
 
-
 #include "configuration.hpp"
-
 
 
 bool Configuration::LoadExistingConfiguration()

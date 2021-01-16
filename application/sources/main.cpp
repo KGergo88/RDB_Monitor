@@ -19,7 +19,6 @@
 //==============================================================================//
 
 
-
 #include <iostream>
 #include <string>
 
@@ -28,7 +27,6 @@
 #include "global.hpp"
 #include "backend.hpp"
 #include "main_window.hpp"
-
 
 
 int main(int argc, char **argv)

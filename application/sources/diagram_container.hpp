@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef DIAGRAM_CONTAINER_HPP
+#define DIAGRAM_CONTAINER_HPP
+
 
 #include <iostream>
 #include <string>
@@ -33,12 +36,7 @@
 #include "diagram.hpp"
 
 
-
-#ifndef DIAGRAM_CONTAINER_HPP
-#define DIAGRAM_CONTAINER_HPP
-
 //#define DIAGRAM_CONTAINER_DEBUG_MODE
-
 
 
 class DiagramContainer : public QAbstractItemModel
@@ -203,5 +201,6 @@ private:
     // This is a pointer to the element that is responsible for holding the diagrams that were received trough the network connetions
     Element* network_element;
 };
+
 
 #endif // DIAGRAM_CONTAINER_HPP

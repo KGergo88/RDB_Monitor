@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef BACKEND_HPP
+#define BACKEND_HPP
+
 
 #include <iostream>
 #include <functional>
@@ -40,12 +43,6 @@
 #include "configuration.hpp"
 #include "connection_factory.hpp"
 #include "protocol_factory.hpp"
-
-
-
-#ifndef BACKEND_HPP
-#define BACKEND_HPP
-
 
 
 class Backend : public QObject, public I_BackendSignal
@@ -106,7 +103,6 @@ private:
     DiagramContainer diagram_container;
     Configuration configuration;
 };
-
 
 
 #endif /* BACKEND_HPP */

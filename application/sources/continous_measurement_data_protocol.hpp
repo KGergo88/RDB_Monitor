@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP
+#define CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP
+
 
 #include <iostream>
 #include <memory>
@@ -37,12 +40,6 @@
 #include "global.hpp"
 #include "i_protocol.hpp"
 #include "diagram.hpp"
-
-
-
-#ifndef CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP
-#define CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP
-
 
 
 static constexpr char continous_measurement_data_protocol_name[] = "Continous Measurement Data Protocol - CMDP";
@@ -101,7 +98,6 @@ private:
     DiagramSpecialized actual_diagram;
     RegexPatterns regex_patterns;
 };
-
 
 
 #endif // CONTINOUS_MEAUREMENT_DATA_PROTOCOL_HPP

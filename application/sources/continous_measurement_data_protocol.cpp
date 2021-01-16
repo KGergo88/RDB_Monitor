@@ -19,9 +19,7 @@
 //==============================================================================//
 
 
-
 #include "continous_measurement_data_protocol.hpp"
-
 
 
 ContinousMeasurementDataProtocol::ContinousMeasurementDataProtocol()

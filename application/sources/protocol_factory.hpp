@@ -19,18 +19,15 @@
 //==============================================================================//
 
 
+#ifndef PROTOCOL_FACTORY_HPP
+#define PROTOCOL_FACTORY_HPP
+
 
 #include <memory>
 
 #include "i_protocol.hpp"
 #include "measurement_data_protocol.hpp"
 #include "continous_measurement_data_protocol.hpp"
-
-
-
-#ifndef PROTOCOL_FACTORY_HPP
-#define PROTOCOL_FACTORY_HPP
-
 
 
 class ProtocolFactory

@@ -19,14 +19,11 @@
 //==============================================================================//
 
 
-
-#include "global.hpp"
-
-
-
 #ifndef DATA_POINT_HPP
 #define DATA_POINT_HPP
 
+
+#include "global.hpp"
 
 
 template <typename T_DATA_POINT>
@@ -65,7 +62,6 @@ private:
     coordinate_t x;
     coordinate_t y;
 };
-
 
 
 #endif /* DATAPOINT_HPP */

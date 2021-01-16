@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef I_GUI_SIGNAL_HPP
+#define I_GUI_SIGNAL_HPP
+
 
 #include <vector>
 #include <string>
@@ -27,12 +30,6 @@
 
 #include "global.hpp"
 #include "connection_request_data.hpp"
-
-
-
-#ifndef I_GUI_SIGNAL_HPP
-#define I_GUI_SIGNAL_HPP
-
 
 
 class I_GuiSignal
@@ -53,5 +50,6 @@ protected:
 };
 
 Q_DECLARE_INTERFACE(I_GuiSignal, "I_GuiSignal")
+
 
 #endif // I_GUI_SIGNAL_HPP

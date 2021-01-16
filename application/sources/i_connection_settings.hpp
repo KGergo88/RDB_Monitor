@@ -19,14 +19,8 @@
 //==============================================================================//
 
 
-
-#include <QString>
-
-
-
 #ifndef I_CONNECTION_SETTINGS_HPP
 #define I_CONNECTION_SETTINGS_HPP
-
 
 
 class I_ConnectionSettings
@@ -34,7 +28,6 @@ class I_ConnectionSettings
 public:
     virtual ~I_ConnectionSettings() = default;
 };
-
 
 
 #endif // I_CONNECTION_SETTINGS_HPP

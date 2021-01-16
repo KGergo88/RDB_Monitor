@@ -19,17 +19,14 @@
 //==============================================================================//
 
 
+#ifndef CONNECTION_FACTORY_HPP
+#define CONNECTION_FACTORY_HPP
+
 
 #include <memory>
 
 #include "i_connection.hpp"
 #include "serial_port.hpp"
-
-
-
-#ifndef CONNECTION_FACTORY_HPP
-#define CONNECTION_FACTORY_HPP
-
 
 
 class ConnectionFactory

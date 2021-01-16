@@ -19,14 +19,12 @@
 //==============================================================================//
 
 
-
 #include <QString>
 #include <QDir>
 
 #include "../application/sources/global.hpp"
 #include "../application/sources/measurement_data_protocol.hpp"
 #include "test_protocol_common.h"
-
 
 
 class TestMeasurementDataProtocol : public ::testing::Test,

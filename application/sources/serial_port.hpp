@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef SERIAL_PORT_HPP
+#define SERIAL_PORT_HPP
+
 
 #include <iostream>
 #include <sstream>
@@ -32,12 +35,6 @@
 #include "i_connection.hpp"
 #include "i_connection_settings.hpp"
 #include "serial_port_settings.hpp"
-
-
-
-#ifndef SERIAL_PORT_HPP
-#define SERIAL_PORT_HPP
-
 
 
 class SerialPort : public QObject, public I_Connection
@@ -71,7 +68,6 @@ private slots:
 private:
     std::unique_ptr<QSerialPort> port;
 };
-
 
 
 #endif // SERIAL_PORT_HPP

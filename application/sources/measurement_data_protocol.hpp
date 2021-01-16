@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef MEAUREMENT_DATA_PROTOCOL_HPP
+#define MEAUREMENT_DATA_PROTOCOL_HPP
+
 
 #include <iostream>
 #include <memory>
@@ -36,12 +39,6 @@
 #include "global.hpp"
 #include "i_protocol.hpp"
 #include "diagram.hpp"
-
-
-
-#ifndef MEAUREMENT_DATA_PROTOCOL_HPP
-#define MEAUREMENT_DATA_PROTOCOL_HPP
-
 
 
 static constexpr char measurement_data_protocol_name[] = "Measurement Data Protocol - MDP";
@@ -104,7 +101,6 @@ private:
     Constants::States state;
     DiagramSpecialized actual_diagram;
 };
-
 
 
 #endif // MEAUREMENT_DATA_PROTOCOL_HPP

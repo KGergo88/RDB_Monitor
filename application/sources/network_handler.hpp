@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef NETWORK_HANDLER_HPP
+#define NETWORK_HANDLER_HPP
+
 
 #include <iostream>
 #include <memory>
@@ -32,12 +35,6 @@
 #include "i_connection_settings.hpp"
 #include "i_protocol.hpp"
 #include "diagram.hpp"
-
-
-
-#ifndef NETWORK_HANDLER_HPP
-#define NETWORK_HANDLER_HPP
-
 
 
 class NetworkHandler : public QObject
@@ -113,7 +110,6 @@ private:
     diagram_collector_type diagram_collector;
     error_collector_type error_collector;
 };
-
 
 
 #endif // NETWORK_HANDLER_HPP

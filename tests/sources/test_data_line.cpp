@@ -19,12 +19,10 @@
 //==============================================================================//
 
 
-
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
 #include "../application/sources/data_line.hpp"
-
 
 
 class TestDataLine : public ::testing::Test

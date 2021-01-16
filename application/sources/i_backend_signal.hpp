@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef I_BACKEND_SIGNAL_HPP
+#define I_BACKEND_SIGNAL_HPP
+
 
 #include <vector>
 #include <string>
@@ -27,12 +30,6 @@
 #include <QAbstractItemModel>
 
 #include "global.hpp"
-
-
-
-#ifndef I_BACKEND_SIGNAL_HPP
-#define I_BACKEND_SIGNAL_HPP
-
 
 
 class I_BackendSignal
@@ -55,7 +52,6 @@ signals:
 };
 
 Q_DECLARE_INTERFACE(I_BackendSignal, "I_BackendSignal")
-
 
 
 #endif // I_BACKEND_SIGNAL_HPP

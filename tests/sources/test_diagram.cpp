@@ -19,17 +19,14 @@
 //==============================================================================//
 
 
-
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
 #include "../application/sources/diagram.hpp"
 
 
-
 using data_type = int;
 using index_type = std::size_t;
-
 
 
 TEST(TestDiagram, BasicConstructor_GetTitle_GetAxisXTitle)

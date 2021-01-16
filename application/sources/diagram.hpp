@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef DIAGRAM_HPP
+#define DIAGRAM_HPP
+
 
 #include <string>
 #include <algorithm>
@@ -27,12 +30,6 @@
 #include "ordered_dict.h"
 #include "data_point.hpp"
 #include "data_line.hpp"
-
-
-
-#ifndef DIAGRAM_HPP
-#define DIAGRAM_HPP
-
 
 
 template <typename T_DATA_POINT, typename T_INDEX >
@@ -213,7 +210,6 @@ private:
     std::string AxisXTitle;
     DataContainer_t Data;
 };
-
 
 
 #endif /* DIAGRAM_HPP */

@@ -19,15 +19,13 @@
 //==============================================================================//
 
 
-
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
 #include "../application/sources/serial_port.hpp"
 
 
-
 TEST(TestSerialPort, Constructor)
 {
-    SerialPort myPort();
+    SerialPort myPort;
 }

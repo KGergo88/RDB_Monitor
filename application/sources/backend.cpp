@@ -19,14 +19,12 @@
 //==============================================================================//
 
 
-
 #include "backend.hpp"
 #include "main_window.hpp"
 #include "network_handler.hpp"
 #include "serial_port.hpp"
 #include "measurement_data_protocol.hpp"
 #include "continous_measurement_data_protocol.hpp"
-
 
 
 Backend::Backend() : QObject(), gui_signal_interface(nullptr)
