@@ -19,7 +19,6 @@
 #===============================================================================#
 
 
-
 TEMPLATE = app
 
 message(===============================)
@@ -74,12 +73,10 @@ HEADERS +=                                          \
     sources/connection_factory.hpp                  \
     sources/connection_request_data.hpp             \
     sources/continous_measurement_data_protocol.hpp \
-    sources/data_connection_interface.hpp           \
     sources/data_line.hpp                           \
     sources/data_point.hpp                          \
     sources/diagram.hpp                             \
     sources/diagram_container.hpp                   \
-    sources/global.hpp                              \
     sources/i_backend_signal.hpp                    \
     sources/i_connection.hpp                        \
     sources/i_connection_settings.hpp               \

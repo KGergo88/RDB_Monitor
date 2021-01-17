@@ -19,20 +19,15 @@
 //==============================================================================//
 
 
+#ifndef SERIAL_PORT_SETTINGS_HPP
+#define SERIAL_PORT_SETTINGS_HPP
+
 
 #include <QSysInfo>
 #include <QSerialPort>
 
 #include "i_connection_settings.hpp"
 
-
-
-#ifndef SERIAL_PORT_SETTINGS_HPP
-#define SERIAL_PORT_SETTINGS_HPP
-
-
-
-static constexpr char serial_port_connection_name[] = "SerialPort";
 
 class SerialPortSettings : public I_ConnectionSettings
 {
@@ -65,7 +60,6 @@ public:
     QSerialPort::Parity parity;
     QSerialPort::FlowControl flowControl;
 };
-
 
 
 #endif // SERIAL_PORT_SETTINGS_HPP

@@ -19,9 +19,11 @@
 //==============================================================================//
 
 
-
 #include "continous_measurement_data_protocol.hpp"
+#include "data_point.hpp"
 
+
+extern const std::string continous_measurement_data_protocol_name = "Continous Measurement Data Protocol - CMDP";
 
 
 ContinousMeasurementDataProtocol::ContinousMeasurementDataProtocol()
@@ -31,12 +33,12 @@ ContinousMeasurementDataProtocol::ContinousMeasurementDataProtocol()
 
 std::string ContinousMeasurementDataProtocol::GetProtocolName(void)
 {
-    return std::string(continous_measurement_data_protocol_name);
+    return continous_measurement_data_protocol_name;
 }
 
-std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(std::istream& input_data)
+std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::istream& input_data)
 {
-    std::vector<DiagramSpecialized> assembled_diagrams;
+    std::vector<DefaultDiagram> assembled_diagrams;
     std::string actual_line_std_string;
 
     while(std::getline(input_data, actual_line_std_string))
@@ -62,7 +64,7 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
                 {
                     auto diagram_title = match.captured("diagram_title");
                     // Then we create a diagram object with the title
-                    actual_diagram = DiagramSpecialized(diagram_title.toStdString());
+                    actual_diagram = DefaultDiagram(diagram_title.toStdString());
                     // Switching to the next state with a break --> a new line will be fetched
                     break;
                 }
@@ -73,7 +75,7 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
                     std::string current_date_and_time_string = ctime(&current_date_and_time);
                     // The ctime adds an extra newline to the string, this needs to be removed
                     current_date_and_time_string.pop_back();
-                    actual_diagram = DiagramSpecialized(current_date_and_time_string);
+                    actual_diagram = DefaultDiagram(current_date_and_time_string);
                     // Switching to the next state without a break --> a new line will NOT be fetched, because this line is the headline
                 }
                 // The falltrough is not an error in this case, this behaviour needed because there was no diagram title found, the actual_line contains the headline
@@ -152,7 +154,7 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
                         // Checking whether the dataline existsm if not we are dropping this diagram
                         if(actual_diagram.HasDataLine(y_id.toStdString()))
                         {
-                            actual_diagram.AddNewDataPoint(y_id.toStdString(), DataPointSpecialized(x_value.toDouble(), y_value.toDouble()));
+                            actual_diagram.AddNewDataPoint(y_id.toStdString(), DefaultDiagram::DataPoint_t(x_value.toDouble(), y_value.toDouble()));
                         }
                         else
                         {
@@ -183,7 +185,7 @@ std::vector<DiagramSpecialized> ContinousMeasurementDataProtocol::ProcessData(st
     return assembled_diagrams;
 }
 
-std::stringstream ContinousMeasurementDataProtocol::ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export)
+std::stringstream ContinousMeasurementDataProtocol::ExportData(const std::vector<DefaultDiagram>& diagrams_to_export)
 {
     (void) diagrams_to_export;
     throw("The Continous Measurement Protocol does not support exporting into files!");

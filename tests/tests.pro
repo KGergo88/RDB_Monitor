@@ -19,7 +19,6 @@
 #===============================================================================#
 
 
-
 include(GoogleTest.pri)
 
 message(===============================)
@@ -63,6 +62,7 @@ SOURCES +=                                                          \
     ../application/sources/configuration.cpp                        \
     ../application/sources/measurement_data_protocol.cpp            \
     ../application/sources/continous_measurement_data_protocol.cpp  \
+    ../application/sources/serial_port.cpp                          \
     sources/test_main.cpp                                           \
     sources/test_data_point.cpp                                     \
     sources/test_data_line.cpp                                      \

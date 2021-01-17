@@ -19,18 +19,15 @@
 //==============================================================================//
 
 
-
 #include "serial_port.hpp"
+#include "serial_port_settings.hpp"
 
 
+extern const std::string serial_port_connection_name = "SerialPort";
 
-SerialPort::~SerialPort()
+std::string SerialPort::getName(void)
 {
-    if(port)
-    {
-        port->close();
-        port.reset();
-    }
+    return serial_port_connection_name;
 }
 
 bool SerialPort::Open(const std::shared_ptr<I_ConnectionSettings> settings)

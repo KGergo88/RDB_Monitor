@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef CONFIGURATION_HPP
+#define CONFIGURATION_HPP
+
 
 #include <set>
 
@@ -28,14 +31,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
-
-#include "global.hpp"
-
-
-
-#ifndef CONFIGURATION_HPP
-#define CONFIGURATION_HPP
-
 
 
 class Configuration
@@ -93,7 +88,6 @@ private:
     const std::string configuration_file_path;
     QJsonObject data;
 };
-
 
 
 #endif /* CONFIGURATION_HPP */

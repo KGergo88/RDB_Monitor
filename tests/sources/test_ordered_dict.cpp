@@ -19,14 +19,12 @@
 //==============================================================================//
 
 
-
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
 #include <cstdint>
 
 #include "../application/sources/ordered_dict.h"
-
 
 
 TEST(TestOrderedDict, Constructor)

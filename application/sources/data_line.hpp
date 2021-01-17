@@ -19,23 +19,21 @@
 //==============================================================================//
 
 
+#ifndef DATA_LINE_HPP
+#define DATA_LINE_HPP
+
 
 #include <string>
 #include <vector>
 #include <functional>
 #include <algorithm>
 
-#include "global.hpp"
 #include "data_point.hpp"
 
 
+using DataLineDefaultIndex_t = std::size_t;
 
-#ifndef DATA_LINE_HPP
-#define DATA_LINE_HPP
-
-
-
-template <typename T_DATA_POINT, typename T_INDEX >
+template <typename T_DATA_POINT = DataPointDefaultCoordinate_t, typename T_INDEX = DataLineDefaultIndex_t>
 class DataLine
 {
 public:
@@ -136,7 +134,6 @@ private:
     std::string DataLineTitle;
     std::vector<DataPoint<coordinate_t> > Data;
 };
-
 
 
 #endif /* DATA_LINE_HPP */

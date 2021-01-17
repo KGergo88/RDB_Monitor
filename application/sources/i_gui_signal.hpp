@@ -19,21 +19,17 @@
 //==============================================================================//
 
 
+#ifndef I_GUI_SIGNAL_HPP
+#define I_GUI_SIGNAL_HPP
+
 
 #include <vector>
 #include <string>
 
 #include <QtPlugin>
 
-#include "global.hpp"
-#include "connection_request_data.hpp"
 
-
-
-#ifndef I_GUI_SIGNAL_HPP
-#define I_GUI_SIGNAL_HPP
-
-
+class ConnectionRequestData;
 
 class I_GuiSignal
 {
@@ -49,9 +45,10 @@ signals:
     virtual void ExportFileStoreCheckedDiagrams(const std::string& path_to_file) = 0;
 
 protected:
-    ~I_GuiSignal() {}
+    virtual ~I_GuiSignal() {}
 };
 
 Q_DECLARE_INTERFACE(I_GuiSignal, "I_GuiSignal")
+
 
 #endif // I_GUI_SIGNAL_HPP

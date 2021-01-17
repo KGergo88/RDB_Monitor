@@ -19,9 +19,9 @@
 //==============================================================================//
 
 
-
 #include "add_connection_dialog.hpp"
-
+#include "serial_port_settings_editor.hpp"
+#include "connection_request_data.hpp"
 
 
 AddConnectionDialog::AddConnectionDialog(QWidget* parent) : QDialog(parent)

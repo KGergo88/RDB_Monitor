@@ -19,19 +19,16 @@
 //==============================================================================//
 
 
+#ifndef I_CONNECTION_SETTINGS_EDITOR_HPP
+#define I_CONNECTION_SETTINGS_EDITOR_HPP
+
 
 #include <memory>
 
 #include <QWidget>
 
-#include "i_connection_settings.hpp"
 
-
-
-#ifndef I_CONNECTION_SETTINGS_EDITOR_HPP
-#define I_CONNECTION_SETTINGS_EDITOR_HPP
-
-
+class I_ConnectionSettings;
 
 class I_ConnectionSettingsEditor : public QWidget
 {
@@ -51,5 +48,6 @@ public:
 };
 
 Q_DECLARE_INTERFACE(I_ConnectionSettingsEditor, "I_ConnectionSettingsEditor")
+
 
 #endif // I_CONNECTION_SETTINGS_EDITOR_HPP

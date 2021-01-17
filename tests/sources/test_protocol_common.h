@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef TEST_PROTOCOL_COMMON_H
+#define TEST_PROTOCOL_COMMON_H
+
 
 #include <fstream>
 
@@ -28,12 +31,6 @@
 #include <QString>
 #include <QDir>
 #include <QCoreApplication>
-
-
-
-#ifndef TEST_PROTOCOL_COMMON_H
-#define TEST_PROTOCOL_COMMON_H
-
 
 
 struct TestProtocolParameter

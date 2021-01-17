@@ -19,9 +19,11 @@
 //==============================================================================//
 
 
+#include <QSerialPort>
 
 #include "serial_port_settings_editor.hpp"
-
+#include "serial_port_settings.hpp"
+#include "serial_port.hpp"
 
 
 SerialPortSettingsEditor::SerialPortSettingsEditor(QWidget* parent) : I_ConnectionSettingsEditor(parent)
@@ -94,6 +96,11 @@ SerialPortSettingsEditor::SerialPortSettingsEditor(QWidget* parent) : I_Connecti
     pGridLayout->addWidget(pFlowControlLabel, 5, 0);
     pGridLayout->addWidget(pFlowControlComboBox, 5, 1);
     QObject::connect(pFlowControlComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int){ reviewSettings(); });
+}
+
+QString SerialPortSettingsEditor::getConnectionName(void)
+{
+    return QString::fromStdString(serial_port_connection_name);
 }
 
 std::shared_ptr<I_ConnectionSettings> SerialPortSettingsEditor::getSettings(void)

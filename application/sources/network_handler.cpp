@@ -19,9 +19,9 @@
 //==============================================================================//
 
 
-
 #include "network_handler.hpp"
-
+#include "i_connection.hpp"
+#include "i_protocol.hpp"
 
 
 bool NetworkHandler::Run(void)

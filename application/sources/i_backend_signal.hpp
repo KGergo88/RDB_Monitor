@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef I_BACKEND_SIGNAL_HPP
+#define I_BACKEND_SIGNAL_HPP
+
 
 #include <vector>
 #include <string>
@@ -26,19 +29,13 @@
 #include <QtPlugin>
 #include <QAbstractItemModel>
 
-#include "global.hpp"
-
-
-
-#ifndef I_BACKEND_SIGNAL_HPP
-#define I_BACKEND_SIGNAL_HPP
-
+#include "diagram.hpp"
 
 
 class I_BackendSignal
 {
 protected:
-    ~I_BackendSignal() {}
+    virtual ~I_BackendSignal() {}
 
 public:
     virtual QAbstractItemModel* GetDiagramContainerModel(void) = 0;
@@ -51,11 +48,10 @@ public:
 signals:
     virtual void NewStatusMessage(const std::string& message_text) = 0;
     virtual void ListOfActiveConnectionsChanged(const QStringList& active_connections) = 0;
-    virtual void ShowThisDiagram(const DiagramSpecialized& diagram) = 0;
+    virtual void ShowThisDiagram(const DefaultDiagram& diagram) = 0;
 };
 
 Q_DECLARE_INTERFACE(I_BackendSignal, "I_BackendSignal")
-
 
 
 #endif // I_BACKEND_SIGNAL_HPP

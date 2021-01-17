@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef I_CONNECTION_HPP
+#define I_CONNECTION_HPP
+
 
 #include <istream>
 #include <memory>
@@ -26,15 +29,8 @@
 
 #include <QtPlugin>
 
-#include "global.hpp"
-#include "i_connection_settings.hpp"
 
-
-
-#ifndef I_CONNECTION_HPP
-#define I_CONNECTION_HPP
-
-
+class I_ConnectionSettings;
 
 class I_Connection
 {
@@ -52,7 +48,6 @@ signals:
 };
 
 Q_DECLARE_INTERFACE(I_Connection, "ConnectionInterface")
-
 
 
 #endif // I_CONNECTION_HPP

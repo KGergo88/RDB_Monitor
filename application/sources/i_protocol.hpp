@@ -19,28 +19,28 @@
 //==============================================================================//
 
 
+#ifndef I_PROTOCOL_HPP
+#define I_PROTOCOL_HPP
+
 
 #include <string>
 #include <vector>
 
-#include "global.hpp"
-
-
-
-#ifndef I_PROTOCOL_HPP
-#define I_PROTOCOL_HPP
-
+#include "diagram.hpp"
 
 
 class I_Protocol
 {
 public:
+    virtual ~I_Protocol() = default;
+
     virtual std::string GetProtocolName(void) = 0;
-    virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) = 0;
-    virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) = 0;
+    virtual std::vector<DefaultDiagram> ProcessData(std::istream& input_data) = 0;
+    virtual std::stringstream ExportData(const std::vector<DefaultDiagram>& diagrams_to_export) = 0;
     virtual bool CanThisFileBeProcessed(const std::string path_to_file) = 0;
     virtual bool CanThisFileBeExportedInto(const std::string path_to_file) = 0;
     virtual std::string GetSupportedFileType(void) = 0;
 };
+
 
 #endif // I_PROTOCOL_HPP

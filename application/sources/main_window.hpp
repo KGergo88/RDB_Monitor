@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef MAIN_WINDOW_HPP
+#define MAIN_WINDOW_HPP
+
 
 #include <vector>
 #include <string>
@@ -32,18 +35,13 @@
 #include <QTreeView>
 #include <QDialog>
 
-#include "global.hpp"
-#include "i_gui_signal.hpp"
-#include "i_backend_signal.hpp"
 #include "diagram.hpp"
-#include "add_connection_dialog.hpp"
+
+#include "i_gui_signal.hpp"
 
 
-
-#ifndef MAIN_WINDOW_HPP
-#define MAIN_WINDOW_HPP
-
-
+class I_BackendSignal;
+class AddConnectionDialog;
 
 class MainWindow : public QMainWindow, public I_GuiSignal
 {
@@ -82,7 +80,7 @@ private slots:
     void ListOfActiveConnectionsChanged(const QStringList& active_connections);
     void DiagramExportButtonExportWasClicked(void);
     void DiagramExportButtonCancelWasClicked(void);
-    void DisplayDiagram(const DiagramSpecialized& diagram);
+    void DisplayDiagram(const DefaultDiagram& diagram);
     void MenuActionDiagramsImportDiagrams(void);
     void MenuActionDiagramsExportDiagrams(void);
     void TreeviewCurrentSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
@@ -190,7 +188,6 @@ private:
     QStackedLayout*          pStackedLayout;
     AddConnectionDialog*     pAddConnectionDialog;
 };
-
 
 
 #endif /* MAIN_WINDOW_HPP */

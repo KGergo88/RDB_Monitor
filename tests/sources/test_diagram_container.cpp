@@ -19,12 +19,10 @@
 //==============================================================================//
 
 
-
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
 #include "../application/sources/diagram_container.hpp"
-
 
 
 TEST(TestDiagramContainer, Constructor)

@@ -19,12 +19,10 @@
 //==============================================================================//
 
 
-
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
 #include "../application/sources/data_point.hpp"
-
 
 
 TEST(TestDataPoint, Constructors_Getters)

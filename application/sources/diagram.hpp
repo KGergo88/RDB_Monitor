@@ -19,23 +19,18 @@
 //==============================================================================//
 
 
-
-#include <string>
-#include <algorithm>
-
-#include "global.hpp"
-#include "ordered_dict.h"
-#include "data_point.hpp"
-#include "data_line.hpp"
-
-
-
 #ifndef DIAGRAM_HPP
 #define DIAGRAM_HPP
 
 
+#include <string>
+#include <algorithm>
 
-template <typename T_DATA_POINT, typename T_INDEX >
+#include "ordered_dict.h"
+#include "data_line.hpp"
+
+
+template <typename T_DATA_POINT = DataPointDefaultCoordinate_t, typename T_INDEX = DataLineDefaultIndex_t >
 class Diagram {
 public:
     using coordinate_t = T_DATA_POINT;
@@ -214,6 +209,7 @@ private:
     DataContainer_t Data;
 };
 
+using DefaultDiagram = Diagram<DataPointDefaultCoordinate_t, DataLineDefaultIndex_t>;
 
 
 #endif /* DIAGRAM_HPP */

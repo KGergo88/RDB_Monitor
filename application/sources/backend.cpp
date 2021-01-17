@@ -19,23 +19,24 @@
 //==============================================================================//
 
 
-
 #include "backend.hpp"
 #include "main_window.hpp"
 #include "network_handler.hpp"
 #include "serial_port.hpp"
 #include "measurement_data_protocol.hpp"
 #include "continous_measurement_data_protocol.hpp"
-
+#include "connection_request_data.hpp"
+#include "connection_factory.hpp"
+#include "protocol_factory.hpp"
 
 
 Backend::Backend() : QObject(), gui_signal_interface(nullptr)
 {
-    available_connection_handlers.append(QString(serial_port_connection_name));
+    available_connection_handlers.append(QString::fromStdString(serial_port_connection_name));
 
-    available_protocol_handlers.append(QString(measurement_data_protocol_name));
+    available_protocol_handlers.append(QString::fromStdString(measurement_data_protocol_name));
     // Deactivate the CMDP before merging as this Protocol is not fully implemented yet!
-    //available_protocol_handlers.append(QString(continous_measurement_data_protocol_name));
+    //available_protocol_handlers.append(QString::fromStdString(continous_measurement_data_protocol_name));
 
     file_handlers.push_back(std::make_shared<MeasurementDataProtocol>());
 }
@@ -104,19 +105,19 @@ void Backend::ReportStatus(const std::string& message)
     }
 }
 
-void Backend::StoreNetworkDiagrams(const QString& connection_name, std::vector<DiagramSpecialized>& new_diagrams)
+void Backend::StoreNetworkDiagrams(const QString& connection_name, std::vector<DefaultDiagram>& new_diagrams)
 {
     StoreDiagrams(new_diagrams,
-        [&](const DiagramSpecialized& diagram_to_add) -> QModelIndex
+        [&](const DefaultDiagram& diagram_to_add) -> QModelIndex
         {
             return diagram_container.AddDiagramFromNetwork(connection_name.toStdString(), diagram_to_add);
         });
 }
 
-void Backend::StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DiagramSpecialized>& new_diagrams)
+void Backend::StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DefaultDiagram>& new_diagrams)
 {
     StoreDiagrams(new_diagrams,
-        [&](const DiagramSpecialized& diagram_to_add) -> QModelIndex
+        [&](const DefaultDiagram& diagram_to_add) -> QModelIndex
         {
             return diagram_container.AddDiagramFromFile(file_name, file_path, diagram_to_add);
         });
@@ -188,7 +189,7 @@ void Backend::CloseNetworkConnection(const QString& user_defined_name)
 
 void Backend::RequestForDiagram(const QModelIndex& model_index)
 {
-    DiagramSpecialized* first_diagram = diagram_container.GetDiagram(model_index);
+    DefaultDiagram* first_diagram = diagram_container.GetDiagram(model_index);
     if(first_diagram)
     {
         emit ShowThisDiagram(*first_diagram);
@@ -281,7 +282,7 @@ void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
     }
 }
 
-void Backend::StoreDiagrams(std::vector<DiagramSpecialized>& new_diagrams, const std::function<QModelIndex(const DiagramSpecialized&)> storage_logic)
+void Backend::StoreDiagrams(std::vector<DefaultDiagram>& new_diagrams, const std::function<QModelIndex(const DefaultDiagram&)> storage_logic)
 {
     auto container_is_empty = (0 == diagram_container.GetNumberOfDiagrams());
 
@@ -296,7 +297,7 @@ void Backend::StoreDiagrams(std::vector<DiagramSpecialized>& new_diagrams, const
         {
             container_is_empty = false;
 
-            DiagramSpecialized* first_diagram = diagram_container.GetDiagram(recently_added_diagram);
+            DefaultDiagram* first_diagram = diagram_container.GetDiagram(recently_added_diagram);
             if(first_diagram)
             {
                 emit ShowThisDiagram(*first_diagram);

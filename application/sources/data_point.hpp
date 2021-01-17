@@ -19,17 +19,13 @@
 //==============================================================================//
 
 
-
-#include "global.hpp"
-
-
-
 #ifndef DATA_POINT_HPP
 #define DATA_POINT_HPP
 
 
+using DataPointDefaultCoordinate_t = double;
 
-template <typename T_DATA_POINT>
+template <typename T_DATA_POINT = DataPointDefaultCoordinate_t>
 class DataPoint
 {
 public:
@@ -65,7 +61,6 @@ private:
     coordinate_t x;
     coordinate_t y;
 };
-
 
 
 #endif /* DATAPOINT_HPP */

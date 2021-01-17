@@ -19,10 +19,14 @@
 //==============================================================================//
 
 
-
 #include "main_window.hpp"
+#include "i_backend_signal.hpp"
+#include "add_connection_dialog.hpp"
+#include "connection_request_data.hpp"
 
 
+extern const QString application_name;
+extern const QString application_version;
 
 MainWindow::MainWindow() : QMainWindow(),
                            backend_signal_interface(nullptr)
@@ -91,7 +95,7 @@ MainWindow::MainWindow() : QMainWindow(),
 
     // Setting the minimum size, and the title of the window
     setMinimumSize(main_window_minimum_width, main_window_minimum_height);
-    setWindowTitle(QString::fromStdString((APPLICATION_NAME)));
+    setWindowTitle(QString(application_name) + "" + QString(application_version));
 
     // Setting the window icon
     QString window_icon_image_path = ":/images/Icon.png";
@@ -148,8 +152,8 @@ void MainWindow::RegisterBackendSignalInterface(I_BackendSignal* new_backend_sig
                          this,                                             SLOT(DisplayStatusMessage(const std::string&)));
         QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ListOfActiveConnectionsChanged(const QStringList&)),
                          this,                                             SLOT(ListOfActiveConnectionsChanged(const QStringList&)));
-        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ShowThisDiagram(const DiagramSpecialized&)),
-                         this,                                             SLOT(DisplayDiagram(const DiagramSpecialized&)));
+        QObject::connect(dynamic_cast<QObject*>(backend_signal_interface), SIGNAL(ShowThisDiagram(const DefaultDiagram&)),
+                         this,                                             SLOT(DisplayDiagram(const DefaultDiagram&)));
 
         // Setting up the TreeView with the Model from the interface (this needs to be done before establishing the signal connections for the pTreeView)
         pTreeView->setModel(backend_signal_interface->GetDiagramContainerModel());
@@ -232,7 +236,7 @@ void MainWindow::DiagramExportButtonCancelWasClicked(void)
     emit ExportFileHideCheckBoxes();
 }
 
-void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
+void MainWindow::DisplayDiagram(const DefaultDiagram& diagram)
 {
    // Creating a new chart that will be displayed in the chartview after loading it with data
     auto pNewChart = new QChart();
@@ -247,22 +251,22 @@ void MainWindow::DisplayDiagram(const DiagramSpecialized& diagram)
     pNewChart->addAxis(pXAxis, Qt::AlignBottom);
 
     // We will add every DataLine of the Diagram to the chart
-    DataIndexType number_of_data_lines = diagram.GetTheNumberOfDataLines();
+    DefaultDiagram::index_t number_of_data_lines = diagram.GetTheNumberOfDataLines();
     // Variables to store the min/max values of the diagram
     auto diagram_extreme_values = diagram.GetExtremeValues();
 
-    for(DataIndexType data_line_counter = 0; data_line_counter < number_of_data_lines; ++data_line_counter)
+    for(DefaultDiagram::index_t data_line_counter = 0; data_line_counter < number_of_data_lines; ++data_line_counter)
     {
         // Creating a line series and filling it with the data that needs to be displayed
         auto pLineSeries = new QLineSeries();
         // Setting the title with the current DataLine name
         pLineSeries->setName(QString::fromStdString(diagram.GetDataLineTitle(data_line_counter)));
         // Setting the data with the DataPoints of the DataLine
-        DataIndexType number_of_data_points = diagram.GetTheNumberOfDataPoints(data_line_counter);
+        DefaultDiagram::index_t number_of_data_points = diagram.GetTheNumberOfDataPoints(data_line_counter);
         // Variable to store the min/max values of the DataLine
         auto data_line_extreme_values = diagram.GetExtremeValues(data_line_counter);
 
-        for(DataIndexType data_point_counter = 0; data_point_counter < number_of_data_points; ++data_point_counter)
+        for(DefaultDiagram::index_t data_point_counter = 0; data_point_counter < number_of_data_points; ++data_point_counter)
         {
             auto data_point = diagram.GetDataPoint(data_line_counter, data_point_counter);
             pLineSeries->append(data_point.GetX(), data_point.GetY());

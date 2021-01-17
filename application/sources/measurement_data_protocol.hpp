@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef MEAUREMENT_DATA_PROTOCOL_HPP
+#define MEAUREMENT_DATA_PROTOCOL_HPP
+
 
 #include <iostream>
 #include <memory>
@@ -33,18 +36,11 @@
 
 #include <QFileInfo>
 
-#include "global.hpp"
 #include "i_protocol.hpp"
 #include "diagram.hpp"
 
 
-
-#ifndef MEAUREMENT_DATA_PROTOCOL_HPP
-#define MEAUREMENT_DATA_PROTOCOL_HPP
-
-
-
-static constexpr char measurement_data_protocol_name[] = "Measurement Data Protocol - MDP";
+extern const std::string measurement_data_protocol_name;
 
 class MeasurementDataProtocol : public I_Protocol
 {
@@ -59,10 +55,10 @@ public:
     MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
 
     virtual std::string GetProtocolName(void) override;
-    virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
+    virtual std::vector<DefaultDiagram> ProcessData(std::istream& input_data) override;
     virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
     virtual std::string GetSupportedFileType(void) override { return Constants::native_file_extension; }
-    virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
+    virtual std::stringstream ExportData(const std::vector<DefaultDiagram>& diagrams_to_export) override;
     virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
 
 private:
@@ -102,9 +98,8 @@ private:
     };
 
     Constants::States state;
-    DiagramSpecialized actual_diagram;
+    DefaultDiagram actual_diagram;
 };
-
 
 
 #endif // MEAUREMENT_DATA_PROTOCOL_HPP

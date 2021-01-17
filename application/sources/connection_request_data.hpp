@@ -19,19 +19,16 @@
 //==============================================================================//
 
 
+#ifndef CONNECTION_REQUEST_DATA_HPP
+#define CONNECTION_REQUEST_DATA_HPP
+
 
 #include <memory>
 
 #include <QString>
 
-#include "i_connection_settings.hpp"
 
-
-
-#ifndef CONNECTION_REQUEST_DATA_HPP
-#define CONNECTION_REQUEST_DATA_HPP
-
-
+class I_ConnectionSettings;
 
 struct ConnectionRequestData
 {
@@ -40,7 +37,6 @@ struct ConnectionRequestData
     QString protocol;
     std::shared_ptr<I_ConnectionSettings> connection_settings;
 };
-
 
 
 #endif // CONNECTION_REQUEST_DATA_HPP

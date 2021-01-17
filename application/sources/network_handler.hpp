@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef NETWORK_HANDLER_HPP
+#define NETWORK_HANDLER_HPP
+
 
 #include <iostream>
 #include <memory>
@@ -27,18 +30,12 @@
 #include <QObject>
 #include <QString>
 
-#include "global.hpp"
-#include "i_connection.hpp"
-#include "i_connection_settings.hpp"
-#include "i_protocol.hpp"
 #include "diagram.hpp"
 
 
-
-#ifndef NETWORK_HANDLER_HPP
-#define NETWORK_HANDLER_HPP
-
-
+class I_Connection;
+class I_ConnectionSettings;
+class I_Protocol;
 
 class NetworkHandler : public QObject
 {
@@ -46,7 +43,7 @@ class NetworkHandler : public QObject
 
 public:
 
-    using diagram_collector_type = std::function<void(const QString&, std::vector<DiagramSpecialized>&)>;
+    using diagram_collector_type = std::function<void(const QString&, std::vector<DefaultDiagram>&)>;
     using error_collector_type = std::function<void(const std::string&)>;
 
     NetworkHandler(const QString& new_user_defined_name,
@@ -113,7 +110,6 @@ private:
     diagram_collector_type diagram_collector;
     error_collector_type error_collector;
 };
-
 
 
 #endif // NETWORK_HANDLER_HPP

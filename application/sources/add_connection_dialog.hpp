@@ -19,6 +19,9 @@
 //==============================================================================//
 
 
+#ifndef ADD_CONNECTION_DIALOG_HPP
+#define ADD_CONNECTION_DIALOG_HPP
+
 
 #include <memory>
 
@@ -39,15 +42,9 @@
 #include <QLineEdit>
 
 #include "i_connection_settings_editor.hpp"
-#include "serial_port_settings_editor.hpp"
-#include "connection_request_data.hpp"
 
 
-
-#ifndef ADD_CONNECTION_DIALOG_HPP
-#define ADD_CONNECTION_DIALOG_HPP
-
-
+class ConnectionRequestData;
 
 class EmptyConnectionSettingsEditor : public I_ConnectionSettingsEditor
 {
@@ -115,7 +112,6 @@ private:
     QDialogButtonBox::StandardButton buttonBoxNokType;
     QList<I_ConnectionSettingsEditor*> connectionSettingsEditors;
 };
-
 
 
 #endif // ADD_CONNECTION_DIALOG_HPP
