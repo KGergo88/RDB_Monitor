@@ -36,7 +36,8 @@
 
 ## Introduction
 
-The RDB Monitor was originally developed in order to visualise the measurement results of the RDB Diplomaterv project. Besides this, the program can be used with any other software or device that produces output as described in the [Supported protocols](#supported-protocols) chapter. The data can be received through one of the [supported connections](#supported-connections) or imported from a file. The diagrams can be also exported into a file.
+The RDB Monitor is a generic measurement result visualiser software. It was originally developed for the RDB Diplomaterv project.
+The primary use case is to visualise data from the embedded controller of an electric drive in order to be able to setup the current, speed, position controllers. Besides this, the program can be used with any other software or device that produces output that follows one of the [supported protocols](#supported-protocols). The data can be received through one of the [supported connections](#supported-connections) or imported from a file. The created diagrams can be also exported to a file.
 
 
 ## Usage
