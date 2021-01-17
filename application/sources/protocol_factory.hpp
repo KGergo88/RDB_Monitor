@@ -37,11 +37,11 @@ public:
     {
         std::shared_ptr<I_Protocol> protocol;
 
-        if(protocol_name == QString(measurement_data_protocol_name))
+        if(protocol_name == QString::fromStdString(measurement_data_protocol_name))
         {
             protocol = std::make_shared<MeasurementDataProtocol>();
         }
-        else if(protocol_name == QString(continous_measurement_data_protocol_name))
+        else if(protocol_name == QString::fromStdString(continous_measurement_data_protocol_name))
         {
             protocol = std::make_shared<ContinousMeasurementDataProtocol>();
         }

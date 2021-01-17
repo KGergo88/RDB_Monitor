@@ -23,12 +23,11 @@
 #include "serial_port_settings.hpp"
 
 
-constexpr char serial_port_connection_name[] = "SerialPort";
-
+extern const std::string serial_port_connection_name = "SerialPort";
 
 std::string SerialPort::getName(void)
 {
-    return std::string(serial_port_connection_name);
+    return serial_port_connection_name;
 }
 
 bool SerialPort::Open(const std::shared_ptr<I_ConnectionSettings> settings)

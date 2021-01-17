@@ -32,7 +32,6 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 
-#include "global.hpp"
 #include "diagram.hpp"
 
 
@@ -55,12 +54,12 @@ public:
 
     std::size_t GetNumberOfDiagrams(void) const {return root_element->CountElementsWithTypeRecursive<Element::DataType_Diagram>();}
     bool IsThisFileAlreadyStored(const std::string& file_name, const std::string& file_path);
-    DiagramSpecialized* GetDiagram(const QModelIndex& model_index);
+    DefaultDiagram* GetDiagram(const QModelIndex& model_index);
     void ShowCheckBoxes(void);
     void HideCheckBoxes(void);
-    std::vector<DiagramSpecialized> GetCheckedDiagrams(void);
-    QModelIndex AddDiagramFromNetwork(const std::string connection_name, const DiagramSpecialized& diagram);
-    QModelIndex AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DiagramSpecialized& diagram);
+    std::vector<DefaultDiagram> GetCheckedDiagrams(void);
+    QModelIndex AddDiagramFromNetwork(const std::string connection_name, const DefaultDiagram& diagram);
+    QModelIndex AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DefaultDiagram& diagram);
 
     // Members overridden from the QAbstractItemModel
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -97,7 +96,7 @@ private:
             std::string name;
         };
         // Data type used of elements that contain a diagram
-        using DataType_Diagram = DiagramSpecialized;
+        using DataType_Diagram = DefaultDiagram;
         // The above data types combined
         using DataType = std::variant<DataType_Name, DataType_File, DataType_Connection, DataType_Diagram>;
 
@@ -178,7 +177,7 @@ private:
         Qt::CheckState check_state;
     };
 
-    QModelIndex AddDiagram(Element* type_parent, const DiagramSpecialized& diagram, const std::function<Element*(void)> storage_logic);
+    QModelIndex AddDiagram(Element* type_parent, const DefaultDiagram& diagram, const std::function<Element*(void)> storage_logic);
     QModelIndex GetModelIndexOfElement(Element* element) const;
     Element* AddChildToElement(Element* element, const Element::DataType& data);
     void RemoveChildFromElement(Element* element, Element* child);

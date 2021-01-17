@@ -35,7 +35,6 @@
 #include <QTreeView>
 #include <QDialog>
 
-#include "global.hpp"
 #include "diagram.hpp"
 
 #include "i_gui_signal.hpp"
@@ -81,7 +80,7 @@ private slots:
     void ListOfActiveConnectionsChanged(const QStringList& active_connections);
     void DiagramExportButtonExportWasClicked(void);
     void DiagramExportButtonCancelWasClicked(void);
-    void DisplayDiagram(const DiagramSpecialized& diagram);
+    void DisplayDiagram(const DefaultDiagram& diagram);
     void MenuActionDiagramsImportDiagrams(void);
     void MenuActionDiagramsExportDiagrams(void);
     void TreeviewCurrentSelectionChanged(const QModelIndex& current, const QModelIndex& previous);

@@ -100,7 +100,7 @@ SerialPortSettingsEditor::SerialPortSettingsEditor(QWidget* parent) : I_Connecti
 
 QString SerialPortSettingsEditor::getConnectionName(void)
 {
-    return serial_port_connection_name;
+    return QString::fromStdString(serial_port_connection_name);
 }
 
 std::shared_ptr<I_ConnectionSettings> SerialPortSettingsEditor::getSettings(void)

@@ -22,12 +22,15 @@
 #include <iostream>
 #include <string>
 
+#include <QString>
 #include <QApplication>
 
-#include "global.hpp"
 #include "backend.hpp"
 #include "main_window.hpp"
 
+
+extern const QString application_name = "RDB Monitor";
+extern const QString application_version = "v2.2.0";
 
 int main(int argc, char **argv)
 {
@@ -37,7 +40,6 @@ int main(int argc, char **argv)
     {
         std::cout << "Hello RDB!" << std::endl;
 
-        std::cout << "Running the GUI." << std::endl;
         QApplication q_application(argc, argv);
 
         Backend backend;
@@ -46,10 +48,10 @@ int main(int argc, char **argv)
         backend.RegisterGuiSignalInterface(&main_window);
         main_window.RegisterBackendSignalInterface(&backend);
 
+        std::cout << "Running the GUI." << std::endl;
         auto q_application_result = q_application.exec();
         std::cout << "The GUI has stopped with result: " << q_application_result << std::endl;
 
-        std::cout << "The End." << std::endl;
         result = q_application_result;
     }
     catch(const std::string& exception_text)

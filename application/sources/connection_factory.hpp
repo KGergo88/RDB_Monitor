@@ -36,7 +36,7 @@ public:
     {
         std::shared_ptr<I_Connection> protocol;
 
-        if(connection_name == QString(serial_port_connection_name))
+        if(connection_name == QString::fromStdString(serial_port_connection_name))
         {
             protocol = std::make_shared<SerialPort>();
         }

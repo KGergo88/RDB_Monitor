@@ -34,7 +34,7 @@
 #include "i_connection.hpp"
 
 
-extern const char serial_port_connection_name[];
+extern const std::string serial_port_connection_name;
 
 class SerialPort : public QObject, public I_Connection
 {
@@ -43,6 +43,7 @@ class SerialPort : public QObject, public I_Connection
 
 public:
     SerialPort() = default;
+
     ~SerialPort()
     {
         if(port)

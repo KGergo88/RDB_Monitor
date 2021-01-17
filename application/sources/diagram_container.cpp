@@ -63,16 +63,16 @@ bool DiagramContainer::IsThisFileAlreadyStored(const std::string& file_name, con
     return bResult;
 }
 
-DiagramSpecialized* DiagramContainer::GetDiagram(const QModelIndex& model_index)
+DefaultDiagram* DiagramContainer::GetDiagram(const QModelIndex& model_index)
 {
-    DiagramSpecialized* result = nullptr;
+    DefaultDiagram* result = nullptr;
 
     if(model_index.isValid())
     {
         Element* requested_element = static_cast<Element*>(model_index.internalPointer());
         if(requested_element->ContainsType<Element::DataType_Diagram>())
         {
-            result = &std::get<DiagramSpecialized>(requested_element->data);
+            result = &std::get<DefaultDiagram>(requested_element->data);
         }
     }
 
@@ -112,9 +112,9 @@ void DiagramContainer::HideCheckBoxes(void)
     root_element->CallFunctionOnElementsRecursive([](Element* element){element->flags &= ~Qt::ItemIsUserCheckable;});
 }
 
-std::vector<DiagramSpecialized> DiagramContainer::GetCheckedDiagrams(void)
+std::vector<DefaultDiagram> DiagramContainer::GetCheckedDiagrams(void)
 {
-    std::vector<DiagramSpecialized> checked_diagrams;
+    std::vector<DefaultDiagram> checked_diagrams;
 
     root_element->CallFunctionOnElementsRecursive(
     [&](Element* element) -> void
@@ -131,7 +131,7 @@ std::vector<DiagramSpecialized> DiagramContainer::GetCheckedDiagrams(void)
     return checked_diagrams;
 }
 
-QModelIndex DiagramContainer::AddDiagramFromNetwork(const std::string connection_name, const DiagramSpecialized& diagram)
+QModelIndex DiagramContainer::AddDiagramFromNetwork(const std::string connection_name, const DefaultDiagram& diagram)
 {
     return AddDiagram(network_element, diagram,
             [&]() -> Element*
@@ -147,7 +147,7 @@ QModelIndex DiagramContainer::AddDiagramFromNetwork(const std::string connection
             });
 }
 
-QModelIndex DiagramContainer::AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DiagramSpecialized& diagram)
+QModelIndex DiagramContainer::AddDiagramFromFile(const std::string file_name, const std::string& file_path, const DefaultDiagram& diagram)
 {
     return AddDiagram(files_element, diagram,
             [&]() -> Element*
@@ -163,7 +163,7 @@ QModelIndex DiagramContainer::AddDiagramFromFile(const std::string file_name, co
             });
 }
 
-QModelIndex DiagramContainer::AddDiagram(Element* type_parent, const DiagramSpecialized& diagram, const std::function<Element*(void)> storage_logic)
+QModelIndex DiagramContainer::AddDiagram(Element* type_parent, const DefaultDiagram& diagram, const std::function<Element*(void)> storage_logic)
 {
     // The type parent is the top level element that determines the source of the diagram
     // This must be either the files_element or the network_element helper variable

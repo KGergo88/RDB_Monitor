@@ -22,7 +22,6 @@
 #include <QString>
 #include <QDir>
 
-#include "../application/sources/global.hpp"
 #include "../application/sources/measurement_data_protocol.hpp"
 #include "test_protocol_common.h"
 
@@ -34,7 +33,7 @@ protected:
     MeasurementDataProtocol test_mdp_processor;
     std::string expected_protocol_name = measurement_data_protocol_name;
     std::string expected_file_type = "mdp";
-    std::vector<DiagramSpecialized> processed_diagrams;
+    std::vector<DefaultDiagram> processed_diagrams;
 };
 
 TEST_F(TestMeasurementDataProtocol, GetProtocolName)

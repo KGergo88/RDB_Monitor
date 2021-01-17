@@ -23,7 +23,9 @@
 #define DATA_POINT_HPP
 
 
-template <typename T_DATA_POINT>
+using DataPointDefaultCoordinate_t = double;
+
+template <typename T_DATA_POINT = DataPointDefaultCoordinate_t>
 class DataPoint
 {
 public:

@@ -29,7 +29,6 @@
 #include <QtPlugin>
 #include <QAbstractItemModel>
 
-#include "global.hpp"
 #include "diagram.hpp"
 
 
@@ -49,7 +48,7 @@ public:
 signals:
     virtual void NewStatusMessage(const std::string& message_text) = 0;
     virtual void ListOfActiveConnectionsChanged(const QStringList& active_connections) = 0;
-    virtual void ShowThisDiagram(const DiagramSpecialized& diagram) = 0;
+    virtual void ShowThisDiagram(const DefaultDiagram& diagram) = 0;
 };
 
 Q_DECLARE_INTERFACE(I_BackendSignal, "I_BackendSignal")

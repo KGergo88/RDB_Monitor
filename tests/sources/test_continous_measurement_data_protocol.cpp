@@ -22,7 +22,6 @@
 #include <QString>
 #include <QDir>
 
-#include "../application/sources/global.hpp"
 #include "../application/sources/continous_measurement_data_protocol.hpp"
 #include "test_protocol_common.h"
 
@@ -33,7 +32,7 @@ class TestContinousMeasurementDataProtocol : public ::testing::Test,
 protected:
     ContinousMeasurementDataProtocol test_cmdp_processor;
     std::string expected_protocol_name = continous_measurement_data_protocol_name;
-    std::vector<DiagramSpecialized> processed_diagrams;
+    std::vector<DefaultDiagram> processed_diagrams;
     // Empty string as the CMDP does not support file handling
     std::string expected_file_type;
 };
@@ -66,7 +65,7 @@ TEST_F(TestContinousMeasurementDataProtocol, ProcessData_EmptyStream)
 TEST_F(TestContinousMeasurementDataProtocol, ExportData)
 {
     std::stringstream exported_data;
-    EXPECT_ANY_THROW(exported_data = test_cmdp_processor.ExportData(std::vector<DiagramSpecialized>()));
+    EXPECT_ANY_THROW(exported_data = test_cmdp_processor.ExportData(std::vector<DefaultDiagram>()));
     EXPECT_EQ(exported_data.str(), std::string());
 }
 

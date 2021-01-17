@@ -31,7 +31,9 @@
 #include "data_point.hpp"
 
 
-template <typename T_DATA_POINT, typename T_INDEX >
+using DataLineDefaultIndex_t = std::size_t;
+
+template <typename T_DATA_POINT = DataPointDefaultCoordinate_t, typename T_INDEX = DataLineDefaultIndex_t>
 class DataLine
 {
 public:

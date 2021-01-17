@@ -22,7 +22,7 @@
 #include "measurement_data_protocol.hpp"
 
 
-constexpr char measurement_data_protocol_name[] = "Measurement Data Protocol - MDP";
+const std::string measurement_data_protocol_name = "Measurement Data Protocol - MDP";
 
 
 MeasurementDataProtocol::MeasurementDataProtocol()
@@ -32,12 +32,12 @@ MeasurementDataProtocol::MeasurementDataProtocol()
 
 std::string MeasurementDataProtocol::GetProtocolName(void)
 {
-    return std::string(measurement_data_protocol_name);
+    return measurement_data_protocol_name;
 }
 
-std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istream& input_data)
+std::vector<DefaultDiagram> MeasurementDataProtocol::ProcessData(std::istream& input_data)
 {
-    std::vector<DiagramSpecialized> assembled_diagrams;
+    std::vector<DefaultDiagram> assembled_diagrams;
     std::string actual_line;
 
     while(std::getline(input_data, actual_line))
@@ -62,7 +62,7 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                     if(std::regex_search(actual_line, match_results, std::regex(Constants::Regex::title_line)))
                     {
                         // Then we create a diagram object with the title
-                        actual_diagram = DiagramSpecialized(match_results[1]);
+                        actual_diagram = DefaultDiagram(match_results[1]);
                         // Switching to the next state with a break --> a new line will be fetched
                         break;
                     }
@@ -73,7 +73,7 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                         std::string current_date_and_time_string = ctime(&current_date_and_time);
                         // The ctime adds an extra newline to the string, this needs to be removed
                         current_date_and_time_string.pop_back();
-                        actual_diagram = DiagramSpecialized(current_date_and_time_string);
+                        actual_diagram = DefaultDiagram(current_date_and_time_string);
                         // Switching to the next state without a break --> a new line will NOT be fetched, because this line is the headline
                     }
 
@@ -86,7 +86,7 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                        (!std::regex_match(actual_line, std::regex(Constants::Regex::data_line))))
                     {
                         std::string headline = actual_line;
-                        DataIndexType column_index = 0;
+                        DefaultDiagram::index_t column_index = 0;
 
                         // Collecting the labels from the headline
                         while(std::regex_search(headline, match_results, std::regex(Constants::Regex::headline_analyzer)))
@@ -116,8 +116,8 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                     if(std::regex_match(actual_line, std::regex(Constants::Regex::data_line)))
                     {
                         std::string data_line = actual_line;
-                        DataIndexType column_index = 0;
-                        DataPointType data_point_x_value = 0;
+                        DefaultDiagram::index_t column_index = 0;
+                        DefaultDiagram::coordinate_t data_point_x_value = 0;
 
                         // Collecting the data from the dataline
                         while(std::regex_search(data_line, match_results, std::regex(Constants::Regex::data_line_analyzer)))
@@ -132,9 +132,9 @@ std::vector<DiagramSpecialized> MeasurementDataProtocol::ProcessData(std::istrea
                                 if((column_index - 1) < actual_diagram.GetTheNumberOfDataLines())
                                 {
                                     std::stringstream stringstream(match_results[1]);
-                                    DataPointType data_point_y_value;
+                                    DefaultDiagram::coordinate_t data_point_y_value;
                                     stringstream >> data_point_y_value;
-                                    actual_diagram.AddNewDataPoint((column_index - 1), DataPointSpecialized(data_point_x_value, data_point_y_value));
+                                    actual_diagram.AddNewDataPoint((column_index - 1), DefaultDiagram::DataPoint_t(data_point_x_value, data_point_y_value));
                                 }
                                 else
                                 {
@@ -189,7 +189,7 @@ bool MeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_f
     return bResult;
 }
 
-std::stringstream MeasurementDataProtocol::ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export)
+std::stringstream MeasurementDataProtocol::ExportData(const std::vector<DefaultDiagram>& diagrams_to_export)
 {
     std::stringstream exported_data;
 

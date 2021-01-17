@@ -26,12 +26,11 @@
 #include <string>
 #include <algorithm>
 
-#include "global.hpp"
 #include "ordered_dict.h"
 #include "data_line.hpp"
 
 
-template <typename T_DATA_POINT, typename T_INDEX >
+template <typename T_DATA_POINT = DataPointDefaultCoordinate_t, typename T_INDEX = DataLineDefaultIndex_t >
 class Diagram {
 public:
     using coordinate_t = T_DATA_POINT;
@@ -209,6 +208,8 @@ private:
     std::string AxisXTitle;
     DataContainer_t Data;
 };
+
+using DefaultDiagram = Diagram<DataPointDefaultCoordinate_t, DataLineDefaultIndex_t>;
 
 
 #endif /* DIAGRAM_HPP */

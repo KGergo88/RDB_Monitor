@@ -61,8 +61,8 @@ public:
 
     void ReportStatus(const std::string& message);
 
-    void StoreNetworkDiagrams(const QString& connection_name, std::vector<DiagramSpecialized>& new_diagrams);
-    void StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DiagramSpecialized>& new_diagrams);
+    void StoreNetworkDiagrams(const QString& connection_name, std::vector<DefaultDiagram>& new_diagrams);
+    void StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DefaultDiagram>& new_diagrams);
 
     QAbstractItemModel* GetDiagramContainerModel(void) override {return &diagram_container;}
     std::string GetFileImportDefaultFolder(void) override {return configuration.ImportFolder();}
@@ -74,7 +74,7 @@ public:
 signals:
     void NewStatusMessage(const std::string& message_text) override;
     void ListOfActiveConnectionsChanged(const QStringList& active_connections) override;
-    void ShowThisDiagram(const DiagramSpecialized& diagram) override;
+    void ShowThisDiagram(const DefaultDiagram& diagram) override;
 
 private slots:
     void OpenNetworkConnection(const ConnectionRequestData& request_data);
@@ -86,7 +86,7 @@ private slots:
     void ExportFileStoreCheckedDiagrams(const std::string& path_to_file);
 
 private:
-    void StoreDiagrams(std::vector<DiagramSpecialized>& new_diagrams, const std::function<QModelIndex(const DiagramSpecialized&)> storage_logic);
+    void StoreDiagrams(std::vector<DefaultDiagram>& new_diagrams, const std::function<QModelIndex(const DefaultDiagram&)> storage_logic);
     QStringList getActiveConnections(void);
     QString makeUserDefinedConnectionNameUnique(const QString& user_defined_name);
 

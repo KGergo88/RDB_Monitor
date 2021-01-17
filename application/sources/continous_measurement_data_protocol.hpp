@@ -37,12 +37,10 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 
-#include "global.hpp"
 #include "i_protocol.hpp"
-#include "diagram.hpp"
 
 
-extern const char continous_measurement_data_protocol_name[];
+extern const std::string continous_measurement_data_protocol_name;
 
 class ContinousMeasurementDataProtocol : public I_Protocol
 {
@@ -57,8 +55,8 @@ public:
     ContinousMeasurementDataProtocol& operator=(ContinousMeasurementDataProtocol&&) = delete;
 
     virtual std::string GetProtocolName(void) override;
-    virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) override;
-    virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) override;
+    virtual std::vector<DefaultDiagram> ProcessData(std::istream& input_data) override;
+    virtual std::stringstream ExportData(const std::vector<DefaultDiagram>& diagrams_to_export) override;
     virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
     virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
     virtual std::string GetSupportedFileType(void) override;
@@ -95,7 +93,7 @@ private:
     };
 
     Constants::States state;
-    DiagramSpecialized actual_diagram;
+    DefaultDiagram actual_diagram;
     RegexPatterns regex_patterns;
 };
 

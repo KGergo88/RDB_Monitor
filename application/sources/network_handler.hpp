@@ -30,7 +30,6 @@
 #include <QObject>
 #include <QString>
 
-#include "global.hpp"
 #include "diagram.hpp"
 
 
@@ -44,7 +43,7 @@ class NetworkHandler : public QObject
 
 public:
 
-    using diagram_collector_type = std::function<void(const QString&, std::vector<DiagramSpecialized>&)>;
+    using diagram_collector_type = std::function<void(const QString&, std::vector<DefaultDiagram>&)>;
     using error_collector_type = std::function<void(const std::string&)>;
 
     NetworkHandler(const QString& new_user_defined_name,

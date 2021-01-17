@@ -77,7 +77,6 @@ HEADERS +=                                          \
     sources/data_point.hpp                          \
     sources/diagram.hpp                             \
     sources/diagram_container.hpp                   \
-    sources/global.hpp                              \
     sources/i_backend_signal.hpp                    \
     sources/i_connection.hpp                        \
     sources/i_connection_settings.hpp               \
