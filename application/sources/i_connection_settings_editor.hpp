@@ -27,8 +27,8 @@
 
 #include <QWidget>
 
-#include "i_connection_settings.hpp"
 
+class I_ConnectionSettings;
 
 class I_ConnectionSettingsEditor : public QWidget
 {

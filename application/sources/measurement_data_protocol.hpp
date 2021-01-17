@@ -41,7 +41,7 @@
 #include "diagram.hpp"
 
 
-static constexpr char measurement_data_protocol_name[] = "Measurement Data Protocol - MDP";
+extern const char measurement_data_protocol_name[];
 
 class MeasurementDataProtocol : public I_Protocol
 {

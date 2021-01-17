@@ -28,7 +28,6 @@
 #include <functional>
 #include <algorithm>
 
-#include "global.hpp"
 #include "data_point.hpp"
 
 

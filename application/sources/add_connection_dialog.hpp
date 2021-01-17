@@ -42,9 +42,9 @@
 #include <QLineEdit>
 
 #include "i_connection_settings_editor.hpp"
-#include "serial_port_settings_editor.hpp"
-#include "connection_request_data.hpp"
 
+
+class ConnectionRequestData;
 
 class EmptyConnectionSettingsEditor : public I_ConnectionSettingsEditor
 {

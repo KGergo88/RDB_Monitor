@@ -31,11 +31,10 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 
-#include "global.hpp"
 #include "i_connection.hpp"
-#include "i_connection_settings.hpp"
-#include "serial_port_settings.hpp"
 
+
+extern const char serial_port_connection_name[];
 
 class SerialPort : public QObject, public I_Connection
 {
@@ -44,7 +43,14 @@ class SerialPort : public QObject, public I_Connection
 
 public:
     SerialPort() = default;
-    ~SerialPort();
+    ~SerialPort()
+    {
+        if(port)
+        {
+            port->close();
+            port.reset();
+        }
+    }
 
     SerialPort(const SerialPort&) = delete;
     SerialPort(SerialPort&&) = delete;
@@ -52,7 +58,7 @@ public:
     SerialPort& operator=(const SerialPort&) = delete;
     SerialPort& operator=(SerialPort&&) = delete;
 
-    std::string getName(void) override { return std::string(serial_port_connection_name); }
+    std::string getName(void) override;
     bool Open(const std::shared_ptr<I_ConnectionSettings> settings) override;
     void Close(void) override;
     bool IsOpen(void) override;

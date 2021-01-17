@@ -25,6 +25,9 @@
 #include "serial_port.hpp"
 #include "measurement_data_protocol.hpp"
 #include "continous_measurement_data_protocol.hpp"
+#include "connection_request_data.hpp"
+#include "connection_factory.hpp"
+#include "protocol_factory.hpp"
 
 
 Backend::Backend() : QObject(), gui_signal_interface(nullptr)

@@ -36,11 +36,13 @@
 #include <QDialog>
 
 #include "global.hpp"
-#include "i_gui_signal.hpp"
-#include "i_backend_signal.hpp"
 #include "diagram.hpp"
-#include "add_connection_dialog.hpp"
 
+#include "i_gui_signal.hpp"
+
+
+class I_BackendSignal;
+class AddConnectionDialog;
 
 class MainWindow : public QMainWindow, public I_GuiSignal
 {

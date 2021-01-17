@@ -42,7 +42,7 @@
 #include "diagram.hpp"
 
 
-static constexpr char continous_measurement_data_protocol_name[] = "Continous Measurement Data Protocol - CMDP";
+extern const char continous_measurement_data_protocol_name[];
 
 class ContinousMeasurementDataProtocol : public I_Protocol
 {

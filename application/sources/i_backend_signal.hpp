@@ -30,12 +30,13 @@
 #include <QAbstractItemModel>
 
 #include "global.hpp"
+#include "diagram.hpp"
 
 
 class I_BackendSignal
 {
 protected:
-    ~I_BackendSignal() {}
+    virtual ~I_BackendSignal() {}
 
 public:
     virtual QAbstractItemModel* GetDiagramContainerModel(void) = 0;

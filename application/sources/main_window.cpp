@@ -20,6 +20,9 @@
 
 
 #include "main_window.hpp"
+#include "i_backend_signal.hpp"
+#include "add_connection_dialog.hpp"
+#include "connection_request_data.hpp"
 
 
 MainWindow::MainWindow() : QMainWindow(),

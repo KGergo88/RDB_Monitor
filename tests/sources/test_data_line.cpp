@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 
+#include "../application/sources/data_point.hpp"
 #include "../application/sources/data_line.hpp"
 
 

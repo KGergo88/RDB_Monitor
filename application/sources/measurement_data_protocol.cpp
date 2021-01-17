@@ -22,6 +22,9 @@
 #include "measurement_data_protocol.hpp"
 
 
+constexpr char measurement_data_protocol_name[] = "Measurement Data Protocol - MDP";
+
+
 MeasurementDataProtocol::MeasurementDataProtocol()
 {
     state = Constants::States::WaitingForStartLine;

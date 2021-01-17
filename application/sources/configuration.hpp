@@ -32,8 +32,6 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-#include "global.hpp"
-
 
 class Configuration
 {

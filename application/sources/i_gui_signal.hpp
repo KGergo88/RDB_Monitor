@@ -28,9 +28,8 @@
 
 #include <QtPlugin>
 
-#include "global.hpp"
-#include "connection_request_data.hpp"
 
+class ConnectionRequestData;
 
 class I_GuiSignal
 {
@@ -46,7 +45,7 @@ signals:
     virtual void ExportFileStoreCheckedDiagrams(const std::string& path_to_file) = 0;
 
 protected:
-    ~I_GuiSignal() {}
+    virtual ~I_GuiSignal() {}
 };
 
 Q_DECLARE_INTERFACE(I_GuiSignal, "I_GuiSignal")

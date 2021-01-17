@@ -29,9 +29,8 @@
 
 #include <QtPlugin>
 
-#include "global.hpp"
-#include "i_connection_settings.hpp"
 
+class I_ConnectionSettings;
 
 class I_Connection
 {

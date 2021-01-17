@@ -31,11 +31,12 @@
 #include <QString>
 
 #include "global.hpp"
-#include "i_connection.hpp"
-#include "i_connection_settings.hpp"
-#include "i_protocol.hpp"
 #include "diagram.hpp"
 
+
+class I_Connection;
+class I_ConnectionSettings;
+class I_Protocol;
 
 class NetworkHandler : public QObject
 {

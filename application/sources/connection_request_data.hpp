@@ -27,8 +27,8 @@
 
 #include <QString>
 
-#include "i_connection_settings.hpp"
 
+class I_ConnectionSettings;
 
 struct ConnectionRequestData
 {

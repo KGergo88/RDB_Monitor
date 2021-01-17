@@ -23,9 +23,6 @@
 #define DATA_POINT_HPP
 
 
-#include "global.hpp"
-
-
 template <typename T_DATA_POINT>
 class DataPoint
 {

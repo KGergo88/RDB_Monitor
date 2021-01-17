@@ -32,18 +32,15 @@
 #include <QApplication>
 #include <QFileInfo>
 
-#include "global.hpp"
 #include "i_backend_signal.hpp"
-#include "i_gui_signal.hpp"
-#include "i_protocol.hpp"
-#include "diagram.hpp"
-#include "serial_port.hpp"
-#include "network_handler.hpp"
 #include "diagram_container.hpp"
 #include "configuration.hpp"
-#include "connection_factory.hpp"
-#include "protocol_factory.hpp"
 
+
+class I_GuiSignal;
+class I_Protocol;
+class ConnectionRequestData;
+class NetworkHandler;
 
 class Backend : public QObject, public I_BackendSignal
 {

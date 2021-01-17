@@ -32,6 +32,8 @@
 class I_Protocol
 {
 public:
+    virtual ~I_Protocol() = default;
+
     virtual std::string GetProtocolName(void) = 0;
     virtual std::vector<DiagramSpecialized> ProcessData(std::istream& input_data) = 0;
     virtual std::stringstream ExportData(const std::vector<DiagramSpecialized>& diagrams_to_export) = 0;

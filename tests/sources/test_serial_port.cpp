@@ -27,5 +27,5 @@
 
 TEST(TestSerialPort, Constructor)
 {
-    SerialPort myPort;
+
 }

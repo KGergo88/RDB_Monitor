@@ -38,7 +38,6 @@
 
 //#define DIAGRAM_CONTAINER_DEBUG_MODE
 
-
 class DiagramContainer : public QAbstractItemModel
 {
     Q_OBJECT

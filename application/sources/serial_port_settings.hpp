@@ -29,8 +29,6 @@
 #include "i_connection_settings.hpp"
 
 
-static constexpr char serial_port_connection_name[] = "SerialPort";
-
 class SerialPortSettings : public I_ConnectionSettings
 {
 public:

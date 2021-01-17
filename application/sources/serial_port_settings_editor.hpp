@@ -31,7 +31,6 @@
 #include <QComboBox>
 
 #include "i_connection_settings_editor.hpp"
-#include "serial_port_settings.hpp"
 
 
 class SerialPortSettingsEditor : public I_ConnectionSettingsEditor
@@ -53,7 +52,7 @@ public:
     SerialPortSettingsEditor& operator=(const SerialPortSettingsEditor&) = delete;
     SerialPortSettingsEditor& operator=(SerialPortSettingsEditor&&) = delete;
 
-    QString getConnectionName(void) override { return serial_port_connection_name; }
+    QString getConnectionName(void) override;
 
     std::shared_ptr<I_ConnectionSettings> getSettings(void) override;
 

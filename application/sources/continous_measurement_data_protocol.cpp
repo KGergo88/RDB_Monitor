@@ -20,6 +20,10 @@
 
 
 #include "continous_measurement_data_protocol.hpp"
+#include "data_point.hpp"
+
+
+constexpr char continous_measurement_data_protocol_name[] = "Continous Measurement Data Protocol - CMDP";
 
 
 ContinousMeasurementDataProtocol::ContinousMeasurementDataProtocol()
