@@ -8,7 +8,7 @@
 
 ## Table of contents <!-- omit in toc -->
 - [Introduction](#introduction)
-- [Usage](#usage)
+- [How to use the RDB Monitor](#how-to-use-the-rdb-monitor)
   - [Importing diagrams](#importing-diagrams)
   - [Exporting diagrams](#exporting-diagrams)
   - [Setting up a connection](#setting-up-a-connection)
@@ -40,7 +40,7 @@ The RDB Monitor is a generic measurement result visualiser software. It was orig
 The primary use case is to visualise data from the embedded controller of an electric drive in order to be able to setup the current, speed, position controllers. Besides this, the program can be used with any other software or device that produces output that follows one of the [supported protocols](#supported-protocols). The data can be received through one of the [supported connections](#supported-connections) or imported from a file. The created diagrams can be also exported to a file.
 
 
-## Usage
+## How to use the RDB Monitor
 
 ### Importing diagrams
 
@@ -179,12 +179,12 @@ u32TimeHour,u8RoomTemperature,
 
 ## Dependencies and portability
 
-The RDB Monitor was developed using C++17 and it depends on the following external components:
+The RDB Monitor was developed using C++17 and it has the following dependencies:
   - Qt5 v5.12.0 or newer
-    - The used components are Core, Widgets, and Charts SerialPort
+    - The used components are Core, Widgets, Charts and SerialPort
     - You can download it from the [Qt website](www.qt.io)
 
-The project can be build and used on Linux and Windows as well. Please see the [CI system](#CI-system) chapter for more details on the supported OS versions.
+The project can be build and used on Linux and Windows as well. Please see the [CI system](#CI-system) chapter for more details on the tested OS versions.
 
 
 ## Building the project
