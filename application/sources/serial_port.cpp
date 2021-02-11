@@ -39,7 +39,6 @@ bool SerialPort::Open(const std::shared_ptr<I_ConnectionSettings> settings)
     {
         try
         {
-            std::shared_ptr<SerialPortSettings> serial_port_settings = std::dynamic_pointer_cast<SerialPortSettings>(settings);
             port = std::make_unique<QSerialPort>();
             port->setPortName(serial_port_settings->portName);
             port->setBaudRate(serial_port_settings->baudRate);
@@ -50,8 +49,8 @@ bool SerialPort::Open(const std::shared_ptr<I_ConnectionSettings> settings)
 
             if(port->open(QIODevice::ReadOnly))
             {
-                QObject::connect(port.get(), &QSerialPort::readyRead,       this, &SerialPort::ReadLineFromPort);
-                QObject::connect(port.get(), &QSerialPort::errorOccurred,   this, &SerialPort::HandleErrors);
+                QObject::connect(port.get(), &QSerialPort::readyRead,     this, &SerialPort::ReadLineFromPort);
+                QObject::connect(port.get(), &QSerialPort::errorOccurred, this, &SerialPort::HandleErrors);
                 result = true;
             }
             else
@@ -107,7 +106,10 @@ void SerialPort::ReadLineFromPort(void)
     if(at_least_one_line_was_received)
     {
         std::stringstream received_data_stream(received_lines);
-        emit DataReceived(received_data_stream);
+        if(m_data_collector)
+        {
+            m_data_collector(received_data_stream);
+        }
     }
 }
 
@@ -115,6 +117,14 @@ void SerialPort::HandleErrors(QSerialPort::SerialPortError error)
 {
     if(QSerialPort::ReadError == error)
     {
-        emit ErrorReport((QObject::tr("SerialPort::HandleErrors: An I/O error occurred while reading the data from port %1, error: %2").arg(port->portName()).arg(port->errorString())).toStdString());
+        std::string error_message = "SerialPort::HandleErrors: An I/O error occurred while reading the data from port "
+                + port->portName().toStdString()
+                + ", error: "
+                + port->errorString().toStdString();
+
+        if(m_error_reporter)
+        {
+            m_error_reporter(error_message);
+        }
     }
 }
