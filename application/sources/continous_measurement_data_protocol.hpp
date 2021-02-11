@@ -55,11 +55,12 @@ public:
     ContinousMeasurementDataProtocol& operator=(ContinousMeasurementDataProtocol&&) = delete;
 
     virtual std::string GetProtocolName(void) override;
-    virtual std::vector<DefaultDiagram> ProcessData(std::istream& input_data) override;
-    virtual std::stringstream ExportData(const std::vector<DefaultDiagram>& diagrams_to_export) override;
-    virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
-    virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
+    virtual void ProcessNetworkData(std::istream& input_data) override;
     virtual std::string GetSupportedFileType(void) override;
+    virtual bool CanThisFileBeImportedFrom(const std::string path_to_file) override;
+    virtual std::vector<DefaultDiagram> ImportFromFile(std::ifstream& file_tream) override;
+    virtual std::stringstream ExportToFile(const std::vector<DefaultDiagram>& diagrams_to_export) override;
+    virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
 
 private:
     struct Constants
@@ -94,6 +95,7 @@ private:
 
     Constants::States state;
     DefaultDiagram actual_diagram;
+    QModelIndex actual_model_index;
     RegexPatterns regex_patterns;
 };
 

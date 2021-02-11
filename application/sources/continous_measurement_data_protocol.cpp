@@ -36,7 +36,7 @@ std::string ContinousMeasurementDataProtocol::GetProtocolName(void)
     return continous_measurement_data_protocol_name;
 }
 
-std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::istream& input_data)
+void ContinousMeasurementDataProtocol::ProcessNetworkData(std::istream& input_data)
 {
     std::vector<DefaultDiagram> assembled_diagrams;
     std::string actual_line_std_string;
@@ -56,6 +56,7 @@ std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::i
                     state = Constants::States::ProcessingHeaderDiagramTitle;
                 }
                 break;
+
             case Constants::States::ProcessingHeaderDiagramTitle:
                 state = Constants::States::ProcessingHeaderDataLines;
                 // If a header message diagram title line was found
@@ -78,8 +79,11 @@ std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::i
                     actual_diagram = DefaultDiagram(current_date_and_time_string);
                     // Switching to the next state without a break --> a new line will NOT be fetched, because this line is the headline
                 }
+                // In both cases the actual model index needs to be invalidated as we are starting a new diagram
+                actual_model_index = QModelIndex();
                 // The falltrough is not an error in this case, this behaviour needed because there was no diagram title found, the actual_line contains the headline
-                [[fallthrough]];
+
+            [[fallthrough]];
             case Constants::States::ProcessingHeaderDataLines:
                 match = regex_patterns.header_datalines.match(actual_line);
                 if(match.hasMatch())
@@ -93,7 +97,7 @@ std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::i
                     QRegularExpressionMatchIterator regex_iterator = regex_patterns.header_dataline_y_titles.globalMatch(y_titles);
                     while(regex_iterator.hasNext())
                     {
-                        auto match = regex_iterator.next();
+                        match = regex_iterator.next();
                         auto y_id = match.captured("id");
                         auto y_title = match.captured("title");
 
@@ -103,7 +107,6 @@ std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::i
                             state = Constants::States::WaitingForHeaderMessageStart;
                         }
                     }
-
                     state = Constants::States::WaitingForHeaderMessageEnd;
                 }
                 else
@@ -111,6 +114,7 @@ std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::i
                     state = Constants::States::WaitingForHeaderMessageStart;
                 }
                 break;
+
             case Constants::States::WaitingForHeaderMessageEnd:
                 // If a header message end line was found
                 match = regex_patterns.header_end.match(actual_line);
@@ -123,6 +127,7 @@ std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::i
                     state = Constants::States::WaitingForHeaderMessageStart;
                 }
                 break;
+
             case Constants::States::WaitingForDataMessageStart:
                 // If a header message end line was found
                 match = regex_patterns.data_start.match(actual_line);
@@ -137,6 +142,7 @@ std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::i
                     state = Constants::States::WaitingForHeaderMessageStart;
                 }
                 break;
+
             case Constants::States::ProcessingDataMessageContent:
                 match = regex_patterns.data_content.match(actual_line);
                 if(match.hasMatch())
@@ -147,7 +153,7 @@ std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::i
                     QRegularExpressionMatchIterator regex_iterator = regex_patterns.data_y_content.globalMatch(y_values);
                     while(regex_iterator.hasNext())
                     {
-                        auto match = regex_iterator.next();
+                        match = regex_iterator.next();
                         auto y_id = match.captured("id");
                         auto y_value = match.captured("value");
 
@@ -175,27 +181,68 @@ std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ProcessData(std::i
                     }
                 }
                 break;
+
             default:
                 state = Constants::States::WaitingForHeaderMessageStart;
-                throw("The DataProcessor::ProcessData's statemachine switched to an unexpected state: " + std::to_string(static_cast<std::underlying_type<Constants::States>::type>(state)));
+                throw("The ContinousMeasurementDataProtocol::ProcessNetworkData's statemachine switched to an unexpected state: "
+                      + std::to_string(static_cast<std::underlying_type<Constants::States>::type>(state)));
                 break;
         }
     }
 
-    return assembled_diagrams;
+    // If the actual model index is valid then this is an update and not a new diagram
+    if(actual_model_index.isValid())
+    {
+        // We should not have assembled diagrams here, only an update to the actual diagram
+        if(!assembled_diagrams.empty())
+        {
+            throw("The ContinousMeasurementDataProtocol::ProcessNetworkData detected an error: the actual_model_index was valid but the assembled_diagrams was not empty!");
+        }
+
+        // Sending the updated diagram
+        if(m_diagram_updater)
+        {
+            m_diagram_updater(actual_model_index, actual_diagram);
+        }
+    }
+    else
+    {
+        // If the model index is not valid then we are sending new diagrams
+        if(m_diagram_collector)
+        {
+            auto model_indexes = m_diagram_collector(assembled_diagrams);
+
+            // If we have the waiting for header start state here then we either had a message error
+            // or a tail message was received. In both cases the last diagram is finished. This means that the
+            // model index does not need to be stored as no update will be sent anymore.
+            if(state != Constants::States::WaitingForHeaderMessageStart)
+            {
+                // We need to only store the last model index,
+                // because we are only going to be able to send updates to the last diagram.
+                actual_model_index = model_indexes.back();
+            }
+        }
+    }
 }
 
-std::stringstream ContinousMeasurementDataProtocol::ExportData(const std::vector<DefaultDiagram>& diagrams_to_export)
+std::string ContinousMeasurementDataProtocol::GetSupportedFileType(void)
 {
-    (void) diagrams_to_export;
-    throw("The Continous Measurement Protocol does not support exporting into files!");
+    // The CMDP protocol does not support any file types
+    return std::string();
 }
 
-bool ContinousMeasurementDataProtocol::CanThisFileBeProcessed(const std::string path_to_file)
+bool ContinousMeasurementDataProtocol::CanThisFileBeImportedFrom(const std::string path_to_file)
 {
     (void) path_to_file;
     // The CMDP protocol does not support file processing
     return false;
+}
+
+std::vector<DefaultDiagram> ContinousMeasurementDataProtocol::ImportFromFile(std::ifstream& file_stream)
+{
+    (void) file_stream;
+    // The CMDP protocol does not support file processing
+    return std::vector<DefaultDiagram>();
 }
 
 bool ContinousMeasurementDataProtocol::CanThisFileBeExportedInto(const std::string path_to_file)
@@ -205,8 +252,8 @@ bool ContinousMeasurementDataProtocol::CanThisFileBeExportedInto(const std::stri
     return false;
 }
 
-std::string ContinousMeasurementDataProtocol::GetSupportedFileType(void)
+std::stringstream ContinousMeasurementDataProtocol::ExportToFile(const std::vector<DefaultDiagram>& diagrams_to_export)
 {
-    // The CMDP protocol does not support any file types
-    return std::string();
+    (void) diagrams_to_export;
+    throw("The Continous Measurement Protocol does not support exporting into files!");
 }
