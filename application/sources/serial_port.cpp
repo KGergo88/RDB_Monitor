@@ -23,6 +23,15 @@
 #include "serial_port_settings.hpp"
 
 
+SerialPort::~SerialPort()
+{
+    if(port)
+    {
+        port->close();
+        port.reset();
+    }
+}
+
 extern const std::string serial_port_connection_name = "SerialPort";
 
 std::string SerialPort::GetName(void)

@@ -26,6 +26,7 @@
 #include <istream>
 #include <memory>
 #include <string>
+#include <functional>
 
 
 class I_ConnectionSettings;

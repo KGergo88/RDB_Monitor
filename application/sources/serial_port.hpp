@@ -42,18 +42,10 @@ class SerialPort : public QObject, public I_Connection
 
 public:
     SerialPort() = default;
-
-    ~SerialPort()
-    {
-        if(port)
-        {
-            port->close();
-            port.reset();
-        }
-    }
-
     SerialPort(const SerialPort&) = delete;
     SerialPort(SerialPort&&) = delete;
+
+    ~SerialPort();
 
     SerialPort& operator=(const SerialPort&) = delete;
     SerialPort& operator=(SerialPort&&) = delete;
