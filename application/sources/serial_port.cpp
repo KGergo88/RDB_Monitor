@@ -25,7 +25,7 @@
 
 extern const std::string serial_port_connection_name = "SerialPort";
 
-std::string SerialPort::getName(void)
+std::string SerialPort::GetName(void)
 {
     return serial_port_connection_name;
 }

@@ -35,7 +35,7 @@ class I_Protocol
 public:
     // Callback types
     // Called when a network diagram got processed
-    using diagram_collector_t = std::function<std::vector<QModelIndex>(const std::vector<DefaultDiagram>&)>;
+    using diagram_collector_t = std::function<std::vector<QModelIndex>(std::vector<DefaultDiagram>&)>;
     // Called when an update is available for a diagram
     using diagram_updater_t = std::function<void(const QModelIndex&, const DefaultDiagram&)>;
     // Called when an error was detected
@@ -43,9 +43,9 @@ public:
 
     virtual ~I_Protocol() = default;
 
-    virtual void RegisterCallbacks(diagram_collector_t&& diagram_collector,
-                                   diagram_updater_t&& diagram_updater,
-                                   error_reporter_t&& error_reporter)
+    virtual void RegisterCallbacks(const diagram_collector_t& diagram_collector,
+                                   const diagram_updater_t& diagram_updater,
+                                   const error_reporter_t& error_reporter)
     {
         m_diagram_collector = diagram_collector;
         m_diagram_updater = diagram_updater;

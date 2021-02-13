@@ -58,7 +58,7 @@ public:
     SerialPort& operator=(const SerialPort&) = delete;
     SerialPort& operator=(SerialPort&&) = delete;
 
-    std::string getName(void) override;
+    std::string GetName(void) override;
     bool Open(const std::shared_ptr<I_ConnectionSettings> settings) override;
     void Close(void) override;
     bool IsOpen(void) override;

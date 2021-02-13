@@ -38,14 +38,14 @@ public:
 
     virtual ~I_Connection() = default;
 
-    virtual void RegisterCallbacks(data_collector_t&& data_collector,
-                                   error_reporter_t&& error_reporter)
+    virtual void RegisterCallbacks(const data_collector_t& data_collector,
+                                   const error_reporter_t& error_reporter)
     {
         m_data_collector = data_collector;
         m_error_reporter = error_reporter;
     }
 
-    virtual std::string getName(void) = 0;
+    virtual std::string GetName(void) = 0;
     virtual bool Open(const std::shared_ptr<I_ConnectionSettings> settings) = 0;
     virtual void Close(void) = 0;
     virtual bool IsOpen(void) = 0;
