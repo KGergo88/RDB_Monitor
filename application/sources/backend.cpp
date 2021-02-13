@@ -35,8 +35,7 @@ Backend::Backend() : QObject(), gui_signal_interface(nullptr)
     available_connection_handlers.append(QString::fromStdString(serial_port_connection_name));
 
     available_protocol_handlers.append(QString::fromStdString(measurement_data_protocol_name));
-    // Deactivate the CMDP before merging as this Protocol is not fully implemented yet!
-    //available_protocol_handlers.append(QString::fromStdString(continous_measurement_data_protocol_name));
+    available_protocol_handlers.append(QString::fromStdString(continous_measurement_data_protocol_name));
 
     file_handlers.push_back(std::make_shared<MeasurementDataProtocol>());
 }
@@ -105,22 +104,36 @@ void Backend::ReportStatus(const std::string& message)
     }
 }
 
-void Backend::StoreNetworkDiagrams(const QString& connection_name, std::vector<DefaultDiagram>& new_diagrams)
+std::vector<QModelIndex> Backend::StoreNetworkDiagrams(const QString& connection_name, std::vector<DefaultDiagram>& new_diagrams)
 {
-    StoreDiagrams(new_diagrams,
+    auto result = StoreDiagrams(new_diagrams,
         [&](const DefaultDiagram& diagram_to_add) -> QModelIndex
         {
             return diagram_container.AddDiagramFromNetwork(connection_name.toStdString(), diagram_to_add);
         });
+
+    return result;
 }
 
-void Backend::StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DefaultDiagram>& new_diagrams)
+std::vector<QModelIndex> Backend::StoreFileDiagrams(const std::string& file_name, const std::string& file_path, std::vector<DefaultDiagram>& new_diagrams)
 {
-    StoreDiagrams(new_diagrams,
+    auto result = StoreDiagrams(new_diagrams,
         [&](const DefaultDiagram& diagram_to_add) -> QModelIndex
         {
             return diagram_container.AddDiagramFromFile(file_name, file_path, diagram_to_add);
         });
+
+    return result;
+}
+
+void Backend::UpdateNetworkDiagram(const QModelIndex& model_index, const DefaultDiagram& updated_diagram)
+{
+    auto diagram_ptr = diagram_container.GetDiagram(model_index);
+    if(diagram_ptr)
+    {
+        // TODO This should be optimized because now for every update (even if that is only just a new point) the whole diagram will be overwritten. See Issue #53
+        *diagram_ptr = updated_diagram;
+    }
 }
 
 std::vector<std::string> Backend::GetSupportedFileExtensions(void)
@@ -165,10 +178,19 @@ void Backend::OpenNetworkConnection(const ConnectionRequestData& request_data)
                                                                                   connection,
                                                                                   connection_settings,
                                                                                   protocol,
-                                                                                  std::bind(&Backend::StoreNetworkDiagrams, this, std::placeholders::_1, std::placeholders::_2),
+                                                                                  std::bind(&Backend::StoreNetworkDiagrams, this, unique_user_defined_name, std::placeholders::_1),
+                                                                                  std::bind(&Backend::UpdateNetworkDiagram, this, std::placeholders::_1, std::placeholders::_2),
                                                                                   std::bind(&Backend::ReportStatus, this, std::placeholders::_1));
 
-    std::string status_message = "The connection \"" + unique_user_defined_name.toStdString() + "\" was successfully opened!";
+    std::string status_message = "The connection \"" + unique_user_defined_name.toStdString() + "\" ";
+    if(network_handlers[unique_user_defined_name]->Run())
+    {
+        status_message = + "was successfully opened!";
+    }
+    else
+    {
+        status_message = "could not be opened! Please delete it andwas successfully opened!";
+    }
     ReportStatus(status_message);
 
     auto active_connections = getActiveConnections();
@@ -207,10 +229,10 @@ void Backend::ImportFile(const std::string& path_to_file)
             bool the_file_was_processed = false;
             for(auto const& file_handler : file_handlers)
             {
-                if(file_handler->CanThisFileBeProcessed(path_to_file))
+                if(file_handler->CanThisFileBeImportedFrom(path_to_file))
                 {
                     std::ifstream file_stream(path_to_file);
-                    auto diagrams_from_file = file_handler->ProcessData(file_stream);
+                    auto diagrams_from_file = file_handler->ImportFromFile(file_stream);
                     StoreFileDiagrams(file_name, path_to_file, diagrams_from_file);
 
                     // Updating the configuration with the folder of the file that was imported
@@ -258,7 +280,7 @@ void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
             auto checked_diagrams = diagram_container.GetCheckedDiagrams();
             if(checked_diagrams.size())
             {
-                auto exported_data = protocol_handler->ExportData(checked_diagrams);
+                auto exported_data = protocol_handler->ExportToFile(checked_diagrams);
 
                 std::ofstream output_file_stream(path_to_file, (std::ofstream::out | std::ofstream::trunc));
                 output_file_stream << exported_data.rdbuf();
@@ -282,8 +304,9 @@ void Backend::ExportFileStoreCheckedDiagrams(const std::string& path_to_file)
     }
 }
 
-void Backend::StoreDiagrams(std::vector<DefaultDiagram>& new_diagrams, const std::function<QModelIndex(const DefaultDiagram&)> storage_logic)
+std::vector<QModelIndex> Backend::StoreDiagrams(std::vector<DefaultDiagram>& new_diagrams, const std::function<QModelIndex(const DefaultDiagram&)> storage_logic)
 {
+    std::vector<QModelIndex> result;
     auto container_is_empty = (0 == diagram_container.GetNumberOfDiagrams());
 
     // Adding the diagrams to the diagram_container
@@ -291,6 +314,7 @@ void Backend::StoreDiagrams(std::vector<DefaultDiagram>& new_diagrams, const std
     {
         // Calling the logic that does the storage for a single diagram, this is provided by the caller
         auto recently_added_diagram = storage_logic(i);
+        result.push_back(recently_added_diagram);
 
         // Displaying the diagram if this was the first
         if(container_is_empty)
@@ -306,6 +330,8 @@ void Backend::StoreDiagrams(std::vector<DefaultDiagram>& new_diagrams, const std
     }
 
     ReportStatus(std::to_string(new_diagrams.size()) + " new diagram was added to the list.");
+
+    return result;
 }
 
 QStringList Backend::getActiveConnections(void)

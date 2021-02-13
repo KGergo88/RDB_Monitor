@@ -19,19 +19,41 @@
 //==============================================================================//
 
 
+#include <functional>
+
 #include "network_handler.hpp"
 #include "i_connection.hpp"
 #include "i_protocol.hpp"
 
 
+NetworkHandler::NetworkHandler(const QString &user_defined_name,
+                               std::shared_ptr<I_Connection> connection_interface,
+                               std::shared_ptr<I_ConnectionSettings> connection_settings,
+                               std::shared_ptr<I_Protocol> protocol_interface,
+                               I_Protocol::diagram_collector_t diagram_collector,
+                               I_Protocol::diagram_updater_t diagram_updater,
+                               error_collector_t error_collector) :
+                                    m_user_defined_name(user_defined_name),
+                                    m_connection_interface(connection_interface),
+                                    m_connection_settings(connection_settings),
+                                    m_protocol_interface(protocol_interface),
+                                    m_diagram_collector(diagram_collector),
+                                    m_diagram_updater(diagram_updater),
+                                    m_error_collector(error_collector)
+{
+    m_connection_interface->RegisterCallbacks(std::bind(&NetworkHandler::DataAvailable, this, std::placeholders::_1),
+                                              m_error_collector);
+    m_protocol_interface->RegisterCallbacks(m_diagram_collector,
+                                            m_diagram_updater,
+                                            m_error_collector);
+}
+
 bool NetworkHandler::Run(void)
 {
     bool result = false;
 
-    if(connection_interface->Open(connection_settings))
+    if(m_connection_interface->Open(m_connection_settings))
     {
-        QObject::connect(dynamic_cast<QObject*>(connection_interface.get()), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
-        QObject::connect(dynamic_cast<QObject*>(connection_interface.get()), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
         result = true;
     }
 
@@ -40,22 +62,10 @@ bool NetworkHandler::Run(void)
 
 void NetworkHandler::Stop(void)
 {
-    connection_interface->Close();
-    QObject::disconnect(dynamic_cast<QObject*>(connection_interface.get()), SIGNAL(DataReceived(std::istream&)),     this, SLOT(DataAvailable(std::istream&)));
-    QObject::disconnect(dynamic_cast<QObject*>(connection_interface.get()), SIGNAL(ErrorReport(const std::string&)), this, SLOT(ErrorReport(const std::string&)));
+    m_connection_interface->Close();
 }
 
 void NetworkHandler::DataAvailable(std::istream& received_data)
 {
-    auto assembled_diagrams = protocol_interface->ProcessData(received_data);
-
-    if(!assembled_diagrams.empty())
-    {
-        diagram_collector(user_defined_name, assembled_diagrams);
-    }
-}
-
-void NetworkHandler::ErrorReport(const std::string& error_message)
-{
-    error_collector(error_message);
+    m_protocol_interface->ProcessNetworkData(received_data);
 }
