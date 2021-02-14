@@ -54,10 +54,10 @@ bool MeasurementDataProtocol::CanThisFileBeImportedFrom(const std::string path_t
     return bResult;
 }
 
-std::vector<DefaultDiagram> MeasurementDataProtocol::ImportFromFile(std::ifstream& file_stream)
+std::vector<DefaultDiagram> MeasurementDataProtocol::ImportFromFile(std::istream& input_stream)
 {
     ProcessingData intermediate_data;
-    return ProcessData(file_stream, intermediate_data);
+    return ProcessData(input_stream, intermediate_data);
 }
 
 bool MeasurementDataProtocol::CanThisFileBeExportedInto(const std::string path_to_file)

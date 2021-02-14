@@ -24,14 +24,32 @@
 
 
 #include <fstream>
+#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <gmock/gmock-matchers.h>
 
 #include <QString>
 #include <QDir>
+#include <QModelIndex>
 #include <QCoreApplication>
 
+
+/*struct ProtocolCallbackMocks {
+    testing::MockFunction<std::vector<QModelIndex>(std::vector<DefaultDiagram> &)> diagram_collector;
+    testing::MockFunction<void(const QModelIndex &, const DefaultDiagram &)> diagram_updater;
+    testing::MockFunction<void(const std::string &)> error_reporter;
+};*/
+
+class ProtocolCallbackMocks
+{
+public:
+    MOCK_METHOD(std::vector<QModelIndex>, diagram_collector, (std::vector<DefaultDiagram>&), ());
+    MOCK_METHOD(void, diagram_updater, (const QModelIndex&, const DefaultDiagram&), ());
+    MOCK_METHOD(void, error_reporter, (const std::string&), ());
+};
 
 struct TestProtocolParameter
 {
@@ -57,5 +75,6 @@ struct TestFileReader
         return test_file_stream;
     }
 };
+
 
 #endif // TEST_PROTOCOL_COMMON_H

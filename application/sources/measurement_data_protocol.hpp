@@ -60,7 +60,7 @@ public:
     virtual void ProcessNetworkData(std::istream& input_data) override;
     virtual std::string GetSupportedFileType(void) override { return Constants::native_file_extension; }
     virtual bool CanThisFileBeImportedFrom(const std::string path_to_file) override;
-    virtual std::vector<DefaultDiagram> ImportFromFile(std::ifstream& file_stream) override;
+    virtual std::vector<DefaultDiagram> ImportFromFile(std::istream& input_stream) override;
     virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
     virtual std::stringstream ExportToFile(const std::vector<DefaultDiagram>& diagrams_to_export) override;
 

@@ -65,7 +65,7 @@ public:
     virtual bool CanThisFileBeImportedFrom(const std::string path_to_file) = 0;
 
     // Processes the content of the file and returns the found diagrams
-    virtual std::vector<DefaultDiagram> ImportFromFile(std::ifstream& file_stream) = 0;
+    virtual std::vector<DefaultDiagram> ImportFromFile(std::istream& input_stream) = 0;
 
     // Checks whether data can be exported into the file
     virtual bool CanThisFileBeExportedInto(const std::string path_to_file) = 0;
