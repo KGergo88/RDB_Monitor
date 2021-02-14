@@ -26,8 +26,7 @@
 #include <istream>
 #include <memory>
 #include <string>
-
-#include <QtPlugin>
+#include <functional>
 
 
 class I_ConnectionSettings;
@@ -35,19 +34,27 @@ class I_ConnectionSettings;
 class I_Connection
 {
 public:
+    using data_collector_t = std::function<void(std::istream& received_data)>;
+    using error_reporter_t = std::function<void(const std::string&)>;
+
     virtual ~I_Connection() = default;
 
-    virtual std::string getName(void) = 0;
+    virtual void RegisterCallbacks(const data_collector_t& data_collector,
+                                   const error_reporter_t& error_reporter)
+    {
+        m_data_collector = data_collector;
+        m_error_reporter = error_reporter;
+    }
+
+    virtual std::string GetName(void) = 0;
     virtual bool Open(const std::shared_ptr<I_ConnectionSettings> settings) = 0;
     virtual void Close(void) = 0;
     virtual bool IsOpen(void) = 0;
 
-signals:
-    virtual void DataReceived(std::istream& received_data) = 0;
-    virtual void ErrorReport(const std::string& error_message) = 0;
+protected:
+    data_collector_t m_data_collector;
+    error_reporter_t m_error_reporter;
 };
-
-Q_DECLARE_INTERFACE(I_Connection, "ConnectionInterface")
 
 
 #endif // I_CONNECTION_HPP

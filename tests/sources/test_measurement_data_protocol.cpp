@@ -19,18 +19,34 @@
 //==============================================================================//
 
 
-#include <QString>
-#include <QDir>
+#include <functional>
 
 #include "../application/sources/measurement_data_protocol.hpp"
 #include "test_protocol_common.h"
 
 
+using testing::_;
+
 class TestMeasurementDataProtocol : public ::testing::Test,
                                     public testing::WithParamInterface<TestProtocolParameter>
 {
 protected:
+    TestMeasurementDataProtocol()
+    {
+        test_mdp_processor.RegisterCallbacks(std::bind(&ProtocolCallbackMocks::diagram_collector, &mocks, std::placeholders::_1),
+                                             std::bind(&ProtocolCallbackMocks::diagram_updater, &mocks, std::placeholders::_1, std::placeholders::_2),
+                                             std::bind(&ProtocolCallbackMocks::error_reporter, &mocks, std::placeholders::_1));
+    }
+
+    void ExpectNoCallbacks(void)
+    {
+        EXPECT_CALL(mocks, diagram_collector(_)).Times(0);
+        EXPECT_CALL(mocks, diagram_updater(_, _)).Times(0);
+        EXPECT_CALL(mocks, error_reporter(_)).Times(0);
+    }
+
     MeasurementDataProtocol test_mdp_processor;
+    ProtocolCallbackMocks mocks;
     std::string expected_protocol_name = measurement_data_protocol_name;
     std::string expected_file_type = "mdp";
     std::vector<DefaultDiagram> processed_diagrams;
@@ -38,42 +54,68 @@ protected:
 
 TEST_F(TestMeasurementDataProtocol, GetProtocolName)
 {
+    ExpectNoCallbacks();
+
     EXPECT_EQ(test_mdp_processor.GetProtocolName(), expected_protocol_name);
 }
 
-TEST_F(TestMeasurementDataProtocol, CanThisFileBeProcessed)
+TEST_P(TestMeasurementDataProtocol, ProcessNetworkData)
 {
-    std::string filename_to_test = std::string("myfile.") + expected_file_type;
-    EXPECT_TRUE(test_mdp_processor.CanThisFileBeProcessed(filename_to_test));
-    filename_to_test = std::string("mymdpfile.") + std::string("txt");
-    EXPECT_FALSE(test_mdp_processor.CanThisFileBeProcessed(filename_to_test));
+    auto test_parameter = GetParam();
+    std::ifstream file_stream = TestFileReader::read(test_parameter.file_name);
+
+    EXPECT_CALL(mocks, diagram_collector(testing::SizeIs(test_parameter.expected_correct_diagrams)))
+        .Times(1);
+    ON_CALL(mocks, diagram_collector)
+        .WillByDefault(testing::Return(std::vector<QModelIndex>(test_parameter.expected_correct_diagrams)));
+    EXPECT_CALL(mocks, diagram_updater(_, _)).Times(0);
+    EXPECT_CALL(mocks, error_reporter(_)).Times(0);
+
+    test_mdp_processor.ProcessNetworkData(file_stream);
 }
 
 TEST_F(TestMeasurementDataProtocol, GetSupportedFileType)
 {
+    ExpectNoCallbacks();
+
     EXPECT_EQ(test_mdp_processor.GetSupportedFileType(), expected_file_type);
 }
 
-TEST_F(TestMeasurementDataProtocol, ProcessData_ExportData_EmptyStream)
+TEST_F(TestMeasurementDataProtocol, CanThisFileBeImportedFrom)
 {
+    ExpectNoCallbacks();
+
+    std::string filename_to_test = std::string("myfile.") + expected_file_type;
+    EXPECT_TRUE(test_mdp_processor.CanThisFileBeImportedFrom(filename_to_test));
+
+    filename_to_test = std::string("mymdpfile.") + std::string("txt");
+    EXPECT_FALSE(test_mdp_processor.CanThisFileBeImportedFrom(filename_to_test));
+}
+
+TEST_F(TestMeasurementDataProtocol, ImportFromFile_ExportToFile_EmptyStream)
+{
+    ExpectNoCallbacks();
+
     std::ifstream empty_stream;
-    processed_diagrams = test_mdp_processor.ProcessData(empty_stream);
+    processed_diagrams = test_mdp_processor.ImportFromFile(empty_stream);
     EXPECT_EQ(processed_diagrams.size(), std::size_t(0));
 
-    std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
-    processed_diagrams = test_mdp_processor.ProcessData(exported_data);
+    std::stringstream exported_data = test_mdp_processor.ExportToFile(processed_diagrams);
+    processed_diagrams = test_mdp_processor.ImportFromFile(exported_data);
     EXPECT_EQ(processed_diagrams.size(), std::size_t(0));
 }
 
-TEST_P(TestMeasurementDataProtocol, ProcessData_ExportData)
+TEST_P(TestMeasurementDataProtocol, ImportFromFile_ExportToFile)
 {
+    ExpectNoCallbacks();
+
     auto test_parameter = GetParam();
     std::ifstream file_stream = TestFileReader::read(test_parameter.file_name);
-    processed_diagrams = test_mdp_processor.ProcessData(file_stream);
+    processed_diagrams = test_mdp_processor.ImportFromFile(file_stream);
     EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams)) << "test_file: " << test_parameter.file_name.toStdString();
 
-    std::stringstream exported_data = test_mdp_processor.ExportData(processed_diagrams);
-    processed_diagrams = test_mdp_processor.ProcessData(exported_data);
+    std::stringstream exported_data = test_mdp_processor.ExportToFile(processed_diagrams);
+    processed_diagrams = test_mdp_processor.ImportFromFile(exported_data);
     EXPECT_EQ(processed_diagrams.size(), std::size_t(test_parameter.expected_correct_diagrams)) << "test_file: " << test_parameter.file_name.toStdString();
 }
 

@@ -23,9 +23,11 @@
 #define MEAUREMENT_DATA_PROTOCOL_HPP
 
 
-#include <iostream>
+#include <vector>
 #include <memory>
 #include <string>
+#include <istream>
+#include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <functional>
@@ -45,7 +47,7 @@ extern const std::string measurement_data_protocol_name;
 class MeasurementDataProtocol : public I_Protocol
 {
 public:
-    MeasurementDataProtocol();
+    MeasurementDataProtocol() = default;
     virtual ~MeasurementDataProtocol() = default;
 
     MeasurementDataProtocol(const MeasurementDataProtocol&) = delete;
@@ -55,11 +57,12 @@ public:
     MeasurementDataProtocol& operator=(MeasurementDataProtocol&&) = delete;
 
     virtual std::string GetProtocolName(void) override;
-    virtual std::vector<DefaultDiagram> ProcessData(std::istream& input_data) override;
-    virtual bool CanThisFileBeProcessed(const std::string path_to_file) override;
+    virtual void ProcessNetworkData(std::istream& input_data) override;
     virtual std::string GetSupportedFileType(void) override { return Constants::native_file_extension; }
-    virtual std::stringstream ExportData(const std::vector<DefaultDiagram>& diagrams_to_export) override;
+    virtual bool CanThisFileBeImportedFrom(const std::string path_to_file) override;
+    virtual std::vector<DefaultDiagram> ImportFromFile(std::istream& input_stream) override;
     virtual bool CanThisFileBeExportedInto(const std::string path_to_file) override;
+    virtual std::stringstream ExportToFile(const std::vector<DefaultDiagram>& diagrams_to_export) override;
 
 private:
     struct Constants
@@ -97,8 +100,14 @@ private:
         };
     };
 
-    Constants::States state;
-    DefaultDiagram actual_diagram;
+    struct ProcessingData
+    {
+        Constants::States state = Constants::States::WaitingForStartLine;
+        DefaultDiagram actual_diagram;
+    };
+
+    std::vector<DefaultDiagram> ProcessData(std::istream& input_data, ProcessingData& processing_data);
+    ProcessingData network_processing_data;
 };
 
 

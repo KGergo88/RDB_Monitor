@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include <QModelIndex>
 
 #include "diagram.hpp"
 
@@ -32,15 +33,50 @@
 class I_Protocol
 {
 public:
+    // Callback types
+    // Called when a network diagram got processed
+    using diagram_collector_t = std::function<std::vector<QModelIndex>(std::vector<DefaultDiagram>&)>;
+    // Called when an update is available for a diagram
+    using diagram_updater_t = std::function<void(const QModelIndex&, const DefaultDiagram&)>;
+    // Called when an error was detected
+    using error_reporter_t = std::function<void(const std::string&)>;
+
     virtual ~I_Protocol() = default;
 
-    virtual std::string GetProtocolName(void) = 0;
-    virtual std::vector<DefaultDiagram> ProcessData(std::istream& input_data) = 0;
-    virtual std::stringstream ExportData(const std::vector<DefaultDiagram>& diagrams_to_export) = 0;
-    virtual bool CanThisFileBeProcessed(const std::string path_to_file) = 0;
-    virtual bool CanThisFileBeExportedInto(const std::string path_to_file) = 0;
-    virtual std::string GetSupportedFileType(void) = 0;
-};
+    virtual void RegisterCallbacks(const diagram_collector_t& diagram_collector,
+                                   const diagram_updater_t& diagram_updater,
+                                   const error_reporter_t& error_reporter)
+    {
+        m_diagram_collector = diagram_collector;
+        m_diagram_updater = diagram_updater;
+        m_error_reporter = error_reporter;
+    }
 
+    // Returns the name of the protocol
+    virtual std::string GetProtocolName(void) = 0;
+
+    // Processes the data received from a network connection and reports the findings trough the callbacks
+    virtual void ProcessNetworkData(std::istream& input_data) = 0;
+
+    // Returns the file extensions that can be imported
+    virtual std::string GetSupportedFileType(void) = 0;
+
+    // Checks whether the file can be imported
+    virtual bool CanThisFileBeImportedFrom(const std::string path_to_file) = 0;
+
+    // Processes the content of the file and returns the found diagrams
+    virtual std::vector<DefaultDiagram> ImportFromFile(std::istream& input_stream) = 0;
+
+    // Checks whether data can be exported into the file
+    virtual bool CanThisFileBeExportedInto(const std::string path_to_file) = 0;
+
+    // Processes the received diagrams and returns a stream that can be written to a file
+    virtual std::stringstream ExportToFile(const std::vector<DefaultDiagram>& diagrams_to_export) = 0;
+
+protected:
+    diagram_collector_t m_diagram_collector;
+    diagram_updater_t m_diagram_updater;
+    error_reporter_t m_error_reporter;
+};
 
 #endif // I_PROTOCOL_HPP

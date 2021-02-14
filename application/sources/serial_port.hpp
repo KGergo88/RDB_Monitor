@@ -39,34 +39,21 @@ extern const std::string serial_port_connection_name;
 class SerialPort : public QObject, public I_Connection
 {
     Q_OBJECT
-    Q_INTERFACES(I_Connection)
 
 public:
     SerialPort() = default;
-
-    ~SerialPort()
-    {
-        if(port)
-        {
-            port->close();
-            port.reset();
-        }
-    }
-
     SerialPort(const SerialPort&) = delete;
     SerialPort(SerialPort&&) = delete;
+
+    ~SerialPort();
 
     SerialPort& operator=(const SerialPort&) = delete;
     SerialPort& operator=(SerialPort&&) = delete;
 
-    std::string getName(void) override;
+    std::string GetName(void) override;
     bool Open(const std::shared_ptr<I_ConnectionSettings> settings) override;
     void Close(void) override;
     bool IsOpen(void) override;
-
-signals:
-    void DataReceived(std::istream& received_data) override;
-    void ErrorReport(const std::string& error_message) override;
 
 private slots:
     void ReadLineFromPort(void);
